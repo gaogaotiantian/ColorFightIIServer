@@ -1,3 +1,4 @@
+import os
 import pathlib 
 
 from aiohttp import web
@@ -21,7 +22,7 @@ async def init_app():
 
 def main():
     app = init_app()
-    web.run_app(app)
+    web.run_app(app, port = os.getenv('PORT', 5000))
 
 if __name__ == '__main__':
     main()
