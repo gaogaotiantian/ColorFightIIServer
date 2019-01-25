@@ -1,0 +1,27 @@
+<meta charset="utf-8">
+<html>
+  <head>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+      crossorigin="anonymous"></script>
+    <script type = "text/javascript">
+    $(function() {
+        var wsUri = (window.location.protocol=='https:'&&'wss://'||'ws://') + window.location.host + '/game_channel';
+        var conn = new WebSocket(wsUri)
+        conn.onopen = function() {
+          console.log("open");
+        }
+        conn.onmessage = function(e) {
+          console.log(e);
+          $('#test').text(e.data);
+        }
+    })
+    </script>
+  </head>
+  <body>
+    <div id="test">
+
+    </div>
+  </body>
+</html>

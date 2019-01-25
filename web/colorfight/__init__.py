@@ -1,0 +1,1 @@
+from .colorfight import Colorfight
