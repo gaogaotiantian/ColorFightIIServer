@@ -39,9 +39,9 @@ async def action_channel(request):
             msg = await ws.receive()
             if msg_type == aiohttp.WSMsgType.text:
                 result = request.app['game'].parse_action(uid, msg)
-                if result['action'] == 'join':
+                if result.get('action', None) == 'join':
                     uid = result['uid']
-                ws.send_json(result)
+                await ws.send_json(result)
             else:
                 break
     finally:

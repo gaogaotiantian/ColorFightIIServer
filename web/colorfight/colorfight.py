@@ -13,7 +13,8 @@ class Colorfight:
         self.users = {}
         self.game_map = GameMap(GAME_WIDTH, GAME_HEIGHT)
         self.valid_actions = {
-            "register": [("username", "password"), ("uid")]
+            "register": [("username", "password"), ("uid")],
+            "command": [("cmd_list"), ()]
         }
 
     def incr(self):
@@ -26,17 +27,28 @@ class Colorfight:
             self.last_update = time.time()
             self.turn += 1
 
-    def register(self, username, password):
+    def register(self, uid, username, password):
         # Check whether user exists first
         for user in self.users.values():
             if user.username == username and user.password == password:
                 return True, (user.uid,)
         for uid in range(1, len(self.users) + 2):
             if uid not in self.users:
-                self.users[uid] = User(uid, username, password)
-                self.game_map.born(self.users[uid])
-                return True, (uid,)
+                user = User(uid, username, password)
+                if self.game_map.born(user):
+                    self.users[uid] = user
+                    return True, (uid,)
+                else:
+                    return False, "Map is full"
         raise Exception("Should never be here")
+
+    def command(self, uid, cmd_list):
+        if type(cmd_list) != list:
+            return False, "Wrong type"
+        self.users[uid].cmd_list = cmd_list
+
+        return True, ()
+
 
     def get_game_info(self):
         return {"turn": self.turn, "game_map":self.game_map.info()}
@@ -72,7 +84,7 @@ class Colorfight:
             arg_list.append(data[arg])
         
         # should be a tuple 
-        success, result = getattr(self, action)(*arg_list)
+        success, result = getattr(self, action)(uid, *arg_list)
         if not success:
             return {"success": False, "err_msg": result}
         if len(result) != len(expected_results):

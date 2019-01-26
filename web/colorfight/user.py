@@ -4,6 +4,10 @@ class User:
         self.username = username
         self.password = password
         self.energy   = 10
+        self.cells = []
+
+    def get_cell(self, cell):
+        self.cells.append(cell)
 
     def info(self):
         return {"uid":self.uid, "username": self.username, "energy":self.energy}

@@ -22,6 +22,20 @@ class GameMap:
         elif isinstance(location, tuple):
             return self._cells[location[0]][location[1]]
 
+    def get_random_empty_cell(self):
+        empty_cells = [cell for cell in self._cells if cell.owner == 0]
+        if not empty_cells:
+            return None
+        return random.choice(empty_cells)
+
+    def born(self, user):
+        cell = self.get_random_empty_cell()
+        if cell == None:
+            return False
+        cell.owner = user.uid
+        user.get_cell(cell)
+        return True
+
     def info(self):
         info = [[None for _ in range(self.width)] for _ in range(self.height)]
         for x in range(self.width):
