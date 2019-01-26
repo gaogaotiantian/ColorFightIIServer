@@ -5,7 +5,10 @@ class MapCell:
     def __init__(self, position, attack_cost = 1):
         self.position = position
         self.attack_cost = random.randint(1,1000)
+        self.gold = random.randint(1, 10)
+        self.energy = random.randint(1, 10)
         self.owner = 0
+        self.attacker_list = []
 
     def info(self):
         return {"position": self.position.info(), "attack_cost": self.attack_cost, "owner": self.owner}
@@ -22,6 +25,14 @@ class GameMap:
         elif isinstance(location, tuple):
             return self._cells[location[0]][location[1]]
 
+    def __contains__(self, item):
+        if isinstance(item, Position):
+            return 0 <= item.x < self.width and 0 <= item.y < self.height
+        elif isinstance(item, tuple):
+            return 0 <= item[0] < self.width and 0 <= item[1] < self.height
+        else:
+            return False
+
     def get_random_empty_cell(self):
         empty_cells = [cell for cell in self._cells if cell.owner == 0]
         if not empty_cells:
@@ -35,6 +46,13 @@ class GameMap:
         cell.owner = user.uid
         user.get_cell(cell)
         return True
+
+    def update_cells(self):
+        # This function updates all cells for a frame
+        for x in range(self.width):
+            for y in range(self.height):
+                cell = self._cells[y][x]
+                cell.update()
 
     def info(self):
         info = [[None for _ in range(self.width)] for _ in range(self.height)]
