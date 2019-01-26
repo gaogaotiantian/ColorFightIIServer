@@ -4,7 +4,7 @@ import time
 from .game_map import GameMap
 from .user import User
 
-from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT
+from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 
 class Colorfight:
     def __init__(self):
@@ -18,21 +18,39 @@ class Colorfight:
             "command": [("cmd_list"), ()]
         }
     
-    def incr(self):
-        self.turn += 1
     def get(self):
         return self.counter
 
+    def restart(self):
+        self.turn = 0
+        self.users = {}
+        self.errors = {}
+        self.game_map = GameMap(GAME_WIDTH, GAME_HEIGHT)
+
     def update(self):
-        if time.time() - self.last_update > ROUND_TIME:
+        if time.time() - self.last_update > ROUND_TIME and self.turn < GAME_MAX_TURN:
             self.last_update = time.time()
             self.turn += 1
             self.errors = self.do_all_commands()
+            # 1. Update all the cells based on attackers
+            #    This will also update the cell dict in users
+            #    and the energy/gold income for a user
             self.update_cells()
+            # 2. Update all the users for gold and energy
+            self.update_users()
 
     def update_cells(self):
-        self.game_map.update_cells()
+        self.game_map.update_cells(self.users)
 
+    def update_users(self):
+        for user in self.users.values():
+            user.update()
+
+    '''
+    This is the game command part.
+    We currently have:
+        ATTACK
+    '''
     def do_all_commands(self):
         errors = {}
         for user in self.users.values():
@@ -58,7 +76,7 @@ class Colorfight:
                 x = int(arg_list[1])
                 y = int(arg_list[2])
                 energy = int(arg_list[3])
-                if not self.attack(uid, x, y, val):
+                if not self.cmd_attack(uid, x, y, val):
                     return "{} failed".format(cmd)
                 return None
             else:
@@ -66,7 +84,7 @@ class Colorfight:
         except:
             return "{} is a wrong command".format(cmd)
 
-    def attack(self, uid, x, y, energy):
+    def cmd_attack(self, uid, x, y, energy):
         atk_pos = Position(x, y)
         if atk_pos not in self.game_map:
             return False
@@ -74,9 +92,17 @@ class Colorfight:
             return False
         for pos in atk_pos.get_surrounding_cardinals():
             if self.game_map[pos].owner == uid:
+                if val < self.users[uid].energy:
+                    return False
+                self.users[uid].energy -= val
                 return self.game_map[(x, y)].attack(uid, energy)
         return False
 
+    '''
+    Possible user actions, after parse_action()
+        register
+        command
+    '''
     def register(self, uid, username, password):
         # Check whether user exists first
         for user in self.users.values():
@@ -99,10 +125,9 @@ class Colorfight:
 
         return True, ()
 
-
-    def get_game_info(self):
-        return {"turn": self.turn, "game_map":self.game_map.info()}
-
+    '''
+    All the action from users
+    '''
     def parse_action(self, uid, msg):
         '''
         uid is the unique id that the web server checks
@@ -145,4 +170,9 @@ class Colorfight:
 
         return ret
 
+    '''
+    Read API
+    '''
+    def get_game_info(self):
+        return {"turn": self.turn, "game_map":self.game_map.info()}
 

@@ -6,10 +6,6 @@ import aiohttp_jinja2
 async def index(request):
     return {}
 
-async def incr(request):
-    request.app['game'].incr()
-    return web.Response(text = str(request.app['game'].turn))
-
 async def game_channel(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
@@ -47,3 +43,7 @@ async def action_channel(request):
     finally:
         pass
     return ws
+
+async def restart(request):
+    app['game'].restart()
+    return web.json_response({"success": True})

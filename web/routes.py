@@ -7,7 +7,7 @@ PROJECT_ROOT = pathlib.Path(__file__).parent
 
 def setup_routes(app):
     app.router.add_get('/', index)
-    app.router.add_get('/incr', incr)
+    app.router.add_post('/restart', restart)
     app.router.add_get('/game_channel', game_channel)
     app.router.add_get('/action_channel', action_channel)
 
