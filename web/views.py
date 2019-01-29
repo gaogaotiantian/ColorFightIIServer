@@ -1,3 +1,4 @@
+import aiohttp
 from aiohttp import web
 import asyncio
 import aiohttp_jinja2
@@ -31,11 +32,11 @@ async def action_channel(request):
     uid = None
 
     try:
-        app['game_sockets'].append(ws)
+        request.app['game_sockets'].append(ws)
         while True:
             msg = await ws.receive()
-            if msg_type == aiohttp.WSMsgType.text:
-                result = request.app['game'].parse_action(uid, msg)
+            if msg.type == aiohttp.WSMsgType.text:
+                result = request.app['game'].parse_action(uid, msg.data)
                 uid = result.get('uid', uid)
                 await ws.send_json(result)
             else:
@@ -45,8 +46,8 @@ async def action_channel(request):
     return ws
 
 async def restart(request):
-    app['game'].restart()
-    for ws in app['game_sockets']:
+    request.app['game'].restart()
+    for ws in request.app['game_sockets']:
         ws.close()
-    app['game_sockets'] = []
+    request.app['game_sockets'] = []
     return web.json_response({"success": True})
