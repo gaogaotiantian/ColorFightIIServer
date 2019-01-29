@@ -31,12 +31,12 @@ async def action_channel(request):
     uid = None
 
     try:
+        app['game_sockets'].append(ws)
         while True:
             msg = await ws.receive()
             if msg_type == aiohttp.WSMsgType.text:
                 result = request.app['game'].parse_action(uid, msg)
-                if result.get('action', None) == 'join':
-                    uid = result['uid']
+                uid = result.get('uid', uid)
                 await ws.send_json(result)
             else:
                 break
@@ -46,4 +46,7 @@ async def action_channel(request):
 
 async def restart(request):
     app['game'].restart()
+    for ws in app['game_sockets']:
+        ws.close()
+    app['game_sockets'] = []
     return web.json_response({"success": True})

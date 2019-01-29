@@ -1,5 +1,5 @@
 class User:
-    def __init__(self, username, password):
+    def __init__(self, uid, username, password):
         self.uid = uid
         self.username = username
         self.password = password
@@ -9,9 +9,12 @@ class User:
         self.gold_source = 0
         self.dead = False
         self.cells = {}
+        self.cmd_list = []
 
     def get_cell(self, cell):
         self.cells[cell.position] = cell
+        self.energy_source += cell.energy
+        self.gold_source   += cell.gold
 
     def update(self):
         self.energy += self.energy_source
@@ -26,4 +29,5 @@ class User:
                 "gold": self.gold, \
                 "dead": self.dead, \
                 "energy_source": self.energy_source, \
-                "gold_source": self.gold_source}
+                "gold_source": self.gold_source, \
+                "cells": [cell.position.info() for cell in self.cells.values()]}

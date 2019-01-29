@@ -5,7 +5,7 @@ class Direction:
     West  = (-1, 0)
     East  = (1, 0)
 
-    @static_method
+    @staticmethod
     def get_all_cardinals():
         return [Direction.North, Direction.South, Direction.West, Direction.East]
 

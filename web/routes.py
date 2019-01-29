@@ -1,7 +1,7 @@
 import pathlib
 import aiohttp_cors
 
-from views import index, incr, game_channel, action_channel
+from views import index, restart, game_channel, action_channel
 
 PROJECT_ROOT = pathlib.Path(__file__).parent
 

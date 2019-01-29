@@ -1,3 +1,4 @@
+from .constants import GAME_WIDTH, GAME_HEIGHT
 from .position import Position
 import random
 
@@ -9,9 +10,12 @@ class MapCell:
         self.energy = random.randint(1, 10)
         self.owner = 0
         self.natural_cost = random.randint(1, 100)
-        self.attack_cost = self.natural_cost
         self.force_field  = 0
         self.attacker_list = []
+
+    @property
+    def attack_cost(self):
+        return int(self.natural_cost + self.force_field)
 
     def attack(self, uid, energy):
         self.attacker_list.append((uid, energy))
@@ -24,17 +28,16 @@ class MapCell:
         else:
             max_energy = 0
             max_id = []
-            for attacker_id, attacker_energy in attacker_list:
+            for attacker_id, attacker_energy in self.attacker_list:
                 if attacker_energy > max_energy:
                     max_id = [attacker_id]
                     max_energy = attacker_energy
                 elif attacker_energy == max_energy:
                     max_id += [attacker_id]
             if len(max_id) == 1:
-                self.force_field = min(1000, attacker_energy*2)
+                self.force_field = int(min(1000, attacker_energy*2))
                 self.owner = max_id[0]
                 self.attacker_list = []
-        self.attack_cost = self.natrual_cost + self.force_field
 
     def info(self):
         return {"position": self.position.info(), \
@@ -65,8 +68,11 @@ class GameMap:
         else:
             return False
 
+    def get_cells(self):
+        return [self._cells[y][x] for y in range(GAME_HEIGHT) for x in range(GAME_WIDTH)]
+
     def get_random_empty_cell(self):
-        empty_cells = [cell for cell in self._cells if cell.owner == 0]
+        empty_cells = [cell for cell in self.get_cells() if cell.owner == 0]
         if not empty_cells:
             return None
         return random.choice(empty_cells)
@@ -110,7 +116,7 @@ class GameMap:
                 cell = self._cells[y][x]
                 surrounding_enemy_number = 0
                 for pos in cell.position.valid_surrounding_cardinals():
-                    if game_map[pos].owner != 0 and game_map[pos].owner != cell.owner:
+                    if self[pos].owner != 0 and self[pos].owner != cell.owner:
                         surrounding_enemy_number += 1
                 cell.force_field -= cell.force_field * (0.05 * surrounding_enemy_number)
 

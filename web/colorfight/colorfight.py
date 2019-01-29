@@ -3,8 +3,9 @@ import time
 
 from .game_map import GameMap
 from .user import User
+from .position import Position
 
-from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
+from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN, CMD_ATTACK
 
 class Colorfight:
     def __init__(self):
@@ -14,8 +15,8 @@ class Colorfight:
         self.errors = {}
         self.game_map = GameMap(GAME_WIDTH, GAME_HEIGHT)
         self.valid_actions = {
-            "register": [("username", "password"), ("uid")],
-            "command": [("cmd_list"), ()]
+            "register": [("username", "password"), ("uid",)],
+            "command": [("cmd_list",), ()]
         }
     
     def get(self):
@@ -27,8 +28,9 @@ class Colorfight:
         self.errors = {}
         self.game_map = GameMap(GAME_WIDTH, GAME_HEIGHT)
 
-    def update(self):
-        if time.time() - self.last_update > ROUND_TIME and self.turn < GAME_MAX_TURN:
+    def update(self, force = False):
+        if force or \
+                (time.time() - self.last_update > ROUND_TIME and self.turn < GAME_MAX_TURN):
             self.last_update = time.time()
             self.turn += 1
             self.errors = self.do_all_commands()
@@ -56,7 +58,7 @@ class Colorfight:
         for user in self.users.values():
             errors[user.uid] = []
             for cmd in user.cmd_list:
-                result = self.do_command(user.id, cmd)
+                result = self.do_command(user.uid, cmd)
                 if result != None:
                     errors[user.uid].append(result)
         return errors
@@ -67,34 +69,36 @@ class Colorfight:
         except:
             return "{} is not a command".format(cmd)
 
-        if len(arg_list) > 0:
+        if len(arg_list) == 0:
             return "{} is not a command".format(cmd)
 
         try:
-            cmd_type = cmd[0]
+            cmd_type = arg_list[0]
             if cmd_type == CMD_ATTACK:
                 x = int(arg_list[1])
                 y = int(arg_list[2])
                 energy = int(arg_list[3])
-                if not self.cmd_attack(uid, x, y, val):
+                if not self.cmd_attack(uid, x, y, energy):
                     return "{} failed".format(cmd)
                 return None
             else:
                 return "{} is a wrong command".format(cmd)
-        except:
+        except Exception as e:
             return "{} is a wrong command".format(cmd)
 
     def cmd_attack(self, uid, x, y, energy):
         atk_pos = Position(x, y)
+        print(self.game_map[atk_pos].info(), energy)
         if atk_pos not in self.game_map:
             return False
-        if val < self.game_map[atk_pos].attack_cost:
+        if energy < self.game_map[atk_pos].attack_cost:
             return False
+
         for pos in atk_pos.get_surrounding_cardinals():
             if self.game_map[pos].owner == uid:
-                if val < self.users[uid].energy:
+                if energy > self.users[uid].energy:
                     return False
-                self.users[uid].energy -= val
+                self.users[uid].energy -= energy 
                 return self.game_map[(x, y)].attack(uid, energy)
         return False
 
@@ -148,7 +152,10 @@ class Colorfight:
         action = data['action']
 
         if action not in self.valid_actions:
-            return {"success": False, "err_msg":"not a valid action"}
+            return {"success": False, "err_msg":"Not a valid action"}
+
+        if action != 'register' and uid == None:
+            return {"success": False, "err_msg":"You need to join the game first"}
 
         required_args = self.valid_actions[action][0]
         expected_results = self.valid_actions[action][1]
@@ -174,5 +181,9 @@ class Colorfight:
     Read API
     '''
     def get_game_info(self):
-        return {"turn": self.turn, "game_map":self.game_map.info()}
+        return {\
+                "turn": self.turn, \
+                "game_map":self.game_map.info(), \
+                "users": {user.uid: user.info() for user in self.users.values()} \
+        }
 
