@@ -180,9 +180,15 @@ class Colorfight:
     '''
     Read API
     '''
+    def info(self):
+        return {"max_turn": GAME_MAX_TURN, \
+                "width": GAME_WIDTH, \
+                "height": GAME_HEIGHT}
     def get_game_info(self):
         return {\
                 "turn": self.turn, \
+                "info": self.info(), \
+                "error": self.errors, \
                 "game_map":self.game_map.info(), \
                 "users": {user.uid: user.info() for user in self.users.values()} \
         }

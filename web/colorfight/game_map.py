@@ -6,6 +6,7 @@ class MapCell:
     def __init__(self, position):
         self.position = position
         self.is_home  = False
+        self.building = "empty"
         self.gold = random.randint(1, 10)
         self.energy = random.randint(1, 10)
         self.owner = 0
@@ -22,10 +23,7 @@ class MapCell:
 
     def update(self):
         # Change owner based on attacker list
-        if not self.attacker_list:
-            # No one attacks
-            self.force_field = int(self.force_field * 0.9)
-        else:
+        if self.attacker_list:
             max_energy = 0
             max_id = []
             for attacker_id, attacker_energy in self.attacker_list:
@@ -35,12 +33,17 @@ class MapCell:
                 elif attacker_energy == max_energy:
                     max_id += [attacker_id]
             if len(max_id) == 1:
+                # Attack will be successful if only one player is the max
                 self.force_field = int(min(1000, attacker_energy*2))
+                if self.owner != max_id[0]:
+                    self.building = "empty"
+                    self.is_home = False
                 self.owner = max_id[0]
                 self.attacker_list = []
 
     def info(self):
         return {"position": self.position.info(), \
+                "building": self.building, \
                 "attack_cost": self.attack_cost, \
                 "owner": self.owner, \
                 "gold": self.gold, \
@@ -85,6 +88,7 @@ class GameMap:
         cell.gold = 10
         cell.natural_cost = 1000
         cell.is_home = True
+        cell.building = "home"
         cell.owner = user.uid
         user.get_cell(cell)
         return True
@@ -118,7 +122,7 @@ class GameMap:
                 for pos in cell.position.valid_surrounding_cardinals():
                     if self[pos].owner != 0 and self[pos].owner != cell.owner:
                         surrounding_enemy_number += 1
-                cell.force_field -= cell.force_field * (0.05 * surrounding_enemy_number)
+                cell.force_field -= int(cell.force_field * (0.05 * surrounding_enemy_number))
 
     def info(self):
         info = [[None for _ in range(self.width)] for _ in range(self.height)]
