@@ -3,16 +3,19 @@ from .position import Position
 import random
 
 class MapCell:
-    def __init__(self, position):
+    def __init__(self, position, **kwargs):
         self.position = position
         self.is_home  = False
         self.building = "empty"
         self.gold = random.randint(1, 10)
         self.energy = random.randint(1, 10)
         self.owner = 0
-        self.natural_cost = random.randint(1, 100)
+        self.natural_cost = random.randint(1, 300)
         self.force_field  = 0
         self.attacker_list = []
+        for kw in kwargs:
+            if hasattr(self, kw):
+                setattr(self, kw, kwargs[kw])
 
     @property
     def attack_cost(self):
@@ -24,22 +27,16 @@ class MapCell:
     def update(self):
         # Change owner based on attacker list
         if self.attacker_list:
-            max_energy = 0
-            max_id = []
-            for attacker_id, attacker_energy in self.attacker_list:
-                if attacker_energy > max_energy:
-                    max_id = [attacker_id]
-                    max_energy = attacker_energy
-                elif attacker_energy == max_energy:
-                    max_id += [attacker_id]
-            if len(max_id) == 1:
-                # Attack will be successful if only one player is the max
-                self.force_field = int(min(1000, attacker_energy*2))
-                if self.owner != max_id[0]:
+            max_id, max_energy = max(self.attacker_list, key = lambda x: x[1])
+            total_energy = sum([x[1] for x in self.attacker_list])
+            if max_energy * 2 > total_energy:
+                # more than 50% of the energy, success
+                self.force_field = int(min(1000, 2*(max_energy*2 - total_energy)))
+                if self.owner != max_id:
                     self.building = "empty"
                     self.is_home = False
-                self.owner = max_id[0]
-                self.attacker_list = []
+                self.owner = max_id
+            self.attacker_list = []
 
     def info(self):
         return {"position": self.position.info(), \
@@ -61,7 +58,7 @@ class GameMap:
         if isinstance(location, Position):
             return self._cells[location.y][location.x]
         elif isinstance(location, tuple):
-            return self._cells[location[0]][location[1]]
+            return self._cells[location[1]][location[0]]
 
     def __contains__(self, item):
         if isinstance(item, Position):
@@ -75,7 +72,7 @@ class GameMap:
         return [self._cells[y][x] for y in range(GAME_HEIGHT) for x in range(GAME_WIDTH)]
 
     def get_random_empty_cell(self):
-        empty_cells = [cell for cell in self.get_cells() if cell.owner == 0]
+        empty_cells = [cell for cell in self.get_cells() if cell.owner == 0 and cell.natural_cost < 100]
         if not empty_cells:
             return None
         return random.choice(empty_cells)
@@ -113,6 +110,8 @@ class GameMap:
                     users[uid].gold_source += cell.gold
                     users[uid].energy_source += cell.energy
                 else:
+                    if cell.owner != 0:
+                        print(cell.owner)
                     cell.owner = 0
         # After updating the owner, we update the force field
         for x in range(self.width):
@@ -131,11 +130,32 @@ class GameMap:
                 info[y][x] = self._cells[y][x].info()
         return info
 
+    def _blur(self, cells, percent = 0.15):
+        new_cells = self._generate_empty_cells(self.width, self.height)
+
+        for x in range(self.width):
+            for y in range(self.height):
+                cell = new_cells[y][x]
+                cell.natural_cost = int(cells[y][x].natural_cost * (1 - 4 * percent))
+                for pos in cell.position.valid_surrounding_cardinals():
+                    new_cells[y][x].natural_cost += int(cells[pos.y][pos.x].natural_cost * percent)
+        
+        return new_cells
+
     def _generate_cells(self, width, height):
         cells = [[None for _ in range(width)] for _ in range(height)]
         for x in range(width):
             for y in range(height):
                 cells[y][x] = MapCell(Position(x, y))
+        for i in range(3):
+            cells = self._blur(cells)
+        return cells
+
+    def _generate_empty_cells(self, width, height):
+        cells = [[None for _ in range(width)] for _ in range(height)]
+        for x in range(width):
+            for y in range(height):
+                cells[y][x] = MapCell(Position(x, y), natural_cost = 0)
         return cells
 
 

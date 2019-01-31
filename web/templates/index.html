@@ -6,18 +6,9 @@
       integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
       crossorigin="anonymous"></script>
     <script type = "text/javascript">
-    $(function() {
-        var wsUri = (window.location.protocol=='https:'&&'wss://'||'ws://') + window.location.host + '/game_channel';
-        var conn = new WebSocket(wsUri)
-        conn.onopen = function() {
-          console.log("open");
-        }
-        conn.onmessage = function(e) {
-          console.log(e);
-          $('#test').text(e.data);
-        }
-    })
     </script>
+    <script src="https://cdn.bootcss.com/pixi.js/4.8.5/pixi.min.js"></script>
+    <script src="/static/gamerender.js"></script>
   </head>
   <body>
     <div id="test">

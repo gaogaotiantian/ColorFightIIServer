@@ -5,7 +5,7 @@ from aiohttp import web
 import aiohttp_jinja2
 import jinja2
 
-from routes import setup_routes
+from routes import setup_routes, setup_static_routes
 from colorfight import Colorfight
 
 PROJECT_ROOT = pathlib.Path(__file__).parent
@@ -18,6 +18,7 @@ async def init_app():
     app['game'] = Colorfight()
     app['game_sockets'] = []
     setup_routes(app)
+    setup_static_routes(app)
     
     return app
 

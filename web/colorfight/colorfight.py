@@ -78,29 +78,30 @@ class Colorfight:
                 x = int(arg_list[1])
                 y = int(arg_list[2])
                 energy = int(arg_list[3])
-                if not self.cmd_attack(uid, x, y, energy):
-                    return "{} failed".format(cmd)
+                result, err_msg = self.cmd_attack(uid, x, y, energy)
+                if not result:
+                    return "{} failed, {}.".format(cmd, err_msg)
                 return None
             else:
-                return "{} is a wrong command".format(cmd)
+                return "{} is a wrong command, cmd type {} is invalid".format(cmd, cmd_type)
         except Exception as e:
             return "{} is a wrong command".format(cmd)
 
     def cmd_attack(self, uid, x, y, energy):
         atk_pos = Position(x, y)
-        print(self.game_map[atk_pos].info(), energy)
         if atk_pos not in self.game_map:
-            return False
+            return False, "Attack position is not in the map"
         if energy < self.game_map[atk_pos].attack_cost:
-            return False
+            return False, "The energy spent is less than attack cost"
+        if energy > self.users[uid].energy:
+            return False, "Do not have enough energy to attack"
 
-        for pos in atk_pos.get_surrounding_cardinals():
+        for pos in atk_pos.valid_surrounding_cardinals():
             if self.game_map[pos].owner == uid:
-                if energy > self.users[uid].energy:
-                    return False
                 self.users[uid].energy -= energy 
-                return self.game_map[(x, y)].attack(uid, energy)
-        return False
+                self.game_map[(x, y)].attack(uid, energy)
+                return True, ""
+        return False, "No valid surrounding cell to attack"
 
     '''
     Possible user actions, after parse_action()
