@@ -1,12 +1,12 @@
-from .constants import GAME_WIDTH, GAME_HEIGHT
 from .position import Position
+from .building import Home, Empty
 import random
 
 class MapCell:
     def __init__(self, position, **kwargs):
         self.position = position
         self.is_home  = False
-        self.building = "empty"
+        self.building = Empty()
         self.gold = random.randint(1, 10)
         self.energy = random.randint(1, 10)
         self.owner = 0
@@ -19,7 +19,15 @@ class MapCell:
 
     @property
     def attack_cost(self):
-        return int(self.natural_cost + self.force_field)
+        return self.building.get_attack_cost(self)
+
+    @property
+    def energy_source(self):
+        return self.building.get_energy_source(self)
+
+    @property
+    def gold_source(self):
+        return self.building.get_gold_source(self)
 
     def attack(self, uid, energy):
         self.attacker_list.append((uid, energy))
@@ -33,18 +41,20 @@ class MapCell:
                 # more than 50% of the energy, success
                 self.force_field = int(min(1000, 2*(max_energy*2 - total_energy)))
                 if self.owner != max_id:
-                    self.building = "empty"
+                    self.building = Empty()
                     self.is_home = False
                 self.owner = max_id
             self.attacker_list = []
 
     def info(self):
         return {"position": self.position.info(), \
-                "building": self.building, \
+                "building": self.building.info(), \
                 "attack_cost": self.attack_cost, \
                 "owner": self.owner, \
-                "gold": self.gold, \
-                "energy": self.energy, \
+                "gold": self.gold_source, \
+                "energy": self.energy_source, \
+                "natural_gold": self.gold, \
+                "natural_energy": self.energy, \
                 "natural_cost": self.natural_cost, \
                 "force_field": self.force_field}
 
@@ -69,7 +79,7 @@ class GameMap:
             return False
 
     def get_cells(self):
-        return [self._cells[y][x] for y in range(GAME_HEIGHT) for x in range(GAME_WIDTH)]
+        return [self._cells[y][x] for y in range(self.height) for x in range(self.width)]
 
     def get_random_empty_cell(self):
         empty_cells = [cell for cell in self.get_cells() if cell.owner == 0 and cell.natural_cost < 100]
@@ -81,11 +91,8 @@ class GameMap:
         cell = self.get_random_empty_cell()
         if cell == None:
             return False
-        cell.energy = 10
-        cell.gold = 10
-        cell.natural_cost = 1000
         cell.is_home = True
-        cell.building = "home"
+        cell.building = Home()
         cell.owner = user.uid
         user.get_cell(cell)
         return True
@@ -107,8 +114,8 @@ class GameMap:
                 uid = cell.owner
                 if uid in users:
                     users[uid].cells[cell.position] = cell
-                    users[uid].gold_source += cell.gold
-                    users[uid].energy_source += cell.energy
+                    users[uid].gold_source += cell.gold_source
+                    users[uid].energy_source += cell.energy_source
                 else:
                     if cell.owner != 0:
                         print(cell.owner)

@@ -4,16 +4,22 @@ import time
 from .game_map import GameMap
 from .user import User
 from .position import Position
+from .building import get_building_class
 
-from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN, CMD_ATTACK
+from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
+from .constants import CMD_ATTACK, CMD_BUILD
 
 class Colorfight:
     def __init__(self):
         self.turn = 0
+        self.max_turn = GAME_MAX_TURN
+        self.width = GAME_WIDTH
+        self.height = GAME_HEIGHT
+        self.round_time = ROUND_TIME
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
-        self.game_map = GameMap(GAME_WIDTH, GAME_HEIGHT)
+        self.game_map = GameMap(self.width, self.height)
         self.valid_actions = {
             "register": [("username", "password"), ("uid",)],
             "command": [("cmd_list",), ()]
@@ -26,11 +32,11 @@ class Colorfight:
         self.turn = 0
         self.users = {}
         self.errors = {}
-        self.game_map = GameMap(GAME_WIDTH, GAME_HEIGHT)
+        self.game_map = GameMap(self.height, self.width) 
 
     def update(self, force = False):
         if force or \
-                (time.time() - self.last_update > ROUND_TIME and self.turn < GAME_MAX_TURN):
+                (time.time() - self.last_update > self.round_time and self.turn < self.max_turn):
             self.last_update = time.time()
             self.turn += 1
             self.errors = self.do_all_commands()
@@ -52,6 +58,7 @@ class Colorfight:
     This is the game command part.
     We currently have:
         ATTACK
+        BUILD
     '''
     def do_all_commands(self):
         errors = {}
@@ -64,6 +71,8 @@ class Colorfight:
         return errors
                     
     def do_command(self, uid, cmd):
+        err_msg = ""
+
         try: 
             arg_list = cmd.split() 
         except:
@@ -79,20 +88,29 @@ class Colorfight:
                 y = int(arg_list[2])
                 energy = int(arg_list[3])
                 result, err_msg = self.cmd_attack(uid, x, y, energy)
-                if not result:
-                    return "{} failed, {}.".format(cmd, err_msg)
-                return None
+            elif cmd_type == CMD_BUILD:
+                x = int(arg_list[1])
+                y = int(arg_list[2])
+                building = arg_list[3]
+                result, err_msg = self.cmd_build(uid, x, y, building)
             else:
                 return "{} is a wrong command, cmd type {} is invalid".format(cmd, cmd_type)
         except Exception as e:
-            return "{} is a wrong command".format(cmd)
+            return "{} is a wrong command, {}".format(cmd, e)
+
+        if not result:
+            return "{} failed, {}.".format(cmd, err_msg)
+        return None
 
     def cmd_attack(self, uid, x, y, energy):
         atk_pos = Position(x, y)
+
         if atk_pos not in self.game_map:
             return False, "Attack position is not in the map"
+
         if energy < self.game_map[atk_pos].attack_cost:
             return False, "The energy spent is less than attack cost"
+
         if energy > self.users[uid].energy:
             return False, "Do not have enough energy to attack"
 
@@ -102,6 +120,30 @@ class Colorfight:
                 self.game_map[(x, y)].attack(uid, energy)
                 return True, ""
         return False, "No valid surrounding cell to attack"
+
+    def cmd_build(self, uid, x, y, building):
+        build_pos = Position(x, y)
+
+        if build_pos not in self.game_map:
+            return False, "Build position is not in the map"
+
+        if self.game_map[build_pos].owner != uid:
+            return False, "You need to build on your own cell"
+
+        if not self.game_map[build_pos].building.is_empty():
+            return False, "There is a building on this cell already"
+
+        BldClass = get_building_class(building)
+        if BldClass is None:
+            return False, "Not a correct building"
+
+        if self.users[uid].gold < BldClass.cost:
+            return False, "Not enough gold"
+
+        self.game_map[build_pos].building = BldClass()
+        self.users[uid].gold -= BldClass.cost
+
+        return True, ""
 
     '''
     Possible user actions, after parse_action()

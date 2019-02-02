@@ -1,5 +1,6 @@
 from ..colorfight import Colorfight
 from ..constants import GAME_WIDTH, GAME_HEIGHT
+from ..constants import BLD_GOLD_MINE, BLD_ENERGY_WELL
 from .util import *
 import pytest
 
@@ -25,7 +26,7 @@ def test_join():
         home = info['game_map'][y][x]
         assert(home['energy'] == 10)
         assert(home['gold'] == 10)
-        assert(home['natural_cost'] == 1000)
+        assert(home['attack_cost'] == 1000)
         x, y = home['position']
     except Exception as e:
         print(e)
@@ -79,3 +80,25 @@ def test_attack():
     game.update(True)
     assert(game.users[uid].energy < 10000)
     assert(len(game.users[uid].cells) == 2)
+
+def test_build():
+    game = Colorfight()
+    uid = join(game, 'a', 'a')
+    info = game.get_game_info()
+    x, y = info['users'][uid]['cells'][0]
+    game.users[uid].energy = 10000
+    game.users[uid].gold = 10000
+    if y == 0:
+        attack_y = 1
+    else:
+        attack_y = y - 1
+    result = attack(game, uid, x, attack_y, 1000)
+    game.update(True)
+    result = build(game, uid, x, attack_y, BLD_GOLD_MINE)
+    game.update(True)
+    info = game.get_game_info()
+    cell = info['game_map'][attack_y][x]
+    assert(not info['error'][1])
+    assert(cell['owner'] == uid)
+    assert(cell['building'] == 'gold_mine')
+    assert(cell['gold'] == cell['natural_gold'] * 2)
