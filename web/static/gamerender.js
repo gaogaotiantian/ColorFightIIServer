@@ -1,87 +1,205 @@
-let pixi_app = new PIXI.Application({width: 960, height: 960});
+
+var WIDTH = 960,
+	HEIGHT = 960;
+let pixi_app = new PIXI.Application({width: WIDTH, height: HEIGHT, antialias: true});
 
 rgb2hex = PIXI.utils.rgb2hex;
 Graphics = PIXI.Graphics;
 
 // Globals
-CELL_SIZE = 32
+const CELL_SIZE = WIDTH/30;
+const TERRAIN_COLOR = rgb2hex([34/255, 139/255, 34/255]);
+const GOLD_COLOR = rgb2hex([255/255, 215/255, 0/255]);
+const ENERGY_COLOR = rgb2hex([30/255, 144/255, 255/255]);
 
 // Utilities
-cost_to_color = function(cost) {
-    var MAX_COST = 200;
-    var MAX_GREY = 150;
-    if (cost > MAX_COST) {
-        cost = MAX_COST
-    }
-    var neg_gray = parseInt(cost / MAX_COST * MAX_GREY);
-    var gray = 255 - neg_gray;
-    return rgb2hex([gray/255, gray/255, gray/255]);
-
+// Colors
+var colors = ['#DDDDDD', '#E6194B', '#3Cb44B', '#FFE119', '#0082C8', '#F58231', 
+	'#911EB4', '#46F0F0', '#F032E6', '#D2F53C', '#008080', 
+	'#AA6E28', '#800000', '#AAFFC3', '#808000', '#000080', '#FABEBE', '#E6BEFF'];
+var COLORS = [];
+for (var color of colors) {
+	var r = parseInt('0x'+color.substring(1, 3));
+	var g = parseInt('0x'+color.substring(3, 5));
+	var b = parseInt('0x'+color.substring(5, 7));
+	COLORS.push({r: r, g: g, b: b});
 }
-var ID_COLORS = [0xDDDDDD, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231, 
-    0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 
-    0xAA6E28, 0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF]
-id_to_color = function(uid) {
-    if (uid < ID_COLORS.length) {
-        return ID_COLORS[uid];
-    } else {
-        return 0x123456;
-    }
+const getRandomColor = () => {
+	var r = Math.floor(Math.random()*255);
+	var g = Math.floor(Math.random()*255);
+	var b = Math.floor(Math.random()*255);
+	return {r: r, g: g, b: b};
+}
+const generateColor = (n) => {
+	if (n===0)
+		return {r: 221, g: 221, b: 221};
+	if (n < COLORS.length) {
+		return COLORS[n];
+	} else {
+		while (COLORS.length <= n) {
+			COLORS.push(getRandomColor());
+		}
+		return COLORS[n];
+	}
 }
 
 // Update functions
-update_frame = function(data) {
-    // Clear stage
-    while (pixi_app.stage.children[0]) {
-        pixi_app.stage.removeChild(pixi_app.stage.children[0]);
-    }
-    draw_gamemap(data['game_map']);
+const update_frame = function(data) {
+	gamemap.load(data);
 }
 
-draw_gamemap = function(data) {
-    for (y in data) {
-        for (x in data[y]) {
-            var cell = data[y][x];
-            draw_cell(cell);
-        }
-    }
+// Game Map
+class Map {
+	// width, height = num of cell
+	constructor(width, height){
+		this.width = width;
+		this.height = height;
+		this.cells = [];
+		this.turn = 0;
+		this.display_mode = 0;
+	}
+	// display the cells
+	draw(){
+		this.clear();
+		switch(this.display_mode){
+			case 0: 
+				for (const cell of this.cells) {
+					cell.draw();
+				}
+				break;
+			case 1: 
+				for (const cell of this.cells) {
+					cell.showTerrain();
+				}
+				break;
+			case 2:
+				for (const cell of this.cells) {
+					cell.showGold();
+				}
+				break;
+			case 3:
+				for (const cell of this.cells) {
+					cell.showEnergy();
+				}
+				break;
+		}
+	}
+	// clear the stage
+	clear(){
+		while (pixi_app.stage.children[0]) {
+			pixi_app.stage.removeChild(pixi_app.stage.children[0]);
+		}
+	}
+	// show terrain
+	showTerrain(){
+		this.display_mode = 1;
+		this.draw();
+	}
+	// show gold
+	showGold(){
+		this.display_mode = 2;
+		this.draw();
+	}
+	// show energy
+	showEnergy(){
+		this.display_mode = 3;
+		this.draw();
+	}
+	// load data
+	load(data){
+		this.turn = data.turn;
+		this.cells = [];
+		//cellcounts = [];
+		for (const list of data.game_map)
+			for (const item of list)
+				//console.log(item.owner);
+				this.cells.push(new Cell(item.position, item.building, item.attack_cost, 
+				item.owner, item.gold, item.energy, item.natural_cost, item.force_field));
+		this.draw();
+	}
+	
 }
 
-draw_cell = function(data) {
-    var corner_x = CELL_SIZE * data.position[0];
-    var corner_y = CELL_SIZE * data.position[1];
-    // Base color
-    let base = new Graphics();
-    
-    base.beginFill(cost_to_color(data['natural_cost']));
-    base.drawRect(corner_x, 
-            corner_y, 
-            CELL_SIZE, 
-            CELL_SIZE)
-    base.endFill();
-
-    pixi_app.stage.addChild(base);
-
-    // User color
-    if (data.owner != 0) {
-        user_flag = new Graphics();
-        user_flag.beginFill(id_to_color(data.owner));
-        user_flag.drawRoundedRect(corner_x+5, corner_y+5, CELL_SIZE-10, CELL_SIZE-10, 3);
-        user_flag.endFill();
-        pixi_app.stage.addChild(user_flag);
-    }
-
+// Cells
+class Cell {
+	constructor(position, building, attack_cost, owner, gold, energy, natural_cost, force_field){
+		this.position = position;
+		this.size = CELL_SIZE;
+		this.building = building;
+		this.attack_cost = attack_cost;
+		this.owner = owner;
+		this.gold = gold;
+		this.energy = energy;
+		this.natural_cost = natural_cost;
+		this.force_field = force_field;
+		//this.owner = Math.floor(Math.random()*10);
+	}
+	draw(){
+		var s = this.size * 0.5,
+			x = this.position[0] * this.size + (this.size - s)/2,
+			y = this.position[1] * this.size + (this.size - s)/2,
+			radius = s / 5;
+		let cell = new Graphics();
+		let color = this.color();
+		cell.beginFill(color[0], color[1]);
+		cell.drawRoundedRect(x, y, s, s, radius);
+		cell.endFill();
+		cell.lineStyle(1, 0xFFFFFF, 1);
+		cell.drawRoundedRect(x, y, s, s, radius);
+		pixi_app.stage.addChild(cell);
+	}
+	showTerrain(){
+		let cell = new Graphics();
+		cell.beginFill(TERRAIN_COLOR, (this.natural_cost/200)*0.5+0.5);
+		cell.drawRect(this.position[0]*this.size, this.position[1]*this.size, this.size, this.size);
+		cell.endFill();
+		pixi_app.stage.addChild(cell);
+		this.draw();
+	}
+	showGold(){
+		let cell = new Graphics();
+		cell.beginFill(GOLD_COLOR, this.gold/10);
+		cell.drawRect(this.position[0]*this.size, this.position[1]*this.size, this.size, this.size);
+		cell.endFill();
+		pixi_app.stage.addChild(cell);
+		this.draw();
+	}
+	showEnergy(){
+		let cell = new Graphics();
+		cell.beginFill(ENERGY_COLOR, this.energy/10);
+		cell.drawRect(this.position[0]*this.size, this.position[1]*this.size, this.size, this.size);
+		cell.endFill();
+		pixi_app.stage.addChild(cell);
+		this.draw();
+	}
+	color(){
+		var a = (this.attack_cost/200) * 0.5 + 0.5;
+		var color = generateColor(this.owner);
+		var hex = rgb2hex([color.r/255, color.g/255, color.b/255]);
+		return [hex, a];
+	}
+	
 }
+
+var gamemap;
 
 pixi_setup = function(app) {
-    app.renderer.backgroundColor = 0x111111;
+	app.renderer.backgroundColor = 0x111111;
 }
 $(function() {
-    var wsUri = (window.location.protocol=='https:'&&'wss://'||'ws://') + window.location.host + '/game_channel';
-    var conn = new WebSocket(wsUri)
-    conn.onmessage = function(e) {
-        update_frame(JSON.parse(e.data))
-    }
-    document.body.appendChild(pixi_app.view)
-    pixi_setup(pixi_app)
+	const wsURL = (window.location.protocol=='https:'&&'wss://'||'ws://') + window.location.host + '/game_channel';
+	/*const wsURL = (window.location.protocol=='https://'&&'wss://'||'ws://') +
+		'colorfightii.herokuapp.com' + '/game_channel';
+	*/
+	const conn = new WebSocket(wsURL);
+	conn.onopen = () => {
+		console.log('opened');
+		gamemap = new Map(30, 30);
+		document.body.appendChild(pixi_app.view);
+		pixi_setup(pixi_app);
+	};
+	conn.onmessage = (e) => {
+		update_frame(JSON.parse(e.data));
+	};
 })
+
