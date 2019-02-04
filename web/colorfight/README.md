@@ -83,7 +83,7 @@ A player starts with 100 ```energy``` and 0 ```gold```.
 ### Preparation
 
 In the beginning of each round, a map will be generated. Each cell of the map
-will have ```natrual_cost```, ```natural_energy and ```natural_gold``` 
+will have ```natrual_cost```, ```natural_energy``` and ```natural_gold``` 
 attributes. 
 
 ### Register
@@ -154,8 +154,8 @@ The only API for an action is through ```parse_action(uid, msg)```
 
 #### Command Format
 
-* attack: "a <x> <y> <energy>". ex "a 2 3 100"
-* build   "b <x> <y> <building>" ex "b 3 5 g"
+* attack: ```"a <x> <y> <energy>"```. ex ```"a 2 3 100"```
+* build: ```"b <x> <y> <building>"``` ex ```"b 3 5 g"```
 
 ### Message to a client
 
@@ -168,31 +168,31 @@ to convert it to string.
 
 ```
 {
-    "turn": <current turn>,
+    "turn": <int, current turn>,
     "info": {
-        "max_turn": <max turn number the game will last>,
-        "width": <width of the game map>,
-        "height": <height of the game map>
+        "max_turn": <int, max turn number the game will last>,
+        "width": <int, width of the game map>,
+        "height": <int, height of the game map>
     },
     "error": {
         uid: [
-            <error_message>
+            <str, error_message>
         ]
     },
     "game_map": {
         [
             [
                 {
-                    "position": [<x>, <y>],
-                    "building": <building name>,
-                    "attack_cost": <cost to attack the cell>,
-                    "owner": <uid>,
-                    "gold": <gold the cell generates a round>,
-                    "energy": <energy the cell generates a round>,
-                    "natural_gold": <natural_gold of the cell>,
-                    "natural_energy": <natural_energy of the cell>,
-                    "natural_cost": <natural_cost of the cell>,
-                    "force_field": <force_field of the cell>
+                    "position": [<int, x>, <int, y>],
+                    "building": <str, building name>,
+                    "attack_cost": <int, cost to attack the cell>,
+                    "owner": <int, uid>,
+                    "gold": <int, gold the cell generates a round>,
+                    "energy": <int, energy the cell generates a round>,
+                    "natural_gold": <int, natural_gold of the cell>,
+                    "natural_energy": <int, natural_energy of the cell>,
+                    "natural_cost": <int, natural_cost of the cell>,
+                    "force_field": <int, force_field of the cell>
                 }
                 ...
             ]
@@ -201,15 +201,15 @@ to convert it to string.
     },
     "users": {
         uid: {
-            "uid": <user id>,
-            "username": <username>,
-            "energy": <current energy the user has>,
-            "gold": <current gold the user has>,
-            "dead": <if the user is dead>
-            "energy_source": <how much energy the user will gain each round>,
-            "gold_source": <how much gold the user will gain each round>,
+            "uid": <int, user id>,
+            "username": <str, username>,
+            "energy": <int, current energy the user has>,
+            "gold": <int, current gold the user has>,
+            "dead": <bool, if the user is dead>
+            "energy_source": <int, how much energy the user will gain each round>,
+            "gold_source": <int, how much gold the user will gain each round>,
             "cells": [
-                [<x>, <y>], ...            
+                [<int, x>, <int, y>], ...            
             ]
         }
     }
