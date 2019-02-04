@@ -7,6 +7,7 @@ def test_invalid_uid():
     try:
         game = Colorfight()
         result = attack(game, 100, 0, 0, 100)
+        assert(not result['success'])
     except Exception as e:
         assert(False)
         
