@@ -1,0 +1,352 @@
+<meta charset="utf-8">
+<html>
+  <head>
+    {% include 'header.html' %}
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="container">
+      <div class="main-content">
+        <div class="row">
+          <div class="col-md-12">
+
+            <div class="doc-content-container">
+
+              <div class="doc-header">
+                <h1>API DOCUMENTATION</h1>
+              </div>
+
+              <div class="doc-section">
+                <h1 id="overview">Overview</h1>
+
+<p>This is the API document for ColorFightII</p>
+
+<h1 id="colorfight">Colorfight</h1>
+
+<p>The <code>Colorfight</code> object holds all the useful information for the game. </p>
+
+<h2 id="attributes">attributes</h2>
+
+<ul>
+<li><p><code>uid</code> </p>
+
+<blockquote>
+  <p>Your user id when you join the game. <code>0</code> before you join the game.</p>
+</blockquote></li>
+
+<li><p><code>turn</code></p>
+
+<blockquote>
+  <p>Current turn number, starts with <code>0</code>.</p>
+</blockquote></li>
+
+<li><p><code>max_turn</code></p>
+
+<blockquote>
+  <p>Turn number that this game will last.</p>
+</blockquote></li>
+
+<li><p><code>me</code></p>
+
+<blockquote>
+  <p><code>User</code> object for you. Invalid before join the game.</p>
+</blockquote></li>
+
+<li><p><code>users</code></p>
+
+<blockquote>
+  <p>A map of <code>User</code> objects. <strong>key</strong> is <code>uid</code> and <strong>value</strong> is the 
+    ```User object.</p>
+</blockquote></li>
+
+<li><p><code>error</code></p>
+
+<blockquote>
+  <p>A map of error <code>string</code>. <strong>key</strong> is <code>uid</code> and <strong>value</strong> is a list
+    of error strings for this user from last round</p>
+</blockquote></li>
+
+<li><p><code>game_map</code></p>
+
+<blockquote>
+  <p><code>GameMap</code> object for current game map.</p>
+</blockquote></li>
+</ul>
+
+<h2 id="methods">methods</h2>
+
+<ul>
+<li><p><code>.connect(url)</code> </p>
+
+<blockquote>
+  <p>Establish connection to the server.</p>
+</blockquote></li>
+
+<li><p><code>.update_turn()</code></p>
+
+<blockquote>
+  <p>Wait until next turn, and update the game info.</p>
+</blockquote></li>
+
+<li><p><code>.register(username, password)</code></p>
+
+<blockquote>
+  <p>Register to the game with <code>username</code> and <code>password</code></p>
+</blockquote></li>
+
+<li><p><code>.attack(position, energy)</code></p>
+
+<blockquote>
+  <p>Returns a <code>string</code> for attacking a certain position. <code>position</code> 
+    should be a <code>Position</code> object and energy should be an integer.</p>
+</blockquote></li>
+
+<li><p><code>.build(position, building)</code></p>
+
+<blockquote>
+  <p>Returns a <code>string</code> for build a building on a certain position. 
+    <code>position</code> should be a <code>Position</code> object and building should be
+    a character(Global const variable) representing the building type.</p>
+</blockquote></li>
+
+<li><p><code>.send_cmd(cmd_list)</code></p>
+
+<blockquote>
+  <p>Sends the command list to the server.</p>
+</blockquote></li>
+</ul>
+
+<h1 id="building">Building</h1>
+
+<h2 id="attributes-1">attributes</h2>
+
+<ul>
+<li><p><code>cost</code></p>
+
+<blockquote>
+  <p>Cost of the building</p>
+</blockquote></li>
+
+<li><p><code>name</code></p>
+
+<blockquote>
+  <p>Name of the building in <code>string</code></p>
+</blockquote></li>
+</ul>
+
+<h1 id="gamemap">GameMap</h1>
+
+<h2 id="attributes-2">attributes</h2>
+
+<ul>
+<li><p><code>width</code></p>
+
+<blockquote>
+  <p>Width of the game map</p>
+</blockquote></li>
+
+<li><p><code>height</code></p>
+
+<blockquote>
+  <p>Height of the game map</p>
+</blockquote></li>
+</ul>
+
+<h2 id="methods-1">methods</h2>
+
+<ul>
+<li><p><code>game_map[position]</code></p>
+
+<blockquote>
+  <p>Get the <code>MapCell</code> object on <code>position</code>. <code>position</code> should be
+    a <code>Position</code> Object.</p>
+</blockquote></li>
+</ul>
+
+<h1 id="mapcell">MapCell</h1>
+
+<h2 id="attributes-3">attributes</h2>
+
+<ul>
+<li><p><code>position</code></p>
+
+<blockquote>
+  <p><code>Position</code> object representing the position of the cell.</p>
+</blockquote></li>
+
+<li><p><code>building</code></p>
+
+<blockquote>
+  <p>An object for the current building. <code>Empty</code> if nothing on the cell.</p>
+</blockquote></li>
+
+<li><p><code>gold</code></p>
+
+<blockquote>
+  <p>The amount of gold the cell produces for each round.</p>
+</blockquote></li>
+
+<li><p><code>energy</code></p>
+
+<blockquote>
+  <p>The amount of energy the cell produces for each round.</p>
+</blockquote></li>
+
+<li><p><code>owner</code></p>
+
+<blockquote>
+  <p><code>uid</code> of the owner of this cell.</p>
+</blockquote></li>
+
+<li><p><code>natural_cost</code></p></li>
+
+<li><p><code>natural_gold</code></p></li>
+
+<li><p><code>natural_energy</code></p></li>
+
+<li><p><code>force_field</code></p></li>
+</ul>
+
+<h1 id="position">Position</h1>
+
+<h2 id="attributes-4">attributes</h2>
+
+<ul>
+<li><p><code>x</code></p></li>
+
+<li><p><code>y</code></p></li>
+</ul>
+
+<h2 id="methods-2">methods</h2>
+
+<ul>
+<li><p><code>.is_valid()</code></p>
+
+<blockquote>
+  <p>If the position is valid on the map</p>
+</blockquote></li>
+
+<li><p><code>.directional_offset(direction)</code></p>
+
+<blockquote>
+  <p>Returns a <code>Position</code> object to the direction. <code>direction</code> should 
+    be a <code>Direction</code> object.</p>
+</blockquote></li>
+
+<li><p><code>.get_surrounding_cardinals()</code></p>
+
+<blockquote>
+  <p>Returns a list of the <code>Position</code> objects that are right adjacent to
+    this position.</p>
+</blockquote></li>
+</ul>
+
+<h1 id="direction">Direction</h1>
+
+<h2 id="attributes-5">attributes</h2>
+
+<ul>
+<li><p><code>North</code></p>
+
+<blockquote>
+  <p>(0, -1)</p>
+</blockquote></li>
+
+<li><p><code>South</code></p>
+
+<blockquote>
+  <p>(0, 1)</p>
+</blockquote></li>
+
+<li><p><code>West</code></p>
+
+<blockquote>
+  <p>(-1, 0)</p>
+</blockquote></li>
+
+<li><p><code>East</code></p>
+
+<blockquote>
+  <p>(1, 0)</p>
+</blockquote></li>
+</ul>
+
+<h2 id="methods-3">methods</h2>
+
+<ul>
+<li><p><code>get_all_cardinals()</code></p>
+
+<blockquote>
+  <p>Returns a list of all directions. </p>
+</blockquote></li>
+</ul>
+
+<h1 id="user">User</h1>
+
+<h2 id="attributes-6">attributes</h2>
+
+<ul>
+<li><p><code>uid</code></p>
+
+<blockquote>
+  <p>User id </p>
+</blockquote></li>
+
+<li><p><code>energy</code></p>
+
+<blockquote>
+  <p>Current energy the user has.</p>
+</blockquote></li>
+
+<li><p><code>gold</code></p>
+
+<blockquote>
+  <p>Current gold the user has.</p>
+</blockquote></li>
+
+<li><p><code>energy_source</code></p>
+
+<blockquote>
+  <p>The amount of energy the user can produce each round</p>
+</blockquote></li>
+
+<li><p><code>gold_source</code></p>
+
+<blockquote>
+  <p>The amount of gold the user can produce each round</p>
+</blockquote></li>
+
+<li><p><code>cells</code></p>
+
+<blockquote>
+  <p>A map of <code>MapCell</code> objects. <strong>key</strong> is <code>Position</code> object and 
+    <strong>value</strong> is <code>MapCell</code> object.</p>
+</blockquote></li>
+</ul>
+
+<h1 id="constants">constants</h1>
+
+<ul>
+<li><p><code>BLD_GOLD_MINE</code></p>
+
+<blockquote>
+  <p>Build character for gold mine</p>
+</blockquote></li>
+
+<li><p><code>BLD_ENERGY_WELL</code></p>
+
+<blockquote>
+  <p>Build character for energy well</p>
+</blockquote></li>
+</ul>
+              </div>
+
+
+            </div> <!-- doc-content-container -->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

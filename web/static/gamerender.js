@@ -82,6 +82,6 @@ $(function() {
     conn.onmessage = function(e) {
         update_frame(JSON.parse(e.data))
     }
-    document.body.appendChild(pixi_app.view)
+    document.getElementById('game_div').appendChild(pixi_app.view)
     pixi_setup(pixi_app)
 })

@@ -7,6 +7,22 @@ import aiohttp_jinja2
 async def index(request):
     return {}
 
+@aiohttp_jinja2.template('gameroom.html')
+async def game_room(request):
+    return {}
+
+@aiohttp_jinja2.template('get_started.html')
+async def get_started(request):
+    return {}
+
+@aiohttp_jinja2.template('document.html')
+async def document(request):
+    return {}
+
+@aiohttp_jinja2.template('contact.html')
+async def contact(request):
+    return {}
+
 async def game_channel(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)

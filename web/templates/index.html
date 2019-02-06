@@ -1,18 +1,21 @@
 <meta charset="utf-8">
 <html>
   <head>
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-      crossorigin="anonymous"></script>
-    <script type = "text/javascript">
-    </script>
-    <script src="https://cdn.bootcss.com/pixi.js/4.8.5/pixi.min.js"></script>
-    <script src="/static/gamerender.js"></script>
+    {% include 'header.html' %}
   </head>
   <body>
-    <div id="test">
-
+    {% include 'navbar.html' %}
+    <div class="container">
+      <div class="main-content">
+        <div class="row section-overview">
+          <div class="col-md-12">
+            <h1>Welcome to ColorFightII</h1>
+            <p>ColorFightII is an open source artificial intelligence platform, created by Tian Gao</p>
+            <p>In ColorFightII, you need to write a bot to expand, develop and conquer. You need to keep a good balance between war and economy, and try to collect more gold in the end of the game.</p>
+            <a class="btn" href="/getstarted">Start Now</a>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
