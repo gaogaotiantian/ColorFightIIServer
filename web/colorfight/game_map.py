@@ -7,8 +7,8 @@ class MapCell:
         self.position = position
         self.is_home  = False
         self.building = Empty()
-        self.gold = random.randint(1, 10)
-        self.energy = random.randint(1, 10)
+        self.natural_gold = random.randint(1, 10)
+        self.natural_energy = random.randint(1, 10)
         self.owner = 0
         self.natural_cost = random.randint(1, 300)
         self.force_field  = 0
@@ -22,12 +22,12 @@ class MapCell:
         return self.building.get_attack_cost(self)
 
     @property
-    def energy_source(self):
-        return self.building.get_energy_source(self)
+    def energy(self):
+        return self.building.get_energy(self)
 
     @property
-    def gold_source(self):
-        return self.building.get_gold_source(self)
+    def gold(self):
+        return self.building.get_gold(self)
 
     def attack(self, uid, energy):
         self.attacker_list.append((uid, energy))
@@ -51,10 +51,10 @@ class MapCell:
                 "building": self.building.info(), \
                 "attack_cost": self.attack_cost, \
                 "owner": self.owner, \
-                "gold": self.gold_source, \
-                "energy": self.energy_source, \
-                "natural_gold": self.gold, \
-                "natural_energy": self.energy, \
+                "gold": self.gold, \
+                "energy": self.energy, \
+                "natural_gold": self.natural_gold, \
+                "natural_energy": self.natural_energy, \
                 "natural_cost": self.natural_cost, \
                 "force_field": self.force_field}
 
@@ -114,8 +114,8 @@ class GameMap:
                 uid = cell.owner
                 if uid in users:
                     users[uid].cells[cell.position] = cell
-                    users[uid].gold_source += cell.gold_source
-                    users[uid].energy_source += cell.energy_source
+                    users[uid].gold_source += cell.gold
+                    users[uid].energy_source += cell.energy
                 else:
                     if cell.owner != 0:
                         print(cell.owner)

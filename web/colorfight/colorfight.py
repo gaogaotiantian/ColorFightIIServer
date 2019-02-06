@@ -168,6 +168,8 @@ class Colorfight:
     def command(self, uid, cmd_list):
         if type(cmd_list) != list:
             return False, "Wrong type"
+        if uid not in self.users:
+            return False, "Wrong uid"
         self.users[uid].cmd_list = cmd_list
 
         return True, ()
