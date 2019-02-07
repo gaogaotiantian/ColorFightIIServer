@@ -49,11 +49,11 @@ class Position:
     def directional_offset(self, direction):
         return self + Position(*direction)
 
-    def get_surrounding_cardinals(self):
+    def _get_all_surrounding_cardinals(self):
         return [self.directional_offset(d) for d in Direction.get_all_cardinals()]
-
-    def valid_surrounding_cardinals(self):
-        return [position for position in self.get_surrounding_cardinals() if position.is_valid()]
+    
+    def get_surrounding_cardinals(self):
+        return [position for position in self._get_all_surrounding_cardinals() if position.is_valid()]
 
     def info(self):
         return (self.x, self.y)

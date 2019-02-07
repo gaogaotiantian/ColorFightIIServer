@@ -125,7 +125,7 @@ class GameMap:
             for y in range(self.height):
                 cell = self._cells[y][x]
                 surrounding_enemy_number = 0
-                for pos in cell.position.valid_surrounding_cardinals():
+                for pos in cell.position.get_surrounding_cardinals():
                     if self[pos].owner != 0 and self[pos].owner != cell.owner:
                         surrounding_enemy_number += 1
                 cell.force_field -= int(cell.force_field * (0.05 * surrounding_enemy_number))
@@ -143,9 +143,12 @@ class GameMap:
         for x in range(self.width):
             for y in range(self.height):
                 cell = new_cells[y][x]
-                cell.natural_cost = int(cells[y][x].natural_cost * (1 - 4 * percent))
-                for pos in cell.position.valid_surrounding_cardinals():
+                cell.natural_cost = cells[y][x].natural_cost
+                count = 0
+                for pos in cell.position.get_surrounding_cardinals():
+                    count += 1
                     new_cells[y][x].natural_cost += int(cells[pos.y][pos.x].natural_cost * percent)
+                cell.natural_cost -= int(cells[y][x].natural_cost * count * percent)
         
         return new_cells
 
