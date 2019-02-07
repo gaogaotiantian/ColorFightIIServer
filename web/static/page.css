@@ -28,11 +28,17 @@ body {
 .nav-link {
     color: #A5E8B7;
     font-size: 1.2rem;
+    padding: 0.5rem 0.2rem;
 }
 
 .nav-link:hover {
     color: #A5E8B7;
     background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+}
+
+.nav ul li {
+    color: #A5E8B7;
+    list-style-type: square;
 }
 
 .main-content {
@@ -79,7 +85,7 @@ body {
 .doc-section {
     background-color: #fff;
     border-radius: 8px;
-    padding: 25px 30px;
+    padding: 20px 35px 40px;
     margin-bottom: 20px;
 }
 
@@ -88,11 +94,23 @@ body {
 }
 
 .doc-section h1 {
-    margin-top: 1.5rem;
+    margin-top: 1.6rem;
+    border-bottom: 2px solid #e0e2e4;
+    padding-bottom: 0.3rem;
 }
 
 .doc-section h2 {
-    margin-top: 1.1rem;
+    margin-top: 1.3rem;
+    border-bottom: 2px solid #eaecef;
+    padding-bottom: 0.3rem;
+}
+
+.doc-section h3 {
+    margin-top: 1.3rem;
+}
+
+.doc-section h4 {
+    margin-top: 1.2rem;
 }
 
 code {

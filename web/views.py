@@ -15,8 +15,12 @@ async def game_room(request):
 async def get_started(request):
     return {}
 
-@aiohttp_jinja2.template('document.html')
-async def document(request):
+@aiohttp_jinja2.template('game_rules.html')
+async def game_rules(request):
+    return {}
+
+@aiohttp_jinja2.template('api.html')
+async def api_documentation(request):
     return {}
 
 @aiohttp_jinja2.template('contact.html')

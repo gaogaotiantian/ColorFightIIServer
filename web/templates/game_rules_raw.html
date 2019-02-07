@@ -1,0 +1,117 @@
+<h1>ColorfightII Rules</h1>
+<h2>Introduction</h2>
+<p>ColorfightII is a round based game. For each round, the players can send an
+action list during a period of time, then the server will update based on the 
+actions.</p>
+<p>Each player has two kinds of resources:</p>
+<ul>
+<li>Energy</li>
+<li>Gold</li>
+</ul>
+<p>Players use energy to attack and occupy other cells to collect more gold and
+energy source.</p>
+<p>Players use gold to build different buildings on their own cells to help the
+game process.</p>
+<p>At the end of the game, the player with the highest amount of gold wins.</p>
+<h2>Game Feature</h2>
+<h3>MapCell</h3>
+<p>A <code>MapCell</code> represents a cell that a user can occupy. </p>
+<p><code>MapCell</code> can produce energy and gold for each round. It has three natural
+attributes:</p>
+<ul>
+<li><code>natural_energy</code> (1 - 10)</li>
+<li><code>natural_gold</code> (1 - 10)</li>
+<li><code>natural_cost</code> (1 - 300)</li>
+</ul>
+<p>The natural attributes of a cell will not change in a game. However, the actual
+energy and gold it produces and the actual cost to occupy it may change due to
+other aspects. </p>
+<h4>Building</h4>
+<p>Players can build on a <code>MapCell</code> that's owned by them.</p>
+<ul>
+<li><code>Home</code> is automatically built on the cell that the player spawns. 
+<ul>
+<li><code>attack_cost</code> 1000</li>
+<li><code>energy</code> 10</li>
+<li><code>gold</code> 10</li>
+</ul></li>
+<li><code>EnergyWell</code> is the building to increase the energy production.
+<ul>
+<li><code>cost</code> = 100 <code>gold</code></li>
+<li><code>energy</code> = <code>natrual_energy * 2</code></li>
+</ul></li>
+<li><code>GoldMine</code> is the building to increase the gold production.
+<ul>
+<li><code>cost</code> = 100 <code>gold</code></li>
+<li><code>gold</code> = <code>natrual_gold * 2</code> </li>
+</ul></li>
+</ul>
+<p>A building will be destroyed if the cell is attacked by other player.</p>
+<h4>Force Field</h4>
+<p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player.
+<code>force_field</code> is determined by the energy a player puts to attack the cell 
+and the total energy all players put to attack this cell. </p>
+<p><code>force_field = int(min(1000, 2*(energy*2 - total_energy)))</code></p>
+<p><code>force_field</code> will be added to <code>attack_cost</code></p>
+<h3>GameMap</h3>
+<p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
+<p>In the beginning of the game, the game will generate a <code>GameMap</code> and blur
+it so the <code>natrual_cost</code> will be smooth.</p>
+<h3>User</h3>
+<p>Each player enters the game with a <code>username</code> and a <code>password</code>. If a
+player register with the same <code>username</code> and <code>password</code>, it will be 
+treated as the same user. </p>
+<p>A player starts with 100 <code>energy</code> and 0 <code>gold</code>. </p>
+<h2>Game Flow</h2>
+<h3>Preparation</h3>
+<p>In the beginning of each round, a map will be generated. Each cell of the map
+will have <code>natrual_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
+attributes. </p>
+<h3>Register</h3>
+<p>During anytime of the game, a player is allowed to join, or register to the
+game. The player will be assigned to a cell, this cell will be the home of
+the player. A player will have 100 <code>energy</code> when register to the game.</p>
+<h3>Command</h3>
+<p>For each round, a player could give a list of valid commands. The possible 
+commands are:</p>
+<ul>
+<li>attack</li>
+<li>build</li>
+</ul>
+<h4>attack</h4>
+<p>A player could use a certain amount of energy to attack a cell that's adjacent
+to occupied cells. The amount of energy has to be more than or equal to the 
+<code>attack_cost</code> of that cell, otherwise the command will fail. Failed command
+will not cost the player's energy.</p>
+<p>The more energy the player uses to attack the cell, the more <code>force_field</code>
+will be generated so the cell is harder to attack by other players. </p>
+<p>If multiple players attack one cell in a single round, the player has to spend
+more than 50% of the total energy spent on that cell to occupy the cell. If
+no player satisfied this condition, no player will occupy the cell, but all the
+energy they use will be spent. </p>
+<h4>build</h4>
+<p>A player could build on the occupied cell.</p>
+<h3>Update</h3>
+<h4>Force field</h4>
+<p>For each enemy's cell around the cell, <code>force_field</code> will lose 5% for each
+round.</p>
+<h4>Order</h4>
+<ol>
+<li>Parse all the commands
+<ol>
+<li>building will be built</li>
+</ol></li>
+<li>Update cells
+<ol>
+<li>parse all the attack commands, calculate the owner of the cell for next
+round.</li>
+<li><code>gold</code> and <code>energy</code> income will be calculated based on the new
+possessions.</li>
+<li><code>force_field</code> will be updated accordingly.</li>
+</ol></li>
+<li>Update players
+<ol>
+<li><code>gold</code> and <code>energy</code> will be updated </li>
+<li>player without any cell will be dead </li>
+</ol></li>
+</ol>
