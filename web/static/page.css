@@ -43,7 +43,7 @@ body {
 
 .main-content {
     color: rgba(255, 255, 255, 0.8);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .section-overview {
@@ -51,7 +51,7 @@ body {
 }
 
 .section-overview h1 {
-    text-shadow: 0 1px 8px #A5E8B7;
+    text-shadow: 0 1px 5px #A5E8B7;
 }
 
 .section-overview p {

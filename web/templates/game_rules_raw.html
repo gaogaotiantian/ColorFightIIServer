@@ -29,22 +29,22 @@ other aspects. </p>
 <h4>Building</h4>
 <p>Players can build on a <code>MapCell</code> that's owned by them.</p>
 <ul>
-<li><code>Home</code> is automatically built on the cell that the player spawns. 
-<ul>
+<li><code>Home</code> is automatically built on the cell that the player spawns. <ul>
 <li><code>attack_cost</code> 1000</li>
 <li><code>energy</code> 10</li>
 <li><code>gold</code> 10</li>
-</ul></li>
-<li><code>EnergyWell</code> is the building to increase the energy production.
-<ul>
+</ul>
+</li>
+<li><code>EnergyWell</code> is the building to increase the energy production.<ul>
 <li><code>cost</code> = 100 <code>gold</code></li>
 <li><code>energy</code> = <code>natrual_energy * 2</code></li>
-</ul></li>
-<li><code>GoldMine</code> is the building to increase the gold production.
-<ul>
+</ul>
+</li>
+<li><code>GoldMine</code> is the building to increase the gold production.<ul>
 <li><code>cost</code> = 100 <code>gold</code></li>
 <li><code>gold</code> = <code>natrual_gold * 2</code> </li>
-</ul></li>
+</ul>
+</li>
 </ul>
 <p>A building will be destroyed if the cell is attacked by other player.</p>
 <h4>Force Field</h4>
@@ -97,21 +97,21 @@ energy they use will be spent. </p>
 round.</p>
 <h4>Order</h4>
 <ol>
-<li>Parse all the commands
-<ol>
+<li>Parse all the commands<ol>
 <li>building will be built</li>
-</ol></li>
-<li>Update cells
-<ol>
+</ol>
+</li>
+<li>Update cells<ol>
 <li>parse all the attack commands, calculate the owner of the cell for next
-round.</li>
+   round.</li>
 <li><code>gold</code> and <code>energy</code> income will be calculated based on the new
-possessions.</li>
+   possessions.</li>
 <li><code>force_field</code> will be updated accordingly.</li>
-</ol></li>
-<li>Update players
-<ol>
+</ol>
+</li>
+<li>Update players<ol>
 <li><code>gold</code> and <code>energy</code> will be updated </li>
 <li>player without any cell will be dead </li>
-</ol></li>
+</ol>
+</li>
 </ol>
