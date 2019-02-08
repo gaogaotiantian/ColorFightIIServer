@@ -159,7 +159,7 @@ class Colorfight:
         if energy > self.users[uid].energy:
             return False, "Do not have enough energy to attack"
 
-        for pos in atk_pos.valid_surrounding_cardinals():
+        for pos in atk_pos.get_surrounding_cardinals():
             if self.game_map[pos].owner == uid:
                 self.users[uid].energy -= energy 
                 self.game_map[(x, y)].attack(uid, energy)
@@ -271,9 +271,10 @@ class Colorfight:
     Read API
     '''
     def info(self):
-        return {"max_turn": GAME_MAX_TURN, \
+        return {"max_turn": self.max_turn, \
                 "width": GAME_WIDTH, \
-                "height": GAME_HEIGHT}
+                "height": GAME_HEIGHT, \
+                "round_time": self.round_time}
     def get_game_info(self):
         return {\
                 "turn": self.turn, \

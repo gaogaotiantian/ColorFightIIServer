@@ -76,8 +76,10 @@ def test_attack():
     game.update(True)
     assert(game.users[uid].energy == 10010)
 
-    attack(game, uid, x, attack_y, 300)
+    result = attack(game, uid, x, attack_y, 300)
+    assert(result["success"])
     game.update(True)
+    assert(len(game.errors[uid]) == 0)
     assert(game.users[uid].energy < 10000)
     assert(len(game.users[uid].cells) == 2)
 
