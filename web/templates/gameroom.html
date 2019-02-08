@@ -39,7 +39,7 @@
                   </div>
                   <div class="game-control">
                     <a id="restart-button" href="#"><i class="fas fa-redo"></i></a>
-                    <a href="#"><i class="fas fa-cog "></i></a>
+                    <a id="config-button" href="#" data-toggle="modal" data-target="#config-modal"><i class="fas fa-cog "></i></a>
                   </div>
                 </div>
               </div>
@@ -49,5 +49,6 @@
       </div>
 
     </div>
+    {% include 'config_modal.html' %}
   </body>
 </html>

@@ -66,8 +66,10 @@ async def action_channel(request):
     return ws
 
 async def restart(request):
-    request.app['game'].restart()
-    for ws in request.app['game_sockets']:
-        ws.close()
-    request.app['game_sockets'] = []
-    return web.json_response({"success": True})
+    data = await request.json()
+    result, err_msg = request.app['game'].config(data)
+    if result:
+        request.app['game'].restart()
+        return web.json_response({"success": True})
+    else:
+        return web.json_response({"success": False, "err_msg": err_msg})

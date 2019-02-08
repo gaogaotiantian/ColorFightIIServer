@@ -16,6 +16,8 @@ class Colorfight:
         self.width = GAME_WIDTH
         self.height = GAME_HEIGHT
         self.round_time = ROUND_TIME
+        self.first_round_time = ROUND_TIME
+        self.finish_time = 0
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
@@ -24,9 +26,40 @@ class Colorfight:
             "register": [("username", "password"), ("uid",)],
             "command": [("cmd_list",), ()]
         }
-    
-    def get(self):
-        return self.counter
+
+    def config(self, data):
+        """
+            /param data: dict for all possible parameters
+        """
+        try:
+            for field in data:
+                val = data[field]
+                if field == "max_turn":
+                    if 200 <= val <= 2000:
+                        self.max_turn = val
+                    else:
+                        return False, "max_turn value invalid"
+                elif field == "round_time":
+                    if 0.2 <= val <= 20:
+                        self.round_time = val
+                    else:
+                        return False, "rount_time value invalid"
+                elif field == "first_round_time":
+                    if 0 <= val <= 60:
+                        self.first_round_time = val
+                    else:
+                        return False, "first_round_time value invalid"
+                elif field == "finish_time":
+                    if 0 <= val <= 60:
+                        self.finish_time = val
+                    else:
+                        return False, "finish_time value invalid"
+                else:
+                    return False, "Invalid field {}".format(field)
+        except Exception as e:
+            return False, "Invalid data, {}".format(e)
+
+        return True, None
 
     def restart(self):
         self.turn = 0
@@ -35,9 +68,21 @@ class Colorfight:
         self.game_map = GameMap(self.height, self.width) 
 
     def update(self, force = False):
-        if force or \
-                (time.time() - self.last_update > self.round_time and self.turn < self.max_turn):
-            self.last_update = time.time()
+        do_update = False
+        do_restart = False
+        if self.turn == 0:
+            if force or (time.time() - self.last_update > self.first_round_time):
+                do_update = True
+        elif self.turn == self.max_turn:
+            if self.finish_time != 0 and time.time() - self.last_update > self.finish_time:
+                do_restart = True
+        else:
+            if force or (time.time() - self.last_update > self.round_time):
+                do_update = True
+        if do_restart:
+            self.restart()
+        elif do_update:
+            self.last_update = time.time() 
             self.turn += 1
             self.errors = self.do_all_commands()
             # 1. Update all the cells based on attackers
