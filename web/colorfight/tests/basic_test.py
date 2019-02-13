@@ -102,5 +102,23 @@ def test_build():
     cell = info['game_map'][attack_y][x]
     assert(not info['error'][1])
     assert(cell['owner'] == uid)
-    assert(cell['building'] == 'gold_mine')
+    assert(cell['building']['name'] == 'gold_mine')
     assert(cell['gold'] == cell['natural_gold'] * 2)
+
+def test_upgrade():
+    game = Colorfight()
+    uid = join(game, 'a', 'a')
+    info = game.get_game_info()
+    x, y = info['users'][uid]['cells'][0]
+    game.users[uid].energy = 10000
+    game.users[uid].gold = 10000
+
+    result = upgrade(game, uid, x, y)
+    assert(result['success'])
+    game.update(True)
+    info = game.get_game_info()
+    assert(len(info['error'][uid]) == 0)
+    cell = info['game_map'][y][x]
+    assert(cell['building']['level'] == 2)
+    assert[info['users'][uid]['tech_level'] == 2]
+

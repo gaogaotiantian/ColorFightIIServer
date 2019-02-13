@@ -5,7 +5,6 @@ import random
 class MapCell:
     def __init__(self, position, **kwargs):
         self.position = position
-        self.is_home  = False
         self.building = Empty()
         self.natural_gold = random.randint(1, 10)
         self.natural_energy = random.randint(1, 10)
@@ -29,8 +28,15 @@ class MapCell:
     def gold(self):
         return self.building.get_gold(self)
 
+    @property
+    def is_home(self):
+        return self.building.is_home
+
     def attack(self, uid, energy):
         self.attacker_list.append((uid, energy))
+
+    def upgrade(self):
+        self.building.upgrade()
 
     def update(self):
         # Change owner based on attacker list
@@ -42,7 +48,6 @@ class MapCell:
                 self.force_field = int(min(1000, 2*(max_energy*2 - total_energy)))
                 if self.owner != max_id:
                     self.building = Empty()
-                    self.is_home = False
                 self.owner = max_id
             self.attacker_list = []
 
@@ -91,7 +96,6 @@ class GameMap:
         cell = self.get_random_empty_cell()
         if cell == None:
             return False
-        cell.is_home = True
         cell.building = Home()
         cell.owner = user.uid
         user.get_cell(cell)
@@ -106,6 +110,7 @@ class GameMap:
             user.cells = {}
             user.energy_source = 0
             user.gold_source = 0
+            user.tech_level = 0
 
         for x in range(self.width):
             for y in range(self.height):
@@ -116,10 +121,14 @@ class GameMap:
                     users[uid].cells[cell.position] = cell
                     users[uid].gold_source += cell.gold
                     users[uid].energy_source += cell.energy
+                    # Update tech_level
+                    if cell.is_home and cell.building.level > users[uid].tech_level:
+                        users[uid].tech_level = cell.building.level
                 else:
                     if cell.owner != 0:
                         print(cell.owner)
                     cell.owner = 0
+
         # After updating the owner, we update the force field
         for x in range(self.width):
             for y in range(self.height):

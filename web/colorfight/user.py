@@ -7,6 +7,7 @@ class User:
         self.gold     = 0
         self.energy_source = 0
         self.gold_source = 0
+        self.tech_level = 1
         self.dead = False
         self.cells = {}
         self.cmd_list = []
@@ -30,4 +31,5 @@ class User:
                 "dead": self.dead, \
                 "energy_source": self.energy_source, \
                 "gold_source": self.gold_source, \
+                "tech_level": self.tech_level, \
                 "cells": [cell.position.info() for cell in self.cells.values()]}

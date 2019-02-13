@@ -28,21 +28,25 @@ energy and gold it produces and the actual cost to occupy it may change due to
 other aspects. </p>
 <h4>Building</h4>
 <p>Players can build on a <code>MapCell</code> that's owned by them.</p>
+<p>Players can upgrade their buildings with resources under certain conditions.</p>
 <ul>
 <li><code>Home</code> is automatically built on the cell that the player spawns. <ul>
 <li><code>attack_cost</code> 1000</li>
-<li><code>energy</code> 10</li>
-<li><code>gold</code> 10</li>
+<li><code>upgrade_cost</code> = <code>[(1000, 1000), (2000, 2000), (4000, 4000)]</code></li>
+<li><code>energy</code> = <code>10 * level</code></li>
+<li><code>gold</code> = <code>10 * level</code></li>
 </ul>
 </li>
 <li><code>EnergyWell</code> is the building to increase the energy production.<ul>
-<li><code>cost</code> = 100 <code>gold</code></li>
-<li><code>energy</code> = <code>natrual_energy * 2</code></li>
+<li><code>cost</code> = <code>100 gold</code></li>
+<li><code>upgrade_cost</code> = <code>[(200, 200), (400, 400), (800, 800)]</code></li>
+<li><code>energy</code> = <code>natural_energy * (1 + level)</code></li>
 </ul>
 </li>
 <li><code>GoldMine</code> is the building to increase the gold production.<ul>
-<li><code>cost</code> = 100 <code>gold</code></li>
-<li><code>gold</code> = <code>natrual_gold * 2</code> </li>
+<li><code>cost</code> = <code>100 gold</code></li>
+<li><code>upgrade_cost</code> =  <code>[(200, 200), (400, 400), (800, 800)]</code></li>
+<li><code>gold</code> = <code>natural_gold * (1 + level)</code> </li>
 </ul>
 </li>
 </ul>
@@ -56,7 +60,7 @@ and the total energy all players put to attack this cell. </p>
 <h3>GameMap</h3>
 <p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
 <p>In the beginning of the game, the game will generate a <code>GameMap</code> and blur
-it so the <code>natrual_cost</code> will be smooth.</p>
+it so the <code>natural_cost</code> will be smooth.</p>
 <h3>User</h3>
 <p>Each player enters the game with a <code>username</code> and a <code>password</code>. If a
 player register with the same <code>username</code> and <code>password</code>, it will be 
@@ -65,7 +69,7 @@ treated as the same user. </p>
 <h2>Game Flow</h2>
 <h3>Preparation</h3>
 <p>In the beginning of each round, a map will be generated. Each cell of the map
-will have <code>natrual_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
+will have <code>natural_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
 attributes. </p>
 <h3>Register</h3>
 <p>During anytime of the game, a player is allowed to join, or register to the
@@ -77,6 +81,7 @@ commands are:</p>
 <ul>
 <li>attack</li>
 <li>build</li>
+<li>upgrade</li>
 </ul>
 <h4>attack</h4>
 <p>A player could use a certain amount of energy to attack a cell that's adjacent
@@ -91,6 +96,14 @@ no player satisfied this condition, no player will occupy the cell, but all the
 energy they use will be spent. </p>
 <h4>build</h4>
 <p>A player could build on the occupied cell.</p>
+<p>A player needs <code>cost</code> amount of gold to build the building. </p>
+<p>The buildings will take affect the round they are built. </p>
+<h4>upgrade</h4>
+<p>A player could upgrade their buildings to have better effects from them. 
+The maximum level of the building(except for home) is limited by the level of
+home. You need to upgrade your home before upgrading other buildings. </p>
+<p>All buildings including home start at level 1. After each upgrade, the level
+will increase by 1. </p>
 <h3>Update</h3>
 <h4>Force field</h4>
 <p>For each enemy's cell around the cell, <code>force_field</code> will lose 5% for each
@@ -99,6 +112,7 @@ round.</p>
 <ol>
 <li>Parse all the commands<ol>
 <li>building will be built</li>
+<li>upgrade will finish</li>
 </ol>
 </li>
 <li>Update cells<ol>
@@ -106,6 +120,7 @@ round.</p>
    round.</li>
 <li><code>gold</code> and <code>energy</code> income will be calculated based on the new
    possessions.</li>
+<li><code>tech_level</code> will be determined.</li>
 <li><code>force_field</code> will be updated accordingly.</li>
 </ol>
 </li>

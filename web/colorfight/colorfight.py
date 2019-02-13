@@ -7,7 +7,7 @@ from .position import Position
 from .building import get_building_class
 
 from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
-from .constants import CMD_ATTACK, CMD_BUILD
+from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
     def __init__(self):
@@ -104,6 +104,7 @@ class Colorfight:
     We currently have:
         ATTACK
         BUILD
+        UPGRADE
     '''
     def do_all_commands(self):
         errors = {}
@@ -138,6 +139,10 @@ class Colorfight:
                 y = int(arg_list[2])
                 building = arg_list[3]
                 result, err_msg = self.cmd_build(uid, x, y, building)
+            elif cmd_type == CMD_UPGRADE:
+                x = int(arg_list[1])
+                y = int(arg_list[2])
+                result, err_msg = self.cmd_upgrade(uid, x, y)
             else:
                 return "{} is a wrong command, cmd type {} is invalid".format(cmd, cmd_type)
         except Exception as e:
@@ -175,7 +180,7 @@ class Colorfight:
         if self.game_map[build_pos].owner != uid:
             return False, "You need to build on your own cell"
 
-        if not self.game_map[build_pos].building.is_empty():
+        if not self.game_map[build_pos].building.is_empty:
             return False, "There is a building on this cell already"
 
         BldClass = get_building_class(building)
@@ -189,6 +194,41 @@ class Colorfight:
         self.users[uid].gold -= BldClass.cost
 
         return True, ""
+
+    def cmd_upgrade(self, uid, x, y):
+        upgrade_pos = Position(x, y)
+
+        if upgrade_pos not in self.game_map:
+            return False, "Upgrade position is not in the map"
+
+        cell = self.game_map[upgrade_pos]
+        if cell.owner != uid:
+            return False, "You need to upgrade on your own cell"
+
+        if cell.building.is_empty:
+            return False, "You can not upgrade empty cell"
+
+        if cell.building.level >= cell.building.max_level:
+            return False, "Level is already at maximum"
+
+        user = self.users[uid]
+
+        if not cell.is_home and cell.building.level >= user.tech_level:
+            return False, "You need to upgrade home first"
+
+        if user.energy < cell.building.upgrade_energy_cost:
+            return False, "Not enough energy"
+
+        if user.gold < cell.building.upgrade_gold_cost:
+            return False, "Not enough gold"
+
+        user.energy -= cell.building.upgrade_energy_cost
+        user.gold   -= cell.building.upgrade_gold_cost
+
+        cell.upgrade()
+
+        return True, ""
+
 
     '''
     Possible user actions, after parse_action()

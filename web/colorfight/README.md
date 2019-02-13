@@ -40,16 +40,21 @@ other aspects.
 
 Players can build on a ```MapCell``` that's owned by them.
 
+Players can upgrade their buildings with resources under certain conditions.
+
 * ```Home``` is automatically built on the cell that the player spawns. 
     * ```attack_cost``` 1000
-    * ```energy``` 10
-    * ```gold``` 10
+    * ```upgrade_cost``` = ```[(1000, 1000), (2000, 2000), (4000, 4000)]```
+    * ```energy``` = ```10 * level```
+    * ```gold``` = ```10 * level```
 * ```EnergyWell``` is the building to increase the energy production.
-    * ```cost``` = 100 ```gold```
-    * ```energy``` = ```natrual_energy * 2```
+    * ```cost``` = ```100 gold```
+    * ```upgrade_cost``` = ```[(200, 200), (400, 400), (800, 800)]```
+    * ```energy``` = ```natural_energy * (1 + level)```
 * ```GoldMine``` is the building to increase the gold production.
-    * ```cost``` = 100 ```gold```
-    * ```gold ``` = ```natrual_gold * 2``` 
+    * ```cost``` = ```100 gold```
+    * ```upgrade_cost``` =  ```[(200, 200), (400, 400), (800, 800)]```
+    * ```gold ``` = ```natural_gold * (1 + level)``` 
 
 A building will be destroyed if the cell is attacked by other player.
 
@@ -68,7 +73,7 @@ and the total energy all players put to attack this cell.
 ```GameMap``` consists of ```GAME_WIDTH * GAME_HEIGHT``` ```MapCell```s.
 
 In the beginning of the game, the game will generate a ```GameMap``` and blur
-it so the ```natrual_cost``` will be smooth.
+it so the ```natural_cost``` will be smooth.
 
 ### User
 
@@ -83,7 +88,7 @@ A player starts with 100 ```energy``` and 0 ```gold```.
 ### Preparation
 
 In the beginning of each round, a map will be generated. Each cell of the map
-will have ```natrual_cost```, ```natural_energy``` and ```natural_gold``` 
+will have ```natural_cost```, ```natural_energy``` and ```natural_gold``` 
 attributes. 
 
 ### Register
@@ -99,6 +104,7 @@ commands are:
 
 * attack
 * build
+* upgrade
 
 #### attack
 
@@ -119,6 +125,19 @@ energy they use will be spent.
 
 A player could build on the occupied cell.
 
+A player needs ```cost``` amount of gold to build the building. 
+
+The buildings will take affect the round they are built. 
+
+#### upgrade
+
+A player could upgrade their buildings to have better effects from them. 
+The maximum level of the building(except for home) is limited by the level of
+home. You need to upgrade your home before upgrading other buildings. 
+
+All buildings including home start at level 1. After each upgrade, the level
+will increase by 1. 
+
 ### Update
 
 #### Force field
@@ -130,12 +149,14 @@ round.
 
 1. Parse all the commands
     1. building will be built
+    2. upgrade will finish
 2. Update cells
     1. parse all the attack commands, calculate the owner of the cell for next
        round.
     2. ```gold``` and ```energy``` income will be calculated based on the new
        possessions.
-    3. ```force_field``` will be updated accordingly.
+    3. ```tech_level``` will be determined.
+    4. ```force_field``` will be updated accordingly.
 3. Update players
     1. ```gold``` and ```energy``` will be updated 
     2. player without any cell will be dead 
@@ -184,7 +205,10 @@ to convert it to string.
             [
                 {
                     "position": [<int, x>, <int, y>],
-                    "building": <str, building name>,
+                    "building":  {
+                        "name": <str, building name>,
+                        "level": <int, level of the building>
+                    },
                     "attack_cost": <int, cost to attack the cell>,
                     "owner": <int, uid>,
                     "gold": <int, gold the cell generates a round>,
@@ -205,7 +229,8 @@ to convert it to string.
             "username": <str, username>,
             "energy": <int, current energy the user has>,
             "gold": <int, current gold the user has>,
-            "dead": <bool, if the user is dead>
+            "dead": <bool, if the user is dead>,
+            "tech_level": <int, technology level or the maximum home level>
             "energy_source": <int, how much energy the user will gain each round>,
             "gold_source": <int, how much gold the user will gain each round>,
             "cells": [
