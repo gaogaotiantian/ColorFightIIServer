@@ -23,7 +23,7 @@ var Graphics = PIXI.Graphics,
 
 /* WEBSOCKET VARIABLES */
 var gameProtocol = window.location.protocol=='https:'&&'wss://'||'ws://',
-    gameSocket = new WebSocket( gameProtocol + "colorfightii.herokuapp.com/game_channel" ),
+    gameSocket = new WebSocket( gameProtocol + window.location.host + "/game_channel" ),
     gameData = false,
     lastTurn = -1;
 

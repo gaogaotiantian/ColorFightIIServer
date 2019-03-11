@@ -1,6 +1,6 @@
 function restartGame( data ) {
     $.ajax( {
-        url: "http://colorfightii.herokuapp.com/restart",
+        url: "/restart",
         method: "POST",
         dataType: "json",
         contentType: 'application/json;charset=UTF-8',
