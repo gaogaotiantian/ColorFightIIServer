@@ -1,87 +1,151 @@
-let pixi_app = new PIXI.Application({width: 960, height: 960});
+/* GAME CONSTANTS */
+var LOGO_HEIGHT = 10,
+    LOGO_WIDTH = 46;
 
-rgb2hex = PIXI.utils.rgb2hex;
-Graphics = PIXI.Graphics;
+/* GAME VARIABLES */
+var animationStartTime = false,
+    animationProgress,
+    gameWidth = 960,
+    cellSize = 28,
+    cellRadius = 7,
+    currentCell;
 
-// Globals
-CELL_SIZE = 32
+/* DOM VARIABLES */
+var gameColumn = document.getElementById( "cf-game-col" ),
+    gameRow = document.getElementById( "cf-game-row" ),
+    gameDiv = document.getElementById( "game-div" ),
+    gameTurn = document.getElementById( "turn-stat" );
 
-// Utilities
-cost_to_color = function(cost) {
-    var MAX_COST = 200;
-    var MAX_GREY = 150;
-    if (cost > MAX_COST) {
-        cost = MAX_COST
+/* PIXI VARIABLES */
+var Graphics = PIXI.Graphics,
+    gameStage = new PIXI.Stage( parseInt( "000000", 16 ), true ),
+    gameRenderer = PIXI.autoDetectRenderer( gameWidth, gameWidth );
+
+/* WEBSOCKET VARIABLES */
+var gameProtocol = window.location.protocol=='https:'&&'wss://'||'ws://',
+    gameSocket = new WebSocket( gameProtocol + "colorfightii.herokuapp.com/game_channel" ),
+    gameData = false,
+    lastTurn = -1;
+
+/* Rendering the logo */
+function init_page() {
+    var logo = document.getElementById( "colorfight-logo" ),
+        pixel;
+    for( var i = 0; i < LOGO_WIDTH * LOGO_HEIGHT; i++ ) {
+        pixel = document.createElement( "div" );
+        pixel.setAttribute( "class", "logo-pixel" );
+        logo.appendChild( pixel );
     }
-    var neg_gray = parseInt(cost / MAX_COST * MAX_GREY);
-    var gray = 255 - neg_gray;
-    return rgb2hex([gray/255, gray/255, gray/255]);
-
+    document.getElementById( "game-div" ).appendChild( gameRenderer.view );
 }
-var ID_COLORS = [0xDDDDDD, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231, 
-    0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 
-    0xAA6E28, 0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF]
-id_to_color = function(uid) {
-    if (uid < ID_COLORS.length) {
-        return ID_COLORS[uid];
+
+/* Utilities */
+get_random_color = function() {
+    var r = ( "0" + Math.floor( Math.random() * 255 ).toString( 16 ) ).slice( -2 ).toUpperCase();
+    var g = ( "0" + Math.floor( Math.random() * 255 ).toString( 16 ) ).slice( -2 ).toUpperCase();
+    var b = ( "0" + Math.floor( Math.random() * 255 ).toString( 16 ) ).slice( -2 ).toUpperCase();
+    return parseInt( r + g + b, 16 );
+}
+
+var ID_COLORS = [] 
+ID_COLORS.push( 0xDDDDDD );
+ID_COLORS.push( 0xE6194B );
+ID_COLORS.push( 0x3Cb44B );
+ID_COLORS.push( 0xFFE119 );
+ID_COLORS.push( 0x0082C8 );
+ID_COLORS.push( 0xF58231 );
+ID_COLORS.push( 0x911EB4 );
+ID_COLORS.push( 0x46F0F0 );
+ID_COLORS.push( 0xF032E6 );
+ID_COLORS.push( 0xD2F53C );
+ID_COLORS.push( 0x008080 );
+ID_COLORS.push( 0xAA6E28 );
+ID_COLORS.push( 0x800000 );
+ID_COLORS.push( 0xAAFFC3 );
+ID_COLORS.push( 0x808000 );
+ID_COLORS.push( 0x000080 );
+ID_COLORS.push( 0xFABEBE );
+ID_COLORS.push( 0xE6BEFF );
+
+function id_to_color( uid ) {
+    if( uid < ID_COLORS.length ) {
+        return ID_COLORS[ uid ];
     } else {
-        return 0x123456;
-    }
-}
-
-// Update functions
-update_frame = function(data) {
-    // Clear stage
-    while (pixi_app.stage.children[0]) {
-        pixi_app.stage.removeChild(pixi_app.stage.children[0]);
-    }
-    draw_gamemap(data['game_map']);
-}
-
-draw_gamemap = function(data) {
-    for (y in data) {
-        for (x in data[y]) {
-            var cell = data[y][x];
-            draw_cell(cell);
+        while( ID_COLORS.length <= uid ) {
+            ID_COLORS.push( get_random_color() );
         }
+        return ID_COLORS[ uid ];
     }
 }
 
-draw_cell = function(data) {
-    var corner_x = CELL_SIZE * data.position[0];
-    var corner_y = CELL_SIZE * data.position[1];
-    // Base color
+function hex_combine( src, dest, per ) {
+    var isrc = parseInt( src, 16 );
+    var idest = parseInt( dest, 16 );
+    var curr = Math.floor( isrc + ( idest - isrc ) * per );
+    return ( "0" + curr.toString( 16 ) ).slice( -2 ).toUpperCase();
+}
+
+function combine_color( src, dest, per ) {
+    if( per < 0 ) per = 0;
+    return parseInt( hex_combine( src.slice( 1, 3 ), dest.slice( 1, 3 ), per ) + hex_combine( src.slice( 3, 5 ), dest.slice( 3, 5 ), per ) + hex_combine( src.slice( 5 ), dest.slice( 5 ), per ), 16 );
+}
+
+/* Animation Loop */
+function draw_game( ts ) {
+    if( !animationStartTime ) animationStartTime = ts;
+    animationProgress = animationStartTime - ts;
+    gameWidth = gameColumn.clientWidth;
+    if( gameWidth + gameRenderer.view.offsetTop > window.innerHeight ) {
+        gameWidth = window.innerHeight - gameRow.offsetTop;
+    }
+    gameWidth -= 20;
+    if( gameRenderer.view.width != gameWidth ) {
+        gameDiv.setAttribute( "style", "width:" + gameWidth + "px;height:" + gameWidth + "px" );
+        gameRenderer.view.style.width = ( gameWidth - 40 ) + "px";
+        gameRenderer.view.style.height = ( gameWidth - 40 ) + "px";
+        //cellSize = gameWidth / 30 - 4;
+        //cellRadius = 7;
+    }
+    if( gameData && gameData[ "turn" ] != lastTurn ) {
+        lastTurn = gameData[ "turn" ];
+        gameTurn.innerHTML = lastTurn + "/500";
+        while( gameStage.children[ 0 ] ) {
+            gameStage.removeChild( gameStage.children[ 0 ] );
+        }
+        for( var y = 0; y < 30; y++ ) {
+            for( var x = 0; x < 30; x++ ) {
+                currentCell = gameData[ "game_map" ][ y ][ x ];
+                draw_cell( x, y, currentCell );
+            }
+        }
+        gameRenderer.render( gameStage );
+    }
+    requestAnimationFrame( draw_game );
+}
+
+
+/* Draw Cell */
+function draw_cell( x, y, currentCell ) {
     let base = new Graphics();
-    
-    base.beginFill(cost_to_color(data['natural_cost']));
-    base.drawRect(corner_x, 
-            corner_y, 
-            CELL_SIZE, 
-            CELL_SIZE)
+    base.beginFill( combine_color( "#000000", "#65c9cf", currentCell[ "natural_energy" ] / 10 ) );
+    base.drawRoundedRect( ( x * ( cellSize + 4 ) ), ( y * ( cellSize + 4 ) ), cellSize + 2, cellSize + 2, cellRadius );
     base.endFill();
-
-    pixi_app.stage.addChild(base);
-
-    // User color
-    if (data.owner != 0) {
-        user_flag = new Graphics();
-        user_flag.beginFill(id_to_color(data.owner));
-        user_flag.drawRoundedRect(corner_x+5, corner_y+5, CELL_SIZE-10, CELL_SIZE-10, 3);
-        user_flag.endFill();
-        pixi_app.stage.addChild(user_flag);
+    base.beginFill( combine_color( "#000000", "#faf334", currentCell[ "natural_gold" ] / 10 ) );
+    base.drawRoundedRect( ( x * ( cellSize + 4 ) ) + 2, ( y * ( cellSize + 4 ) ) + 2, cellSize - 2, cellSize - 2, cellRadius - 2 );
+    base.endFill();
+    if( currentCell[ "owner" ] == 0 ) {
+        base.beginFill( parseInt( "000000", 16 ) );
+    } else {
+        base.beginFill( id_to_color( currentCell[ "owner" ] ) );
     }
-
+    base.drawRoundedRect( ( x * ( cellSize + 4 ) ) + 4, ( y * ( cellSize + 4 ) ) + 4, cellSize - 6, cellSize - 6, cellRadius - 4 );
+    base.endFill();
+    gameStage.addChild( base );
 }
 
-pixi_setup = function(app) {
-    app.renderer.backgroundColor = 0x111111;
+init_page();
+window.requestAnimationFrame( draw_game );
+
+gameSocket.onmessage = function( msg ) {
+    gameData = JSON.parse( msg.data );
 }
-$(function() {
-    var wsUri = (window.location.protocol=='https:'&&'wss://'||'ws://') + window.location.host + '/game_channel';
-    var conn = new WebSocket(wsUri)
-    conn.onmessage = function(e) {
-        update_frame(JSON.parse(e.data))
-    }
-    document.getElementById('game-div').appendChild(pixi_app.view)
-    pixi_setup(pixi_app)
-})
