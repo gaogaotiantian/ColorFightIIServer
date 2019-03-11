@@ -17,6 +17,11 @@ The -m flag shows the line numbers of missing statements.
 If you want branch coverage measurement, use the --branch flag. 
 Otherwise only statement coverage is measured.
 
+In order to see the basic report of the test, use the following report command.
+```
+$ coverage report -m
+```
+
 ## Data file
 Coverage.py collects execution data in a file called ”.coverage”.
 By default, each run of your program starts with an empty data set.
