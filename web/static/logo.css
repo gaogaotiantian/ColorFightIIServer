@@ -1,5 +1,6 @@
 #colorfight-logo {
 	background-image: url( "logo.png" );
+	background-size: 184px 40px;
 	margin: 10px 0px 0px 10px;
 	display: inline-block;
 	width: 184px;
