@@ -6,7 +6,7 @@ var LOGO_HEIGHT = 10,
 var animationStartTime = false,
     animationProgress,
     gameWidth = 960,
-    cellSize = 28,
+    cellSize = 32,
     cellRadius = 7,
     currentCell;
 
@@ -47,25 +47,7 @@ get_random_color = function() {
     return parseInt( r + g + b, 16 );
 }
 
-var ID_COLORS = [] 
-ID_COLORS.push( 0xDDDDDD );
-ID_COLORS.push( 0xE6194B );
-ID_COLORS.push( 0x3Cb44B );
-ID_COLORS.push( 0xFFE119 );
-ID_COLORS.push( 0x0082C8 );
-ID_COLORS.push( 0xF58231 );
-ID_COLORS.push( 0x911EB4 );
-ID_COLORS.push( 0x46F0F0 );
-ID_COLORS.push( 0xF032E6 );
-ID_COLORS.push( 0xD2F53C );
-ID_COLORS.push( 0x008080 );
-ID_COLORS.push( 0xAA6E28 );
-ID_COLORS.push( 0x800000 );
-ID_COLORS.push( 0xAAFFC3 );
-ID_COLORS.push( 0x808000 );
-ID_COLORS.push( 0x000080 );
-ID_COLORS.push( 0xFABEBE );
-ID_COLORS.push( 0xE6BEFF );
+var ID_COLORS = [ 0xDDDDDD, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231, 0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28, 0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF ];
 
 function id_to_color( uid ) {
     if( uid < ID_COLORS.length ) {
@@ -128,17 +110,17 @@ function draw_game( ts ) {
 function draw_cell( x, y, currentCell ) {
     let base = new Graphics();
     base.beginFill( combine_color( "#000000", "#65c9cf", currentCell[ "natural_energy" ] / 10 ) );
-    base.drawRoundedRect( ( x * ( cellSize + 4 ) ), ( y * ( cellSize + 4 ) ), cellSize + 2, cellSize + 2, cellRadius );
+    base.drawRoundedRect( x * cellSize, y * cellSize, cellSize - 2, cellSize - 2, cellRadius );
     base.endFill();
     base.beginFill( combine_color( "#000000", "#faf334", currentCell[ "natural_gold" ] / 10 ) );
-    base.drawRoundedRect( ( x * ( cellSize + 4 ) ) + 2, ( y * ( cellSize + 4 ) ) + 2, cellSize - 2, cellSize - 2, cellRadius - 2 );
+    base.drawRoundedRect( x * cellSize + 2, y * cellSize + 2, cellSize - 6, cellSize - 6, cellRadius - 2 );
     base.endFill();
     if( currentCell[ "owner" ] == 0 ) {
         base.beginFill( parseInt( "000000", 16 ) );
     } else {
         base.beginFill( id_to_color( currentCell[ "owner" ] ) );
     }
-    base.drawRoundedRect( ( x * ( cellSize + 4 ) ) + 4, ( y * ( cellSize + 4 ) ) + 4, cellSize - 6, cellSize - 6, cellRadius - 4 );
+    base.drawRoundedRect( x * cellSize + 4, y * cellSize + 4, cellSize - 10, cellSize - 10, cellRadius - 4 );
     base.endFill();
     gameStage.addChild( base );
 }
