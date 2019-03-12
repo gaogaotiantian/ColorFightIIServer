@@ -27,15 +27,8 @@ var gameProtocol = window.location.protocol=='https:'&&'wss://'||'ws://',
     gameData = false,
     lastTurn = -1;
 
-/* Rendering the logo */
+/* Appending the PIXI renderer to the DOM */
 function init_page() {
-    var logo = document.getElementById( "colorfight-logo" ),
-        pixel;
-    for( var i = 0; i < LOGO_WIDTH * LOGO_HEIGHT; i++ ) {
-        pixel = document.createElement( "div" );
-        pixel.setAttribute( "class", "logo-pixel" );
-        logo.appendChild( pixel );
-    }
     document.getElementById( "game-div" ).appendChild( gameRenderer.view );
 }
 
