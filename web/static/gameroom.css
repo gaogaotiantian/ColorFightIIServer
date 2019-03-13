@@ -1,0 +1,23 @@
+html, body {
+	margin: 0px;
+	padding: 0px;
+	height: 100%;
+	width: 100%;
+	background: url( "background.jpg" );
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+
+
+#cf-game-col {
+	font-size: 0px;
+}
+
+#game-div {
+	margin: auto;
+	background: black;
+	padding: 20px;
+	border-radius: 7px;
+}

@@ -1,54 +1,38 @@
+<!DOCTYPE html>
 <html>
   <head>
     {% include 'header.html' %}
-    <script src="https://cdn.bootcss.com/pixi.js/4.8.5/pixi.min.js"></script>
-    <script src="/static/gamerender.js"></script>
-    <script src="/static/gamecontrol.js"></script>
+    <link rel="stylesheet" href='./static/gameroom.css'>
   </head>
   <body>
     {% include 'navbar.html' %}
     <div class="container-fluid">
-
-      <div class="d-flex justify-content-center">
-        <div class="px-3">
-          <div id="user-list">
-          </div>
+      <div class="row" id="cf-game-row">
+        <div class="col-1">
         </div>
-
-        <div class="px-3">
-          <div class="row">
-          </div>
-
-          <div class="row">
-            <div class="col-md-12">
-              <div class="d-flex justify-content-center" id="game-div">
+        <div class="col-1">
+        </div>
+        <div class="col-8 text-center" id="cf-game-col"><div id="game-div"></div></div>
+        <div class="col-2" id="game-status-div">
+          <h3 class="game-status-header">GAME STAT</h3>
+          <div class="game-status-section">
+            <div class="d-flex">
+              <div class="mr-auto">
+                <p class="game-status-title">Turn</p>
+                <p id="turn-stat" class="game-status-value">0/500</p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="px-3">
-          <div class="row">
-            <div id="game-status-div" class="col-md-12">
-              <h3 class="game-status-header">GAME STAT</h3>
-              <div class="game-status-section">
-                <div class="d-flex">
-                  <div class="mr-auto">
-                    <p class="game-status-title">Turn</p>
-                    <p id="turn-stat" class="game-status-value">0/500</p>
-                  </div>
-                  <div class="game-control">
-                    <a id="restart-button" href="#"><i class="fas fa-redo"></i></a>
-                    <a id="config-button" href="#" data-toggle="modal" data-target="#config-modal"><i class="fas fa-cog "></i></a>
-                  </div>
-                </div>
+              <div class="game-control">
+                <a id="restart-button" href="#"><i class="fas fa-redo"></i></a>
+                <a id="config-button" href="#" data-toggle="modal" data-target="#config-modal"><i class="fas fa-cog "></i></a>
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
     {% include 'config_modal.html' %}
+    <script src="https://cdn.bootcss.com/pixi.js/4.8.5/pixi.min.js"></script>
+    <script src="./static/gamerender.js"></script>
+    <script src="./static/gamecontrol.js"></script>
   </body>
 </html>
