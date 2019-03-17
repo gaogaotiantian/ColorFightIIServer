@@ -27,11 +27,39 @@
               </div>
             </div>
           </div>
+          <h3 class="game-status-header">USER INFO</h3>
+          <div class="game-status-section">
+            <div class="d-flex">
+              <div class="user-color-box" style="background-color:#000000"></div>
+              <p id="username">username</p>
+            </div>
+            <p id="user-tech">Lv. 1</p>
+            <p id="user-cells">0/900</p>
+            <div class="d-flex">
+              <!-- Vertical Align: | Total | + | Rate | Type | -->
+              <div>
+                <p id="energy-user" class="text-right">0</p>
+                <p id="gold-user"   class="text-right">0</p>
+              </div>
+              <div>
+                <p>+</p>
+                <p>+</p>
+              </div>
+              <div>
+                <p id="energy-rate-user"  class="text-left">0</p>
+                <p id="gold-rate-user"    class="text-left">0</p>
+              </div>
+              <div>
+                <p id="energy-name-user">Energy</p>
+                <p id="gold-name-user">Gold</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     {% include 'config_modal.html' %}
-    <script src="https://cdn.bootcss.com/pixi.js/4.8.5/pixi.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.6/pixi.min.js"></script>
     <script src="./static/gamerender.js"></script>
     <script src="./static/gamecontrol.js"></script>
   </body>
