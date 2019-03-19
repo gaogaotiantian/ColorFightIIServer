@@ -21,3 +21,8 @@ html, body {
 	padding: 20px;
 	border-radius: 7px;
 }
+
+.user-color-box {
+	width :32px;
+	height:32px;
+}
