@@ -9,8 +9,6 @@ html, body {
 	background-repeat: no-repeat;
 }
 
-
-
 #cf-game-col {
 	font-size: 0px;
 }
@@ -23,6 +21,23 @@ html, body {
 }
 
 .user-color-box {
-	width :32px;
-	height:32px;
+	/* Small margin to username */
+	margin-right:4px;
+	/* Divs default to ~30 px */
+	width :30px;
+	height:30px;
+}
+
+.user-list-line {
+	/* Black line break. Reduced margins above/below. */
+	border:none;
+	background-color:#000000;
+	height:2px;
+	margin-top:4px;
+	margin-bottom:4px;
+}
+
+input.row-input {
+	/* Full div-width input box */
+	width:100%;
 }

@@ -8,13 +8,14 @@
     {% include 'navbar.html' %}
     <div class="container-fluid">
       <div class="row" id="cf-game-row">
-        <div class="col-1">
+        <div class="col-2" id="user-list-div">
+          <h3 class="game-status-header">USER LIST</h3>
+          <div class="game-status-section" id="user-list-info">
+          </div>
         </div>
-        <div class="col-1">
-        </div>
-        <div class="col-8 text-center" id="cf-game-col"><div id="game-div"></div></div>
-        <div class="col-2" id="game-status-div">
-          <h3 class="game-status-header">GAME STAT</h3>
+        <div class="col-6 text-center" id="cf-game-col"><div id="game-div"></div></div>
+        <div class="col-3" id="game-status-div">
+          <h4 class="game-status-header">GAME STAT</h3>
           <div class="game-status-section">
             <div class="d-flex">
               <div class="mr-auto">
@@ -27,33 +28,23 @@
               </div>
             </div>
           </div>
-          <h3 class="game-status-header">USER INFO</h3>
-          <div class="game-status-section">
-            <div class="d-flex">
-              <div class="user-color-box" style="background-color:#000000"></div>
-              <p id="username">username</p>
+          <h4 class="game-status-header">USER INFO</h3>
+          <div id="self-info">
+            <div id= "join-game-section" class="game-status-section">
+              <form id="join-game-form">
+                <label>Username:</label><br>
+                <input type="text" class="row-input"><br>
+                <label>Password:</label><br>
+                <input type="password" class="row-input"><br>
+                <input type="button" onclick="join_game_button()" value="Join Game">
+              </form>
             </div>
-            <p id="user-tech">Lv. 1</p>
-            <p id="user-cells">0/900</p>
-            <div class="d-flex">
-              <!-- Vertical Align: | Total | + | Rate | Type | -->
-              <div>
-                <p id="energy-user" class="text-right">0</p>
-                <p id="gold-user"   class="text-right">0</p>
-              </div>
-              <div>
-                <p>+</p>
-                <p>+</p>
-              </div>
-              <div>
-                <p id="energy-rate-user"  class="text-left">0</p>
-                <p id="gold-rate-user"    class="text-left">0</p>
-              </div>
-              <div>
-                <p id="energy-name-user">Energy</p>
-                <p id="gold-name-user">Gold</p>
-              </div>
-            </div>
+          </div>
+          <h4 class="game-status-header">SELECTED CELL INFO</h3>
+          <div id='cell-info'>
+          </div>
+          <h4 class="game-status-header">SELECTED USER INFO</h3>
+          <div id="user-info">
           </div>
         </div>
       </div>
