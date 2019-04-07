@@ -64,7 +64,7 @@ const GOLD_COLOR    = "#faf334";
 // PIXI Variables
 
 const gameStage     = new PIXI.Container( parseInt( "000000", 16 ), true );
-const gameRenderer  = PIXI.autoDetectRenderer( gameWidth, gameWidth );
+const gameRenderer  = new PIXI.CanvasRenderer( gameWidth, gameWidth );
 gameRenderer.interactive = true;
 gameRenderer.plugins.interaction.on('pointerdown', click_handler);
 
