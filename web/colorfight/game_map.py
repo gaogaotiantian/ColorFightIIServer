@@ -1,6 +1,7 @@
 from .position import Position
 from .building import Home, Empty
 import random
+import copy
 
 class MapCell:
     def __init__(self, position, **kwargs):
@@ -9,13 +10,12 @@ class MapCell:
         self.natural_gold = random.randint(1, 10)
         self.natural_energy = random.randint(1, 10)
         self.owner = 0
-        self.natural_cost = random.randint(1, 300)
+        self.natural_cost = int((self.natural_gold + self.natural_energy) * 15 * random.uniform(0.6, 1.5))
         self.force_field  = 0
         self.attacker_list = []
         for kw in kwargs:
             if hasattr(self, kw):
                 setattr(self, kw, kwargs[kw])
-
     @property
     def attack_cost(self):
         return self.building.get_attack_cost(self)
@@ -87,7 +87,7 @@ class GameMap:
         return [self._cells[y][x] for y in range(self.height) for x in range(self.width)]
 
     def get_random_empty_cell(self):
-        empty_cells = [cell for cell in self.get_cells() if cell.owner == 0 and cell.natural_cost < 100]
+        empty_cells = [cell for cell in self.get_cells() if cell.owner == 0]
         if not empty_cells:
             return None
         return random.choice(empty_cells)
@@ -147,7 +147,7 @@ class GameMap:
         return info
 
     def _blur(self, cells, percent = 0.15):
-        new_cells = self._generate_empty_cells(self.width, self.height)
+        new_cells = self._copy_cells(cells)
 
         for x in range(self.width):
             for y in range(self.height):
@@ -167,14 +167,15 @@ class GameMap:
             for y in range(height):
                 cells[y][x] = MapCell(Position(x, y))
         for i in range(3):
-            cells = self._blur(cells)
+            cells = self._blur(cells, percent = 0.05)
         return cells
 
-    def _generate_empty_cells(self, width, height):
-        cells = [[None for _ in range(width)] for _ in range(height)]
+    def _copy_cells(self, cells):
+        height = len(cells)
+        width = len(cells[0])
+        ret = [[None for _ in range(width)] for _ in range(height)]
         for x in range(width):
             for y in range(height):
-                cells[y][x] = MapCell(Position(x, y), natural_cost = 0)
-        return cells
-
+                ret[y][x] = copy.deepcopy(cells[y][x])
+        return ret
 
