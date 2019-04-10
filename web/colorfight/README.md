@@ -1,23 +1,104 @@
 # ColorfightII Rules
 
-## Introduction
+## Overview
 
-ColorfightII is a round based game. For each round, the players can send an
-action list during a period of time, then the server will update based on the 
-actions.
+ColorfightII is a round based game where players try to expand their territory 
+and collect resource to win the game. 
 
-Each player has two kinds of resources:
+There are two kinds of resources:
 
 * Energy
 * Gold
 
-Players use energy to attack and occupy other cells to collect more gold and
-energy source.
+Each player starts with a certain amount of energy and a home cell. The player
+will get energy and gold from the cells they occupy. Each cell provides 
+different amount of energy and gold per round.
+
+Players use energy to attack and occupy other cells to expand their territory,
+therefore collect more gold and energy source.
 
 Players use gold to build different buildings on their own cells to help the
 game process.
 
 At the end of the game, the player with the highest amount of gold wins.
+
+## Game Flow
+
+### Preparation
+
+In the beginning of each game, a 30x30 map will be generated. Each cell of the map
+will have ```natural_cost```, ```natural_energy``` and ```natural_gold``` 
+attributes. 
+
+### Register
+
+During anytime of the game, a player is allowed to register to the
+game. The player will be assigned to a cell, this cell will be the home of
+the player. A player will have 100 ```energy``` when register to the game.
+
+### Command
+
+For each round, a player could give a list of valid commands. The possible 
+commands are:
+
+* attack
+* build
+* upgrade
+
+#### attack
+
+A player could use a certain amount of energy to attack a cell that's adjacent
+to already occupied cells. The amount of energy has to be more than or equal to the 
+```attack_cost``` of that cell, otherwise the command will fail. Failed command
+will not cost the player's energy.
+
+The more energy the player uses to attack the cell, the more ```force_field```
+will be generated after the cell is occupied so it is harder for other players to take it back. 
+
+If multiple players attack one cell in a single round, the player has to spend
+more than 50% of the total energy spent on that cell to occupy the cell. If
+no player satisfied this condition, no player will occupy the cell, but all the
+energy they use will be spent. 
+
+#### build
+
+A player could build on occupied cells.
+
+A player needs ```cost``` amount of gold to build the building. 
+
+The buildings will take affect the round they are built. 
+
+#### upgrade
+
+A player could upgrade their buildings to have better effects from them. 
+The maximum level of the building(except for home) is limited by the level of
+home. You need to upgrade your home before upgrading other buildings. 
+
+All buildings including home start at level 1. After each upgrade, the level
+will increase by 1. 
+
+### Update
+
+#### Force field
+
+For each enemy's cell around the cell, ```force_field``` will lose 5% for each
+round.
+
+#### Order
+
+1. Parse all the commands
+    1. building will be built
+    2. upgrade will finish
+2. Update cells
+    1. parse all the attack commands, calculate the owner of the cell for next
+       round.
+    2. ```gold``` and ```energy``` income will be calculated based on the new
+       possessions.
+    3. ```tech_level``` will be determined.
+    4. ```force_field``` will be updated accordingly.
+3. Update players
+    1. ```gold``` and ```energy``` will be updated 
+    2. player without any cell will be dead 
 
 ## Game Feature
 
@@ -79,87 +160,9 @@ it so the ```natural_cost``` will be smooth.
 
 Each player enters the game with a ```username``` and a ```password```. If a
 player register with the same ```username``` and ```password```, it will be 
-treated as the same user. 
+treated as the same user. Duplicate usernames are not allowed.
 
 A player starts with 100 ```energy``` and 0 ```gold```. 
-
-## Game Flow
-
-### Preparation
-
-In the beginning of each round, a map will be generated. Each cell of the map
-will have ```natural_cost```, ```natural_energy``` and ```natural_gold``` 
-attributes. 
-
-### Register
-
-During anytime of the game, a player is allowed to join, or register to the
-game. The player will be assigned to a cell, this cell will be the home of
-the player. A player will have 100 ```energy``` when register to the game.
-
-### Command
-
-For each round, a player could give a list of valid commands. The possible 
-commands are:
-
-* attack
-* build
-* upgrade
-
-#### attack
-
-A player could use a certain amount of energy to attack a cell that's adjacent
-to occupied cells. The amount of energy has to be more than or equal to the 
-```attack_cost``` of that cell, otherwise the command will fail. Failed command
-will not cost the player's energy.
-
-The more energy the player uses to attack the cell, the more ```force_field```
-will be generated so the cell is harder to attack by other players. 
-
-If multiple players attack one cell in a single round, the player has to spend
-more than 50% of the total energy spent on that cell to occupy the cell. If
-no player satisfied this condition, no player will occupy the cell, but all the
-energy they use will be spent. 
-
-#### build
-
-A player could build on the occupied cell.
-
-A player needs ```cost``` amount of gold to build the building. 
-
-The buildings will take affect the round they are built. 
-
-#### upgrade
-
-A player could upgrade their buildings to have better effects from them. 
-The maximum level of the building(except for home) is limited by the level of
-home. You need to upgrade your home before upgrading other buildings. 
-
-All buildings including home start at level 1. After each upgrade, the level
-will increase by 1. 
-
-### Update
-
-#### Force field
-
-For each enemy's cell around the cell, ```force_field``` will lose 5% for each
-round.
-
-#### Order
-
-1. Parse all the commands
-    1. building will be built
-    2. upgrade will finish
-2. Update cells
-    1. parse all the attack commands, calculate the owner of the cell for next
-       round.
-    2. ```gold``` and ```energy``` income will be calculated based on the new
-       possessions.
-    3. ```tech_level``` will be determined.
-    4. ```force_field``` will be updated accordingly.
-3. Update players
-    1. ```gold``` and ```energy``` will be updated 
-    2. player without any cell will be dead 
 
 ## Communication
 

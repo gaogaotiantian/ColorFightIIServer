@@ -1,18 +1,84 @@
 <h1>ColorfightII Rules</h1>
-<h2>Introduction</h2>
-<p>ColorfightII is a round based game. For each round, the players can send an
-action list during a period of time, then the server will update based on the 
-actions.</p>
-<p>Each player has two kinds of resources:</p>
+<h2>Overview</h2>
+<p>ColorfightII is a round based game where players try to expand their territory 
+and collect resource to win the game. </p>
+<p>There are two kinds of resources:</p>
 <ul>
 <li>Energy</li>
 <li>Gold</li>
 </ul>
-<p>Players use energy to attack and occupy other cells to collect more gold and
-energy source.</p>
+<p>Each player starts with a certain amount of energy and a home cell. The player
+will get energy and gold from the cells they occupy. Each cell provides 
+different amount of energy and gold per round.</p>
+<p>Players use energy to attack and occupy other cells to expand their territory,
+therefore collect more gold and energy source.</p>
 <p>Players use gold to build different buildings on their own cells to help the
 game process.</p>
 <p>At the end of the game, the player with the highest amount of gold wins.</p>
+<h2>Game Flow</h2>
+<h3>Preparation</h3>
+<p>In the beginning of each game, a 30x30 map will be generated. Each cell of the map
+will have <code>natural_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
+attributes. </p>
+<h3>Register</h3>
+<p>During anytime of the game, a player is allowed to register to the
+game. The player will be assigned to a cell, this cell will be the home of
+the player. A player will have 100 <code>energy</code> when register to the game.</p>
+<h3>Command</h3>
+<p>For each round, a player could give a list of valid commands. The possible 
+commands are:</p>
+<ul>
+<li>attack</li>
+<li>build</li>
+<li>upgrade</li>
+</ul>
+<h4>attack</h4>
+<p>A player could use a certain amount of energy to attack a cell that's adjacent
+to already occupied cells. The amount of energy has to be more than or equal to the 
+<code>attack_cost</code> of that cell, otherwise the command will fail. Failed command
+will not cost the player's energy.</p>
+<p>The more energy the player uses to attack the cell, the more <code>force_field</code>
+will be generated after the cell is occupied so it is harder for other players to take it back. </p>
+<p>If multiple players attack one cell in a single round, the player has to spend
+more than 50% of the total energy spent on that cell to occupy the cell. If
+no player satisfied this condition, no player will occupy the cell, but all the
+energy they use will be spent. </p>
+<h4>build</h4>
+<p>A player could build on occupied cells.</p>
+<p>A player needs <code>cost</code> amount of gold to build the building. </p>
+<p>The buildings will take affect the round they are built. </p>
+<h4>upgrade</h4>
+<p>A player could upgrade their buildings to have better effects from them. 
+The maximum level of the building(except for home) is limited by the level of
+home. You need to upgrade your home before upgrading other buildings. </p>
+<p>All buildings including home start at level 1. After each upgrade, the level
+will increase by 1. </p>
+<h3>Update</h3>
+<h4>Force field</h4>
+<p>For each enemy's cell around the cell, <code>force_field</code> will lose 5% for each
+round.</p>
+<h4>Order</h4>
+<ol>
+<li>Parse all the commands<ol>
+<li>building will be built</li>
+<li>upgrade will finish</li>
+</ol>
+</li>
+<li>Update cells<ol>
+<li>parse all the attack commands, calculate the owner of the cell for next
+   round.</li>
+<li><code>gold</code> and <code>energy</code> income will be calculated based on the new
+   possessions.</li>
+<li><code>tech_level</code> will be determined.</li>
+<li><code>force_field</code> will be updated accordingly.</li>
+</ol>
+</li>
+<li>Update players<ol>
+<li><code>gold</code> and <code>energy</code> will be updated </li>
+<li>player without any cell will be dead </li>
+</ol>
+</li>
+</ol>
 <h2>Game Feature</h2>
 <h3>MapCell</h3>
 <p>A <code>MapCell</code> represents a cell that a user can occupy. </p>
@@ -64,69 +130,5 @@ it so the <code>natural_cost</code> will be smooth.</p>
 <h3>User</h3>
 <p>Each player enters the game with a <code>username</code> and a <code>password</code>. If a
 player register with the same <code>username</code> and <code>password</code>, it will be 
-treated as the same user. </p>
+treated as the same user. Duplicate usernames are not allowed.</p>
 <p>A player starts with 100 <code>energy</code> and 0 <code>gold</code>. </p>
-<h2>Game Flow</h2>
-<h3>Preparation</h3>
-<p>In the beginning of each round, a map will be generated. Each cell of the map
-will have <code>natural_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
-attributes. </p>
-<h3>Register</h3>
-<p>During anytime of the game, a player is allowed to join, or register to the
-game. The player will be assigned to a cell, this cell will be the home of
-the player. A player will have 100 <code>energy</code> when register to the game.</p>
-<h3>Command</h3>
-<p>For each round, a player could give a list of valid commands. The possible 
-commands are:</p>
-<ul>
-<li>attack</li>
-<li>build</li>
-<li>upgrade</li>
-</ul>
-<h4>attack</h4>
-<p>A player could use a certain amount of energy to attack a cell that's adjacent
-to occupied cells. The amount of energy has to be more than or equal to the 
-<code>attack_cost</code> of that cell, otherwise the command will fail. Failed command
-will not cost the player's energy.</p>
-<p>The more energy the player uses to attack the cell, the more <code>force_field</code>
-will be generated so the cell is harder to attack by other players. </p>
-<p>If multiple players attack one cell in a single round, the player has to spend
-more than 50% of the total energy spent on that cell to occupy the cell. If
-no player satisfied this condition, no player will occupy the cell, but all the
-energy they use will be spent. </p>
-<h4>build</h4>
-<p>A player could build on the occupied cell.</p>
-<p>A player needs <code>cost</code> amount of gold to build the building. </p>
-<p>The buildings will take affect the round they are built. </p>
-<h4>upgrade</h4>
-<p>A player could upgrade their buildings to have better effects from them. 
-The maximum level of the building(except for home) is limited by the level of
-home. You need to upgrade your home before upgrading other buildings. </p>
-<p>All buildings including home start at level 1. After each upgrade, the level
-will increase by 1. </p>
-<h3>Update</h3>
-<h4>Force field</h4>
-<p>For each enemy's cell around the cell, <code>force_field</code> will lose 5% for each
-round.</p>
-<h4>Order</h4>
-<ol>
-<li>Parse all the commands<ol>
-<li>building will be built</li>
-<li>upgrade will finish</li>
-</ol>
-</li>
-<li>Update cells<ol>
-<li>parse all the attack commands, calculate the owner of the cell for next
-   round.</li>
-<li><code>gold</code> and <code>energy</code> income will be calculated based on the new
-   possessions.</li>
-<li><code>tech_level</code> will be determined.</li>
-<li><code>force_field</code> will be updated accordingly.</li>
-</ol>
-</li>
-<li>Update players<ol>
-<li><code>gold</code> and <code>energy</code> will be updated </li>
-<li>player without any cell will be dead </li>
-</ol>
-</li>
-</ol>
