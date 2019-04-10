@@ -152,6 +152,16 @@ function draw_cell( x, y, currentCell ) {
     // TODO: Highlight selected cell. 
 
     gameStage.addChild( base );
+
+    // Draw home image if it's home
+    if (currentCell[ "building" ][ "name" ] == "home") {
+        let home_image = PIXI.Sprite.from('/static/assets/base.png');
+        home_image.x = x * cellSize;
+        home_image.y = y * cellSize;
+        gameStage.addChild(home_image);
+    }
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
