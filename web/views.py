@@ -101,9 +101,17 @@ async def action_channel(request):
 
 async def restart(request):
     data = await request.json()
-    result, err_msg = request.app['game'].config(data)
+    gameroom_id = data['gameroom_id']
+    config = data['config']
+
+    if gameroom_id not in request.app['game']:
+        return web.json_response({"success": False, "err_msg": "No such room"})
+
+    game = request.app['game'][gameroom_id]
+
+    result, err_msg = game.config(data['config'])
     if result:
-        request.app['game'].restart()
+        game.restart()
         return web.json_response({"success": True})
     else:
         return web.json_response({"success": False, "err_msg": err_msg})

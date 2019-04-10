@@ -13,25 +13,29 @@ function restartGame( data ) {
 
 function getConfig() {
     var data = {};
+    var config = {};
     var max_turn = $( "#max-turn-sel option:selected" ).val();
     if( max_turn != "same" ) {
-        data[ "max_turn" ] = parseFloat( max_turn );
+        config[ "max_turn" ] = parseFloat( max_turn );
     }
 
     var round_time = $( "#round-time-sel option:selected" ).val();
     if( round_time != "same" ) {
-        data[ "round_time" ] = parseFloat( round_time );
+        config[ "round_time" ] = parseFloat( round_time );
     }
 
     var first_round_time = $( "#first-round-time-sel option:selected" ).val();
     if( first_round_time != "same" ) {
-        data[ "first_round_time" ] = parseFloat( first_round_time );
+        config[ "first_round_time" ] = parseFloat( first_round_time );
     }
 
     var finish_time = $( "#finish-time-sel option:selected" ).val();
     if( first_round_time != "same" ) {
-        data[ "finish_time" ] = parseFloat( finish_time );
+        config[ "finish_time" ] = parseFloat( finish_time );
     }
+
+    data['config'] = config;
+    data['gameroom_id'] = window.location.pathname.substr(window.location.pathname.lastIndexOf('/')+1);
 
     return data;
 }

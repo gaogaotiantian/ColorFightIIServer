@@ -47,6 +47,7 @@ const GAME_MAX_ATTACK       = GAME_MAX_FORCE_FIELD / 2;
 
 let gameData    = false;
 let lastTurn    = -1;
+let maxTurn     = 500;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Rendering Variables
@@ -104,7 +105,8 @@ function draw_game( ts ) {
 
     if( gameData && gameData[ "turn" ] != lastTurn ) {
         lastTurn = gameData[ "turn" ];
-        gameTurn.innerHTML = lastTurn + "/500";
+        maxTurn  = gameData[ "info" ][ "max_turn" ];
+        gameTurn.innerHTML = lastTurn + "/" + maxTurn;
 
         // Clear the game board for redrawing. 
         while( gameStage.children[ 0 ] ) {
