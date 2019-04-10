@@ -238,8 +238,11 @@ class Colorfight:
     def register(self, uid, username, password):
         # Check whether user exists first
         for user in self.users.values():
-            if user.username == username and user.password == password:
-                return True, (user.uid,)
+            if user.username == username:
+                if user.password == password:
+                    return True, (user.uid,)
+                else:
+                    return False, "Username exists"
         for uid in range(1, len(self.users) + 2):
             if uid not in self.users:
                 user = User(uid, username, password)

@@ -40,10 +40,13 @@ def test_register_with_same_username_different_password():
         game = Colorfight()
         uid = join(game, 'a', 'a')
         assert (uid > 0)
-        uid = join(game, 'a', 'ab')
-        assert (uid > 0)
+        try:
+            uid = join(game, 'a', 'ab')
+            assert(False)
+        except:
+            pass
         info = game.get_game_info()
-        assert(len(info["users"]) == 2)
+        assert(len(info["users"]) == 1)
     except Exception as e:
         print(e)
         assert (False)
