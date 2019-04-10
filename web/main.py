@@ -15,7 +15,8 @@ async def init_app():
     app = web.Application()
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(PROJECT_ROOT / 'templates')))
-    app['game'] = Colorfight()
+    app['game'] = {}
+    app['game']['public'] = Colorfight()
     app['game_sockets'] = []
     setup_routes(app)
     setup_static_routes(app)

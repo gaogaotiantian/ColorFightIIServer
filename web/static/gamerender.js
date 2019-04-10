@@ -2,7 +2,7 @@
 // WebSocket Variables
 
 const gameProtocol  = window.location.protocol=='https:'&&'wss://'||'ws://';
-const gameSocket    = new WebSocket( gameProtocol + window.location.host + "/game_channel" );
+const gameSocket    = new WebSocket( gameProtocol + window.location.host + window.location.pathname + "/game_channel" );
 
 ////////////////////////////////////////////////////////////////////////////////
 // DOM Variables
@@ -259,7 +259,7 @@ function join_game_button() {
 
     if (actionChannel == null) {
         // Open a socket to the action channel. 
-        actionChannel = new WebSocket(gameProtocol + window.location.host + "/action_channel");
+        actionChannel = new WebSocket(gameProtocol + window.location.host + window.location.pathname + "/action_channel");
         // Register ourselves when the socket finishes initializing. 
         actionChannel.onopen = function() {
             send_join_command(username, password); 

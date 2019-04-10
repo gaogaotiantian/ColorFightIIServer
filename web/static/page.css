@@ -66,7 +66,7 @@ body {
     border: 0;
 }
 
-.btn {
+.btn-start {
     padding: 15px 20px;
     text-align: center;
     text-transform: uppercase;
@@ -146,3 +146,35 @@ code {
     padding: 2px 4px;
 }
 
+.table-container {
+    background: #edf6ff;
+}
+
+table {
+    width: 100%;
+    max-width: 100%;
+    border-color: grey;
+}
+
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    background: rgba(2, 82, 30, 0.05);
+}
+
+th {
+    border-right: 1.2px solid rgba(8, 27, 83, 0.1);
+    padding: 15px;
+    font-size: 1.2rem;
+}
+
+tr {
+    display: table-row;
+}
+
+td {
+    border: 1.2px solid rgba(8, 27, 83, 0.1);
+    color: #0c0c0c;
+    padding: 15px;
+    font-size: 1.1rem;
+}
