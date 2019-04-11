@@ -158,9 +158,6 @@ class Colorfight:
         if atk_pos not in self.game_map:
             return False, "Attack position is not in the map"
 
-        if energy < self.game_map[atk_pos].attack_cost:
-            return False, "The energy spent is less than attack cost"
-
         if energy > self.users[uid].energy:
             return False, "Do not have enough energy to attack"
 
