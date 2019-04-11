@@ -23,7 +23,7 @@ attributes. </p>
 <h3>Register</h3>
 <p>During anytime of the game, a player is allowed to register to the
 game. The player will be assigned to a cell, this cell will be the home of
-the player. A player will have 100 <code>energy</code> when register to the game.</p>
+the player. A player will have 1000 <code>energy</code> when register to the game.</p>
 <h3>Command</h3>
 <p>For each round, a player could give a list of valid commands. The possible 
 commands are:</p>
@@ -92,9 +92,23 @@ attributes:</p>
 <p>The natural attributes of a cell will not change in a game. However, the actual
 energy and gold it produces and the actual cost to occupy it may change due to
 other aspects. </p>
+<p>A <code>MapCell</code> will generate energy and gold each round based on 
+<code>natural_energy</code>, <code>natural_gold</code> and the building on the cell. </p>
+<p><code>energy_source</code> and <code>gold_source</code> shows the resource a <code>MapCell</code>
+can produce per round.</p>
+<p>However, the actual energy and gold a player gets may be taxed if the player
+owns too many cells.</p>
+<p>For every 100 cells the player owns, a 10% tax will be applied to the energy
+and gold income.</p>
 <h4>Building</h4>
-<p>Players can build on a <code>MapCell</code> that's owned by them.</p>
-<p>Players can upgrade their buildings with resources under certain conditions.</p>
+<p>Players can build on a <code>MapCell</code> that's owned by them. Only one building
+is allowed on one <code>MapCell</code></p>
+<p>Each building has a <code>level</code>. When the building is built, the <code>level</code>
+is <code>1</code>. Players can upgrade their buildings(increase level) with resources 
+as long as the building's level is less than their <code>tech_level</code>(Upgrading
+home is not restricted by this rule).</p>
+<p>A building on a <code>MapCell</code> will change the amount of energy and gold the 
+cell provides. </p>
 <ul>
 <li><code>Home</code> is automatically built on the cell that the player spawns. <ul>
 <li><code>attack_cost</code> 1000</li>
@@ -116,19 +130,33 @@ other aspects. </p>
 </ul>
 </li>
 </ul>
-<p>A building will be destroyed if the cell is attacked by other player.</p>
+<p>A building will be destroyed if the cell is occupied by another player.</p>
 <h4>Force Field</h4>
-<p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player.
+<p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player. 
+This will equivalently add <code>attack_cost</code> to the <code>MapCell</code> so it would 
+be harder for other players to occupy it.
 <code>force_field</code> is determined by the energy a player puts to attack the cell 
-and the total energy all players put to attack this cell. </p>
+and the total energy all players put to attack this cell in that round. </p>
 <p><code>force_field = int(min(1000, 2*(energy*2 - total_energy)))</code></p>
 <p><code>force_field</code> will be added to <code>attack_cost</code></p>
 <h3>GameMap</h3>
 <p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
 <p>In the beginning of the game, the game will generate a <code>GameMap</code> and blur
 it so the <code>natural_cost</code> will be smooth.</p>
+<p><code>natural_cost</code> is moderately related to <code>natural_energy</code> and 
+<code>natural_gold</code></p>
 <h3>User</h3>
 <p>Each player enters the game with a <code>username</code> and a <code>password</code>. If a
 player register with the same <code>username</code> and <code>password</code>, it will be 
 treated as the same user. Duplicate usernames are not allowed.</p>
-<p>A player starts with 100 <code>energy</code> and 0 <code>gold</code>. </p>
+<p>A player starts with 1000 <code>energy</code> and 0 <code>gold</code>. </p>
+<h4>Tech Level</h4>
+<p><code>tech_level</code> is determined by the highest level of <code>home</code> buildings the
+player has. <code>tech_level</code> limits the level of all other buildings. The player
+needs to upgrade their home to a higher level, therefore achieves a higher
+<code>tech_level</code>, before they upgrade other buildings.</p>
+<h4>Tax Level</h4>
+<p><code>tax_level</code> is determined by the cell number the player owns. For every
+100 cells, a 10% tax will be applied to the energy and gold income. </p>
+<p>For example, if the player has 298 cells, the <code>tax_level</code> will be 2 and a 
+20% tax will be applied to the player's energy and gold income. </p>

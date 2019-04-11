@@ -60,7 +60,7 @@ def test_initial_user_info():
         user = info['users'][uid]
         assert (user['uid'] == uid)
         assert (len(user['cells']) == 1)
-        assert(user['energy'] == 100)
+        assert(user['energy'] == 1000)
         assert(user['gold'] == 0)
         assert(not user['dead'])
         assert(user['gold_source'] == 10)

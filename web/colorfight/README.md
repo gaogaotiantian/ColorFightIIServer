@@ -34,7 +34,7 @@ attributes.
 
 During anytime of the game, a player is allowed to register to the
 game. The player will be assigned to a cell, this cell will be the home of
-the player. A player will have 100 ```energy``` when register to the game.
+the player. A player will have 1000 ```energy``` when register to the game.
 
 ### Command
 
@@ -117,11 +117,30 @@ The natural attributes of a cell will not change in a game. However, the actual
 energy and gold it produces and the actual cost to occupy it may change due to
 other aspects. 
 
+A ```MapCell``` will generate energy and gold each round based on 
+```natural_energy```, ```natural_gold``` and the building on the cell. 
+
+```energy_source``` and ```gold_source``` shows the resource a ```MapCell```
+can produce per round.
+
+However, the actual energy and gold a player gets may be taxed if the player
+owns too many cells.
+
+For every 100 cells the player owns, a 10% tax will be applied to the energy
+and gold income.
+
 #### Building
 
-Players can build on a ```MapCell``` that's owned by them.
+Players can build on a ```MapCell``` that's owned by them. Only one building
+is allowed on one ```MapCell```
 
-Players can upgrade their buildings with resources under certain conditions.
+Each building has a ```level```. When the building is built, the ```level```
+is ```1```. Players can upgrade their buildings(increase level) with resources 
+as long as the building's level is less than their ```tech_level```(Upgrading
+home is not restricted by this rule).
+
+A building on a ```MapCell``` will change the amount of energy and gold the 
+cell provides. 
 
 * ```Home``` is automatically built on the cell that the player spawns. 
     * ```attack_cost``` 1000
@@ -137,13 +156,15 @@ Players can upgrade their buildings with resources under certain conditions.
     * ```upgrade_cost``` =  ```[(200, 200), (400, 400), (800, 800)]```
     * ```gold ``` = ```natural_gold * (1 + level)``` 
 
-A building will be destroyed if the cell is attacked by other player.
+A building will be destroyed if the cell is occupied by another player.
 
 #### Force Field
 
-A ```MapCell``` will have a ```force_field``` after it's occupied by a player.
+A ```MapCell``` will have a ```force_field``` after it's occupied by a player. 
+This will equivalently add ```attack_cost``` to the ```MapCell``` so it would 
+be harder for other players to occupy it.
 ```force_field``` is determined by the energy a player puts to attack the cell 
-and the total energy all players put to attack this cell. 
+and the total energy all players put to attack this cell in that round. 
 
 ```force_field = int(min(1000, 2*(energy*2 - total_energy)))```
 
@@ -156,13 +177,31 @@ and the total energy all players put to attack this cell.
 In the beginning of the game, the game will generate a ```GameMap``` and blur
 it so the ```natural_cost``` will be smooth.
 
+```natural_cost``` is moderately related to ```natural_energy``` and 
+```natural_gold```
+
 ### User
 
 Each player enters the game with a ```username``` and a ```password```. If a
 player register with the same ```username``` and ```password```, it will be 
 treated as the same user. Duplicate usernames are not allowed.
 
-A player starts with 100 ```energy``` and 0 ```gold```. 
+A player starts with 1000 ```energy``` and 0 ```gold```. 
+
+#### Tech Level
+
+```tech_level``` is determined by the highest level of ```home``` buildings the
+player has. ```tech_level``` limits the level of all other buildings. The player
+needs to upgrade their home to a higher level, therefore achieves a higher
+```tech_level```, before they upgrade other buildings.
+
+#### Tax Level
+
+```tax_level``` is determined by the cell number the player owns. For every
+100 cells, a 10% tax will be applied to the energy and gold income. 
+
+For example, if the player has 298 cells, the ```tax_level``` will be 2 and a 
+20% tax will be applied to the player's energy and gold income. 
 
 ## Communication
 
