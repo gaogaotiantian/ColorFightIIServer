@@ -33,16 +33,37 @@ commands are:</p>
 <li>upgrade</li>
 </ul>
 <h4>attack</h4>
-<p>A player could use a certain amount of energy to attack a cell that's adjacent
-to already occupied cells. The amount of energy has to be more than or equal to the 
-<code>attack_cost</code> of that cell, otherwise the command will fail. Failed command
-will not cost the player's energy.</p>
+<p>Players could use a certain amount of energy to attack a cell that's adjacent
+to their already occupied cells. </p>
+<p>To successfully attack(or occupy) the cell, the player has to spend at least
+<code>attack_cost</code> amount of energy.</p>
+<p>If multiple players attack one cell in the same round, the player spends the 
+most energy will be the attacker and the equivalent attack energy will be
+<code>max_energy * 2 - total_energy</code> where <code>max_energy</code> is the maximum energy
+a player spends and the <code>total_energy</code> will be all the energy spent on this
+cell. </p>
+<p>In this case, the <code>equivalent_energy</code> has to be at least <code>attack_cost</code>
+to successfully attack the cell. </p>
 <p>The more energy the player uses to attack the cell, the more <code>force_field</code>
-will be generated after the cell is occupied so it is harder for other players to take it back. </p>
-<p>If multiple players attack one cell in a single round, the player has to spend
-more than 50% of the total energy spent on that cell to occupy the cell. If
-no player satisfied this condition, no player will occupy the cell, but all the
-energy they use will be spent. </p>
+will be generated after the cell is occupied so it is harder for other players 
+to take it back. The generated <code>force_field</code> will be the equivalent energy
+spent on the cell times 2. The upper limit of <code>force_field</code> is 1000.</p>
+<p>No matter whether the attack is successful, all the energy will be spent.</p>
+<blockquote>
+<p>For example, assume the <code>attack_cost</code> of a cell is <code>100</code>.</p>
+<p>Case 1, if player A spent 50 energy to attack it, the attack would fail and 
+  player A will lose 50 energy(which is not a wise move). </p>
+<p>Case 2, if player A spent 150 energy to attack it, the attack would succeed and
+  player A will occupy the cell with 150 energy spent. The cell will also have 300
+  <code>force_field</code> so the <code>attack_cost</code> will be higher. </p>
+<p>Case 3, if player A spent 150 energy and player B spent 150 energy. The 
+  <code>equivalent_energy</code> will be 0 so the attack would fail. Both A and B lose
+  150 energy(bad for them but this is not a stupid move for them because they
+  would not have known).</p>
+<p>Case 4, if the player A spent 350 energy and player B spent 150 energy, the 
+  <code>equivalent_energy</code> will be 200(350-150) and player A will take the cell.
+  player B will lose 150 energy and the <code>force_field</code> would be 400.</p>
+</blockquote>
 <h4>build</h4>
 <p>A player could build on occupied cells.</p>
 <p>A player needs <code>cost</code> amount of gold to build the building. </p>

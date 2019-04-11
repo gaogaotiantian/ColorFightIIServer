@@ -47,18 +47,45 @@ commands are:
 
 #### attack
 
-A player could use a certain amount of energy to attack a cell that's adjacent
-to already occupied cells. The amount of energy has to be more than or equal to the 
-```attack_cost``` of that cell, otherwise the command will fail. Failed command
-will not cost the player's energy.
+Players could use a certain amount of energy to attack a cell that's adjacent
+to their already occupied cells. 
+
+To successfully attack(or occupy) the cell, the player has to spend at least
+```attack_cost``` amount of energy.
+
+If multiple players attack one cell in the same round, the player spends the 
+most energy will be the attacker and the equivalent attack energy will be
+```max_energy * 2 - total_energy``` where ```max_energy``` is the maximum energy
+a player spends and the ```total_energy``` will be all the energy spent on this
+cell. 
+
+In this case, the ```equivalent_energy``` has to be at least ```attack_cost```
+to successfully attack the cell. 
 
 The more energy the player uses to attack the cell, the more ```force_field```
-will be generated after the cell is occupied so it is harder for other players to take it back. 
+will be generated after the cell is occupied so it is harder for other players 
+to take it back. The generated ```force_field``` will be the equivalent energy
+spent on the cell times 2. The upper limit of ```force_field``` is 1000.
 
-If multiple players attack one cell in a single round, the player has to spend
-more than 50% of the total energy spent on that cell to occupy the cell. If
-no player satisfied this condition, no player will occupy the cell, but all the
-energy they use will be spent. 
+No matter whether the attack is successful, all the energy will be spent.
+
+> For example, assume the ```attack_cost``` of a cell is ```100```.
+  
+> Case 1, if player A spent 50 energy to attack it, the attack would fail and 
+  player A will lose 50 energy(which is not a wise move). 
+  
+> Case 2, if player A spent 150 energy to attack it, the attack would succeed and
+  player A will occupy the cell with 150 energy spent. The cell will also have 300
+  ```force_field``` so the ```attack_cost``` will be higher. 
+  
+> Case 3, if player A spent 150 energy and player B spent 150 energy. The 
+  ```equivalent_energy``` will be 0 so the attack would fail. Both A and B lose
+  150 energy(bad for them but this is not a stupid move for them because they
+  would not have known).
+  
+> Case 4, if the player A spent 350 energy and player B spent 150 energy, the 
+  ```equivalent_energy``` will be 200(350-150) and player A will take the cell.
+  player B will lose 150 energy and the ```force_field``` would be 400.
 
 #### build
 
