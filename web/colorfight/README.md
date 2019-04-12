@@ -176,12 +176,14 @@ cell provides.
     * ```gold``` = ```10 * level```
 * ```EnergyWell``` is the building to increase the energy production.
     * ```cost``` = ```100 gold```
-    * ```upgrade_cost``` = ```[(200, 200), (400, 400), (800, 800)]```
+    * ```upgrade_cost``` = ```[(200, 0), (400, 0), (800, 0)]```
     * ```energy``` = ```natural_energy * (1 + level)```
 * ```GoldMine``` is the building to increase the gold production.
     * ```cost``` = ```100 gold```
-    * ```upgrade_cost``` =  ```[(200, 200), (400, 400), (800, 800)]```
+    * ```upgrade_cost``` =  ```[(200, 0), (400, 0), (800, 0)]```
     * ```gold ``` = ```natural_gold * (1 + level)``` 
+
+```upgrade_cost``` = [level1 cost(gold, energy), level2 cost(gold, energy), level3 cost(gold, energy)]
 
 A building will be destroyed if the cell is occupied by another player.
 
