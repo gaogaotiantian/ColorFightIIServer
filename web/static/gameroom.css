@@ -11,12 +11,14 @@ html, body {
 
 #cf-game-col {
 	font-size: 0px;
+    padding: 0px;
+    margin: 0px;
 }
 
 #game-div {
-	margin: auto;
+	margin: 0px;
 	background: black;
-	padding: 20px;
+	padding: 10px;
 	border-radius: 7px;
 }
 

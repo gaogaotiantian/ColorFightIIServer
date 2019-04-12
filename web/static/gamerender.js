@@ -137,15 +137,20 @@ function draw_game(ts) {
 
     // Limit the dimension by width. 
     gameDim = gameCol.clientWidth;
+    
+    // We have a 10px padding, so the game dimension needs to minus 10*2 = 20 
+    gameDim -= 20
+
     // Limit the dimension by height. 
     if (gameDim + gameRenderer.view.offsetTop > window.innerHeight) {
         gameDim = window.innerHeight - gameRow.offsetTop;
     }
 
-    if (gameRenderer.view.width != gameDim) {
+    if (gameDiv.clientWidth != gameDim) {
         gameDiv.setAttribute("style", "width:" + gameDim + "px; height:" + gameDim + "px");
-        gameRenderer.view.style.width  = (gameDim - 40) + "px";
-        gameRenderer.view.style.height = (gameDim - 40) + "px";
+        // Consider the 10px padding
+        gameRenderer.view.style.width  = (gameDim - 20) + "px";
+        gameRenderer.view.style.height = (gameDim - 20) + "px";
     }
 
     if (gameData && gameData["turn"] != lastTurn ) {
