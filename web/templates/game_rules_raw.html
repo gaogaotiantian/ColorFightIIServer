@@ -140,17 +140,18 @@ cell provides. </p>
 </li>
 <li><code>EnergyWell</code> is the building to increase the energy production.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> = <code>[(200, 200), (400, 400), (800, 800)]</code></li>
+<li><code>upgrade_cost</code> = <code>[(200, 0), (400, 0), (800, 0)]</code></li>
 <li><code>energy</code> = <code>natural_energy * (1 + level)</code></li>
 </ul>
 </li>
 <li><code>GoldMine</code> is the building to increase the gold production.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> =  <code>[(200, 200), (400, 400), (800, 800)]</code></li>
+<li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0), (800, 0)]</code></li>
 <li><code>gold</code> = <code>natural_gold * (1 + level)</code> </li>
 </ul>
 </li>
 </ul>
+<p><code>upgrade_cost</code> = [level1 cost(gold, energy), level2 cost(gold, energy), level3 cost(gold, energy)]</p>
 <p>A building will be destroyed if the cell is occupied by another player.</p>
 <h4>Force Field</h4>
 <p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player. 
