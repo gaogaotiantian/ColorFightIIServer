@@ -42,6 +42,8 @@ const GAME_MAX_FORCE_FIELD  = 1000;
 // Therefore, 500 energy is enough to max out the force field. 
 const GAME_MAX_ATTACK       = GAME_MAX_FORCE_FIELD / 2; 
 
+const BASE_BUILD_COST       = 100; 
+
 ////////////////////////////////////////////////////////////////////////////////
 // Game Variables
 
@@ -55,24 +57,66 @@ let maxTurn     = 500;
 const cellSize      = 32;
 const cellRadius    = 7;
 
-let gameWidth       = cellSize * GAME_WIDTH;
+// Draw the game as a square, so we only need one dimension. 
+let gameDim         = cellSize * GAME_WIDTH;
 
 // Use a common color for ENERGY and GOLD related drawing. 
 const ENERGY_COLOR  = "#65c9cf";
 const GOLD_COLOR    = "#faf334";
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// 0 is an invalid UID so it can be used as a sentinel value. 
+const SENTINEL_UID  = 0; 
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Track the state of our action_channel websocket. 
+let actionChannel   = null; 
+
+let clickUID        = SENTINEL_UID; 
+let hoverUID        = SENTINEL_UID; 
+
+let selectUID       = SENTINEL_UID; 
+
+// Remember the username we submit. We will need this to look ourselves up 
+// after we join the server since the server does not send us a confirmation. 
+let selfUsername    = null; 
+let selfUID         = SENTINEL_UID; 
+
+// Selected cell position. Default to (0, 0). 
+let clickCell       = [0, 0]; 
+let hoverCell       = [0, 0]; 
+
+////////////////////////////////////////////////////////////////////////////////
 // PIXI Variables
 
-const gameStage     = new PIXI.Container( parseInt( "000000", 16 ), true );
-const gameRenderer  = new PIXI.CanvasRenderer( gameWidth, gameWidth );
+const gameStage     = new PIXI.Container(parseInt("000000", 16), true);
+const gameRenderer  = new PIXI.CanvasRenderer(gameDim, gameDim);
 gameRenderer.interactive = true;
-gameRenderer.plugins.interaction.on('pointerdown', click_handler);
+gameRenderer.plugins.interaction.on('mousedown', cell_click_handler);
+gameRenderer.plugins.interaction.on('mousemove', cell_hover_handler); 
 
-function click_handler(click) {
-    cellX = Math.floor(click.data.global.x / 32);
-    cellY = Math.floor(click.data.global.y / 32);
-    select_cell(cellX, cellY);
+// Coordinates are canvas coordinates, so rescaling is automatically handled. 
+
+function cell_hover_handler(hover) {
+    hoverCell = position_to_cell(hover.data.global.x, hover.data.global.y); 
+    draw_selected_cell_info(); 
+}
+
+function cell_click_handler(click) {
+    clickCell = position_to_cell(click.data.global.x, click.data.global.y); 
+    draw_selected_cell_info(); 
+}
+
+function position_to_cell(x, y)
+{
+    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH), 
+            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT)]
+}
+
+function clamp(val, lower, upper) {
+    return Math.min(Math.max(val, lower), upper); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,75 +125,71 @@ let animationStartTime  = false;
 
 /* Appending the PIXI renderer to the DOM */
 function main() {
-    document.getElementById( "game-div" ).appendChild( gameRenderer.view );
+    document.getElementById("game-div").appendChild(gameRenderer.view);
     window.requestAnimationFrame(draw_game);
 }
 
 /* Animation Loop */
-function draw_game( ts ) {
-    if( !animationStartTime ) { animationStartTime = ts; }
+function draw_game(ts) {
+    if (!animationStartTime) { animationStartTime = ts; }
 
     let animationProgress = animationStartTime - ts;
-    gameWidth = gameCol.clientWidth;
-    if( gameWidth + gameRenderer.view.offsetTop > window.innerHeight ) {
-        gameWidth = window.innerHeight - gameRow.offsetTop;
-    }
-    gameWidth -= 20;
-    if( gameRenderer.view.width != gameWidth ) {
-        gameDiv.setAttribute( "style", "width:" + gameWidth + "px;height:" + gameWidth + "px" );
-        gameRenderer.view.style.width  = ( gameWidth - 40 ) + "px";
-        gameRenderer.view.style.height = ( gameWidth - 40 ) + "px";
-        //cellSize = gameWidth / 30 - 4;
-        //cellRadius = 7;
+
+    // Limit the dimension by width. 
+    gameDim = gameCol.clientWidth;
+    // Limit the dimension by height. 
+    if (gameDim + gameRenderer.view.offsetTop > window.innerHeight) {
+        gameDim = window.innerHeight - gameRow.offsetTop;
     }
 
-    if( gameData && gameData[ "turn" ] != lastTurn ) {
-        lastTurn = gameData[ "turn" ];
-        maxTurn  = gameData[ "info" ][ "max_turn" ];
+    if (gameRenderer.view.width != gameDim) {
+        gameDiv.setAttribute("style", "width:" + gameDim + "px; height:" + gameDim + "px");
+        gameRenderer.view.style.width  = (gameDim - 40) + "px";
+        gameRenderer.view.style.height = (gameDim - 40) + "px";
+    }
+
+    if (gameData && gameData["turn"] != lastTurn ) {
+        lastTurn = gameData["turn"];
+        maxTurn  = gameData["info"]["max_turn"];
         gameTurn.innerHTML = lastTurn + "/" + maxTurn;
 
         // Clear the game board for redrawing. 
-        while( gameStage.children[ 0 ] ) {
-            gameStage.removeChild( gameStage.children[ 0 ] );
+        while (gameStage.children[0]) {
+            gameStage.removeChild(gameStage.children[0]);
         }
 
         // Draw the game board. 
-        for( var y = 0; y < 30; y++ ) {
-            for( var x = 0; x < 30; x++ ) {
-                let currentCell = gameData[ "game_map" ][ y ][ x ];
-                draw_cell( x, y, currentCell );
+        for (let y = 0; y < 30; y++) {
+            for (let x = 0; x < 30; x++) {
+                draw_cell(x, y, gameData["game_map"][y][x]);
             }
         }
 
-        gameRenderer.render( gameStage );
+        gameRenderer.render(gameStage);
     }
-    requestAnimationFrame( draw_game );
+    requestAnimationFrame(draw_game);
 }
 
 /* Draw Cell */
-function draw_cell( x, y, currentCell ) {
+function draw_cell(x, y, currentCell) {
     let base = new PIXI.Graphics();
 
     // Draw energy border. 
-    base.beginFill( combine_color( "#000000", "#65c9cf", currentCell[ "natural_energy" ] / 10 ) );
-    base.drawRoundedRect( x * cellSize, y * cellSize, cellSize - 2, cellSize - 2, cellRadius );
+    base.beginFill(combine_color("#000000", "#65c9cf", currentCell["natural_energy"] / 10));
+    base.drawRoundedRect(x * cellSize, y * cellSize, cellSize - 2, cellSize - 2, cellRadius);
     base.endFill();
 
     // Draw gold border. 
-    base.beginFill( combine_color( "#000000", "#faf334", currentCell[ "natural_gold" ] / 10 ) );
-    base.drawRoundedRect( x * cellSize + 2, y * cellSize + 2, cellSize - 6, cellSize - 6, cellRadius - 2 );
+    base.beginFill(combine_color("#000000", "#faf334", currentCell["natural_gold"] / 10));
+    base.drawRoundedRect(x * cellSize + 2, y * cellSize + 2, cellSize - 6, cellSize - 6, cellRadius - 2);
     base.endFill();
 
-    // Fill in owner color. 
-    if( currentCell[ "owner" ] == 0 ) {
-        base.beginFill( parseInt( "000000", 16 ) );
-    } else {
-        base.beginFill( id_to_color( currentCell[ "owner" ] ) );
-    }
-    base.drawRoundedRect( x * cellSize + 4, y * cellSize + 4, cellSize - 10, cellSize - 10, cellRadius - 4 );
+    // Fill in owner color. Unowned corresponds to black. 
+    base.beginFill(id_to_color(currentCell["owner"]));
+    base.drawRoundedRect(x * cellSize + 4, y * cellSize + 4, cellSize - 10, cellSize - 10, cellRadius - 4);
     base.endFill();
 
-    // TODO: Highlight selected cell. 
+    // TODO: Highlight clicked cell. 
 
     gameStage.addChild( base );
 
@@ -168,39 +208,37 @@ function draw_cell( x, y, currentCell ) {
 // Utilities
 
 get_random_color = function() {
-    var r = ( "0" + Math.floor( Math.random() * 255 ).toString( 16 ) ).slice( -2 ).toUpperCase();
-    var g = ( "0" + Math.floor( Math.random() * 255 ).toString( 16 ) ).slice( -2 ).toUpperCase();
-    var b = ( "0" + Math.floor( Math.random() * 255 ).toString( 16 ) ).slice( -2 ).toUpperCase();
-    return parseInt( r + g + b, 16 );
+    var r = ("0" + Math.floor(Math.random() * 255).toString(16)).slice(-2).toUpperCase();
+    var g = ("0" + Math.floor(Math.random() * 255).toString(16)).slice(-2).toUpperCase();
+    var b = ("0" + Math.floor(Math.random() * 255).toString(16)).slice(-2).toUpperCase();
+    return parseInt(r + g + b, 16);
 }
 
-var ID_COLORS = [ 0xDDDDDD, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
+// UID 0 corresponds to unowned. It is set to black. 
+var ID_COLORS = [ 0x000000, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
                   0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
-                  0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF ];
+                  0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
+                  0xDDDDDD, ];
 
-function id_to_color( uid ) {
-    if( uid < ID_COLORS.length ) {
-        return ID_COLORS[ uid ];
-    } else {
-        while( ID_COLORS.length <= uid ) {
-            ID_COLORS.push( get_random_color() );
-        }
-        return ID_COLORS[ uid ];
+function id_to_color(uid) {
+    while (ID_COLORS.length <= uid) {
+        ID_COLORS.push(get_random_color()); 
     }
+    return ID_COLORS[uid]; 
 }
 
 function hex_combine( src, dst, per ) {
-    var isrc = parseInt( src, 16 );
-    var idst = parseInt( dst, 16 );
-    var curr = Math.floor( isrc + ( idst - isrc ) * per );
-    return ( "0" + curr.toString( 16 ) ).slice( -2 ).toUpperCase();
+    var isrc = parseInt(src, 16);
+    var idst = parseInt(dst, 16);
+    var curr = Math.floor(isrc + (idst - isrc) * per );
+    return ("0" + curr.toString(16)).slice(-2).toUpperCase();
 }
 
 function combine_color( src, dst, per ) {
-    if( per < 0 ) per = 0;
-    return parseInt( hex_combine( src.slice( 1, 3 ), dst.slice( 1, 3 ), per ) 
-                   + hex_combine( src.slice( 3, 5 ), dst.slice( 3, 5 ), per ) 
-                   + hex_combine( src.slice( 5 )   , dst.slice( 5 )   , per ), 16 );
+    if (per < 0) { per = 0; }
+    return parseInt(hex_combine(src.slice(1, 3), dst.slice(1, 3), per) 
+                  + hex_combine(src.slice(3, 5), dst.slice(3, 5), per) 
+                  + hex_combine(src.slice(5)   , dst.slice(5)   , per), 16);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -236,26 +274,6 @@ gameSocket.onmessage = function( msg ) {
 Move turn info update into the web client code. 
 */
 ////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-
-// 0 is an invalid UID so it can be used as a sentinel value. 
-const SENTINEL_UID  = 0; 
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Track the state of our action_channel websocket. 
-let actionChannel   = null; 
-
-let selectUID       = SENTINEL_UID; 
-
-// Remember the username we submit. We will need this to look ourselves up 
-// after we join the server since the server does not send us a confirmation. 
-let selfUsername    = null; 
-let selfUID         = SENTINEL_UID; 
-
-// Selected cell position. Default to (0, 0). 
-let selectCell      = [0, 0]; 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -364,7 +382,9 @@ function draw_user_list() {
         // Create a user info row. 
         userDiv = create_user_box(uid, user['username']);
         // Select the user on click. 
-        userDiv.onclick = select_user;
+        userDiv.onclick     = user_click_handler;
+        userDiv.onmouseover = user_hover_handler; 
+        userDiv.onmouseout  = user_out_handler; 
 
         // Append the row to the list. 
         listHTML.appendChild(userDiv);
@@ -379,9 +399,33 @@ function draw_user_list() {
     }
 }
 
-function select_user() {
+function update_selected_user() {
+    // Hover has priority over click. 
+    if (hoverUID == SENTINEL_UID) {
+        selectUID = clickUID; 
+    }
+    else {
+        selectUID = hoverUID;
+    }
+}
+
+function user_hover_handler() {
     // Grab the data-uid field we stored on creation. 
-    selectUID = this.getAttribute('data-uid');
+    hoverUID = this.getAttribute('data-uid'); 
+    update_selected_user(); 
+    draw_selected_user_info(); 
+}
+
+function user_out_handler() {
+    hoverUID = SENTINEL_UID; 
+    update_selected_user(); 
+    draw_selected_user_info(); 
+}
+
+function user_click_handler() {
+    // Grab the data-uid field we stored on creation. 
+    clickUID = this.getAttribute('data-uid');
+    update_selected_user(); 
     draw_selected_user_info();
 }
 
@@ -428,6 +472,7 @@ function draw_self_user_info() {
     // Therefore we need to check if we are in the game and draw the 
     // appropriate section. 
 
+    const joinHTML = document.getElementById('join-game-section');
     const selfHTML = document.getElementById('self-info'); 
     // Regardless of what we do, we will overwrite the self user info. 
     clear_div(selfHTML); 
@@ -449,14 +494,11 @@ function draw_self_user_info() {
 
     if (selfUID == SENTINEL_UID) {
         // We are not in the game. Show the join game form. 
-        const joinHTML = document.getElementById('join-game-section');
         joinHTML.style.display = '';
     }
     else {
         // Hide the join game form. 
-        const joinHTML = document.getElementById('join-game-section');
         joinHTML.style.display = 'none';
-
         // Insert the desired user info. 
         selfHTML.appendChild(create_user_info(selfUID, get_user_info(selfUID))); 
     }
@@ -531,17 +573,20 @@ function create_user_info(uid, user) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function select_cell(x, y) {
-    selectCell[0] = x; 
-    selectCell[1] = y; 
-    draw_selected_cell_info(); 
-}
-
-function draw_selected_cell_info(x, y)
+function draw_selected_cell_info()
 {
     const cellHTML = document.getElementById('selected-cell-info');
     clear_div(cellHTML);
-    cellHTML.appendChild(create_cell_info(selectCell[0], selectCell[1]));
+
+    if (gameData) {
+        // Do not draw until we have game information. 
+        if (gameRenderer.plugins.interaction.mouseOverRenderer) {
+            cellHTML.appendChild(create_cell_info(hoverCell[0], hoverCell[1]));
+        }
+        else {
+            cellHTML.appendChild(create_cell_info(clickCell[0], clickCell[1])); 
+        }
+    }
 }
 
 // Create a cell info div. 
@@ -644,6 +689,8 @@ function create_cell_info(x, y) {
 
     ////////////////////////////////////////////////////////////////////////////
 
+    let buttonDiv = document.createElement('div'); 
+
     if (selfUID != SENTINEL_UID) {
         // We are in the game. Draw possible action buttons. 
         let selfData = gameData['users'][selfUID];
@@ -652,35 +699,37 @@ function create_cell_info(x, y) {
             // We are the owner. We can either build or upgrade. 
             if (building['name'] == 'empty') {
                 // There is no building. Draw building choices. 
-
-                // TODO: Construct EnergyWell button. 
-                // TODO: Construct GoldMine   button. 
+                buttonDiv.appendChild(create_cost_button('Create Well', 
+                    BASE_BUILD_COST, function(){queue_well(x, y);})); 
+                buttonDiv.appendChild(create_cost_button('Create Mine', 
+                    BASE_BUILD_COST, function(){queue_mine(x, y);})); 
             }
             else {
                 // There is a building. Draw upgrade choice. 
-                let upgradeLevel = building['level'] + 1;
-                if (upgradeLevel <= GAME_MAX_LEVEL) {
-                    // Can upgrade further. Construct an upgrade button. 
-
+                let upgradeLevel = building['level'];
+                if (upgradeLevel < GAME_MAX_LEVEL) {
+                    // Can upgrade further. 
+                    let canUpgrade  = true; 
                     let upgradeCost = 0; 
                     if (building['name'] == 'home') {
                         // Home has a base cost of 1000. 
-                        upgradeCost = 1000; 
+                        // Cost doubles per level. 
+                        upgradeCost = 1000 * Math.pow(2, upgradeLevel - 1); 
                     }
                     else {
                         // We are not upgrading a home. 
-                        if (upgradeLevel > selfData['tech_level']) {
+                        if (upgradeLevel >= selfData['tech_level']) {
                             // Home not high enough level. 
+                            canUpgrade = false; 
                         }
-                        // Other buildings have a base cost of 200. 
-                        upgradeCost = 200; 
+                        // Cost doubles per level. 
+                        upgradeCost = BASE_BUILD_COST * Math.pow(2, upgradeLevel);
                     }
-                    // Cost doubles per level. 
-                    upgradeCost = upgradeCost * Math.pow(2, upgradeLevel); 
 
-                    if (  (selfData['energy'] < upgradeCost) 
-                        || selfData['gold']   < upgradeCost) {
-                        // Not enough resources. 
+                    if (canUpgrade) {
+                        // Enough resources. 
+                        buttonDiv.appendChild(create_cost_button('Upgrade', 
+                            upgradeCost, function(){queue_upgrade(x, y);})); 
                     }
                 }
             }
@@ -703,19 +752,19 @@ function create_cell_info(x, y) {
                 let selfEnergy  = selfData['energy'];
 
                 // Min attack. Just enough to capture. 
-                let minAttack   = attackCost;
+                let minAttack   = attackCost + forceField;
                 // Max attack. Enough to max out the force field. 
-                let maxAttack   = Math.max(attackCost, GAME_MAX_ATTACK); 
+                let maxAttack   = Math.max(minAttack, GAME_MAX_ATTACK); 
 
-                // TODO: Create a min attack button div. 
-                if (selfEnergy < minAttack) {
-                    // Grey out the min attack button. 
-                }
-                // TODO: Create a max attack button div. 
-                if (selfEnergy < maxAttack) {
-                    // Grey out the max attack button. 
-                }
-                // TODO: Draw in a fill in box attack. 
+                // Create a min attack button. 
+                buttonDiv.appendChild(create_button('Min Attack: ' + minAttack, 
+                    function(){queue_attack(x, y, minAttack)}));
+
+                // Create a max attack button. 
+                buttonDiv.appendChild(create_button('Max Attack: ' + maxAttack, 
+                    function(){queue_attack(x, y, maxAttack)})); 
+
+                // TODO: Draw in a form attack. 
             }
         }
     }
@@ -732,6 +781,7 @@ function create_cell_info(x, y) {
     cellDiv.appendChild(create_flex_table(cellResourceTable)); 
     // Construct the cost info. 
     cellDiv.appendChild(create_p(costString)); 
+    cellDiv.appendChild(buttonDiv); 
 
     ////////////////////////////////////////////////////////////////////////////
 
@@ -750,6 +800,18 @@ function get_adjacent_cells(x, y) {
         }
     }
     return adjCells; 
+}
+
+function create_cost_button(name, cost, click_handler) {
+    return create_button(name + ': ' + '(' + cost + ', ' + cost + ')', click_handler); 
+}
+
+function create_button(text, click_handler)
+{
+    let button = document.createElement('BUTTON');
+    button.innerHTML    = text; 
+    button.onclick      = click_handler; 
+    return button; 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -792,14 +854,10 @@ function clear_div(divHTML) {
 
 // Convert a 6-hex value to a corresponding HTML RGB color code string. 
 function HTML_id_to_color(uid) {
-    // TODO: ID_COLORS[0] should be #000000 to simplify some edge cases. 
-    if (uid == 0) {
-        return '#000000'; 
-    }
-    else {
-        // HTML expects a '#' + hex. 
-        return '#' + id_to_color(uid).toString(16); 
-    }
+    colorString = id_to_color(uid).toString(16); 
+    // HTML expects a '#' + hex. 
+    // Pad string to 6 hex values since javascript will remove leading zeroes. 
+    return '#' + '0'.repeat(6 - colorString.length) + colorString; 
 }
 
 // Capitalize the first character in a string. 
