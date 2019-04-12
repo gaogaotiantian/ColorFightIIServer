@@ -206,6 +206,46 @@ function draw_cell(x, y, currentCell) {
         gameStage.addChild(home_image);
     }
 
+    // Draw energy well and gold mine
+    if (currentCell[ "building" ][ "name" ] == "energy_well") {
+        let energy_well_image = null;
+        switch(currentCell[ "building" ][ "level" ]) {
+            case 1:
+                energy_well_image = PIXI.Sprite.from("/static/assets/energyI.png");
+                break;
+            case 2:
+                energy_well_image = PIXI.Sprite.from("/static/assets/energyII.png");
+                break;
+            case 3:
+                energy_well_image = PIXI.Sprite.from("/static/assets/energyIII.png");
+                break;
+        }
+        if (energy_well_image) {
+            energy_well_image.x = x * cellSize;
+            energy_well_image.y = y * cellSize;
+            gameStage.addChild(energy_well_image);
+        }
+    }
+
+    if (currentCell[ "building" ][ "name" ] == "gold_mine") {
+        let gold_mine_image = null;
+        switch(currentCell[ "building" ][ "level" ]) {
+            case 1:
+                gold_mine_image = PIXI.Sprite.from("/static/assets/goldI.png");
+                break;
+            case 2:
+                gold_mine_image = PIXI.Sprite.from("/static/assets/goldII.png");
+                break;
+            case 3:
+                gold_mine_image = PIXI.Sprite.from("/static/assets/goldIII.png");
+                break;
+        }
+        if (gold_mine_image) {
+            gold_mine_image.x = x * cellSize;
+            gold_mine_image.y = y * cellSize;
+            gameStage.addChild(gold_mine_image);
+        }
+    }
 
 }
 
