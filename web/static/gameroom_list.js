@@ -16,6 +16,12 @@ function createGameroom( data ) {
 function getConfig() {
     var data = {};
     data['gameroom_id'] = $( '#gameroom-name' ).val();
+
+    var admin_password = $( '#admin-password-input' ).val();
+    if (admin_password) {
+        data['admin_password'] = admin_password;
+    }
+
     return data;
 }
 

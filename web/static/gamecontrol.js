@@ -6,7 +6,9 @@ function restartGame( data ) {
         contentType: 'application/json;charset=UTF-8',
         data: JSON.stringify( data ),
         success: function(msg) {
-
+            if (!msg['success']) {
+                alert(msg['err_msg']);
+            }
         }
     } );
 }
@@ -14,6 +16,12 @@ function restartGame( data ) {
 function getConfig() {
     var data = {};
     var config = {};
+
+    var password = $( "#admin-password-input" ).val();
+    if (password) {
+        data[ "admin_password" ] = password;
+    }
+
     var max_turn = $( "#max-turn-sel option:selected" ).val();
     if( max_turn != "same" ) {
         config[ "max_turn" ] = parseFloat( max_turn );

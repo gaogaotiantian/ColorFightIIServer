@@ -104,17 +104,24 @@ async def restart(request):
     gameroom_id = data['gameroom_id']
     config = data['config']
 
+    admin_password = None
+    if 'admin_password' in data:
+        admin_password = data['admin_password']
+
     if gameroom_id not in request.app['game']:
         return web.json_response({"success": False, "err_msg": "No such room"})
 
     game = request.app['game'][gameroom_id]
 
-    result, err_msg = game.config(data['config'])
-    if result:
-        game.restart()
-        return web.json_response({"success": True})
+    if admin_password == game.admin_password:
+        result, err_msg = game.config(data['config'])
+        if result:
+            game.restart()
+            return web.json_response({"success": True})
+        else:
+            return web.json_response({"success": False, "err_msg": err_msg})
     else:
-        return web.json_response({"success": False, "err_msg": err_msg})
+        return web.json_response({"success": False, "err_msg": "You are not allowed to do this"})
 
 async def create_gameroom(request):
     data = await request.json()
@@ -123,6 +130,10 @@ async def create_gameroom(request):
         if gameroom_id in request.app['game']:
             return web.json_response({"success": False, "err_msg": "Same id exists"})
         request.app['game'][gameroom_id] = Colorfight()
+
+        if 'admin_password' in data:
+            request.app['game'][gameroom_id].admin_password = data['admin_password']
+
     except Exception as e:
         return web.json_response({"success": False, "err_msg": str(e)})
 

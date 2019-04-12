@@ -17,6 +17,7 @@ class Colorfight:
         self.height = GAME_HEIGHT
         self.round_time = ROUND_TIME
         self.first_round_time = ROUND_TIME
+        self.admin_password = None
         self.finish_time = 0
         self.last_update = time.time()
         self.users = {}
