@@ -115,6 +115,7 @@ class Colorfight:
                 result = self.do_command(user.uid, cmd)
                 if result != None:
                     errors[user.uid].append(result)
+            user.cmd_list = []
         return errors
                     
     def do_command(self, uid, cmd):
