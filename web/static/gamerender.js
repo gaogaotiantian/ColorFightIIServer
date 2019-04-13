@@ -35,7 +35,7 @@ const BLD_ENERGY_WELL   = 'e';
 
 // Derive the maximum board size. 
 const GAME_MAX_CELLS        = GAME_WIDTH * GAME_HEIGHT;
-const GAME_MAX_LEVEL        = 3;
+const GAME_MAX_LEVEL        = 4;
 
 const GAME_MAX_FORCE_FIELD  = 1000; 
 // Force field is min(1000, 2 * energy) if we are the only attacker. 
@@ -200,7 +200,21 @@ function draw_cell(x, y, currentCell) {
 
     // Draw home image if it's home
     if (currentCell[ "building" ][ "name" ] == "home") {
-        let home_image = PIXI.Sprite.from('/static/assets/base.png');
+        let home_image = PIXI.Sprite.from('/static/assets/homeI.png');
+        switch(currentCell[ "building" ][ "level" ]) {
+            case 1:
+                home_image = PIXI.Sprite.from('/static/assets/homeI.png');
+                break;
+            case 2:
+                home_image = PIXI.Sprite.from('/static/assets/homeII.png');
+                break;
+            case 3:
+                home_image = PIXI.Sprite.from('/static/assets/homeIII.png');
+                break;
+            case 4:
+                home_image = PIXI.Sprite.from('/static/assets/homeIV.png');
+                break;
+        }
         home_image.x = x * cellSize;
         home_image.y = y * cellSize;
         gameStage.addChild(home_image);
