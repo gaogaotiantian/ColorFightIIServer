@@ -38,7 +38,7 @@
 <p><code>users</code></p>
 <blockquote>
 <p>A map of <code>User</code> objects. <strong>key</strong> is <code>uid</code> and <strong>value</strong> is the 
-  ```User object.</p>
+  <code>User</code> object.</p>
 </blockquote>
 </li>
 <li>
@@ -60,19 +60,25 @@
 <li>
 <p><code>.connect(url)</code> </p>
 <blockquote>
-<p>Establish connection to the server.</p>
+<p>Establish connection to the server. <code>url</code> is the url of the game room
+  you want to join.</p>
 </blockquote>
 </li>
 <li>
 <p><code>.update_turn()</code></p>
 <blockquote>
-<p>Wait until next turn, and update the game info.</p>
+<p>Wait until next turn, and update the game info.
+  You should use this command after you send the command list to get the 
+  latest info from the game.</p>
 </blockquote>
 </li>
 <li>
 <p><code>.register(username, password)</code></p>
 <blockquote>
-<p>Register to the game with <code>username</code> and <code>password</code></p>
+<p>Register to the game with <code>username</code> and <code>password</code>. Duplicate 
+  <code>username</code> is not allowed. If you already joined the game and somehow
+  disconnected. Using the same <code>username</code> and <code>password</code> will allow
+  you to continue with previous account.</p>
 </blockquote>
 </li>
 <li>
@@ -80,6 +86,8 @@
 <blockquote>
 <p>Returns a <code>string</code> for attacking a certain position. <code>position</code> 
   should be a <code>Position</code> object and energy should be an integer.</p>
+<p><strong> This string is a command that you should put in your command list
+  and send with <code>send_cmd</code> </strong></p>
 </blockquote>
 </li>
 <li>
@@ -88,12 +96,26 @@
 <p>Returns a <code>string</code> for build a building on a certain position. 
   <code>position</code> should be a <code>Position</code> object and building should be
   a character(Global const variable) representing the building type.</p>
+<p><strong> This string is a command that you should put in your command list
+  and send with <code>send_cmd</code> </strong></p>
+</blockquote>
+</li>
+<li>
+<p><code>.upgrade(position)</code></p>
+<blockquote>
+<p>Returns a <code>string</code> for upgrade the build on <code>position</code>. 
+  <code>position</code> should be a <code>Position</code> object.</p>
+<p><strong> This string is a command that you should put in your command list
+  and send with <code>send_cmd</code> </strong></p>
 </blockquote>
 </li>
 <li>
 <p><code>.send_cmd(cmd_list)</code></p>
 <blockquote>
-<p>Sends the command list to the server.</p>
+<p>Sends the command list to the server. If you send multiple command lists
+  to the server in a single round, the latter one will overlap the former
+  ones. Only the last command list the server receives is valid. In theory,
+  you should only send one command list every round. </p>
 </blockquote>
 </li>
 </ul>
@@ -110,6 +132,12 @@
 <p><code>name</code></p>
 <blockquote>
 <p>Name of the building in <code>string</code></p>
+</blockquote>
+</li>
+<li>
+<p><code>level</code></p>
+<blockquote>
+<p>Level of the building</p>
 </blockquote>
 </li>
 </ul>
@@ -135,7 +163,7 @@
 <p><code>game_map[position]</code></p>
 <blockquote>
 <p>Get the <code>MapCell</code> object on <code>position</code>. <code>position</code> should be
-  a <code>Position</code> Object.</p>
+  a <code>Position</code> Object or a <code>tuple</code> <code>(x, y)</code>.</p>
 </blockquote>
 </li>
 </ul>
@@ -151,7 +179,10 @@
 <li>
 <p><code>building</code></p>
 <blockquote>
-<p>An object for the current building. <code>Empty</code> if nothing on the cell.</p>
+<p>An object for the current building. <code>Empty</code> if nothing on the cell.
+  You should check the <code>name</code> of the <code>building</code> to determine what
+  kind of building it is. The possible names are <code>empty</code>, <code>home</code>, 
+  <code>energy_well</code> and <code>gold_mine</code>.</p>
 </blockquote>
 </li>
 <li>
