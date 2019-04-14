@@ -7,5 +7,6 @@ CMD_ATTACK  = 'a'
 CMD_BUILD   = 'b'
 CMD_UPGRADE = 'u'
 
+BLD_HOME        = 'h'
 BLD_GOLD_MINE   = 'g'
 BLD_ENERGY_WELL = 'e'

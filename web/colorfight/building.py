@@ -85,5 +85,7 @@ def get_building_class(building):
         return EnergyWell
     elif building == BLD_GOLD_MINE:
         return GoldMine
+    elif building == BLD_HOME:
+        return Home
     else:
         return None
