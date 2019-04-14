@@ -1,4 +1,4 @@
-from .constants import BLD_ENERGY_WELL, BLD_GOLD_MINE
+from .constants import BLD_ENERGY_WELL, BLD_GOLD_MINE, BLD_HOME
 
 class BaseBuilding:
     cost = 0

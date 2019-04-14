@@ -2,7 +2,13 @@
 <p>This is the API document for ColorFightII</p>
 <h1>Colorfight</h1>
 <p>The <code>Colorfight</code> object holds all the useful information for the game. </p>
-<h2>attributes</h2>
+<blockquote>
+<p><code>game = Colorfight()</code> will create the instance. You should always have
+  this object for the game.</p>
+<p>After instantiate the object, you can access the attributes like 
+  <code>game.uid</code>, and use the methods like <code>game.update_turn()</code></p>
+</blockquote>
+<h2>attributes of <code>Colorfight</code></h2>
 <ul>
 <li>
 <p><code>uid</code> </p>
@@ -25,13 +31,16 @@
 <li>
 <p><code>round_time</code></p>
 <blockquote>
-<p>The time the player have to take actions between each round.</p>
+<p>The time in seconds the player have to take actions between each round.</p>
 </blockquote>
 </li>
 <li>
 <p><code>me</code></p>
 <blockquote>
 <p><code>User</code> object for you. Invalid before join the game.</p>
+<p>This is a useful object. You could do <code>me = game.me</code> after you do
+  <code>game.update_turn()</code> so that you can access the information of your
+  bot.</p>
 </blockquote>
 </li>
 <li>
@@ -39,6 +48,8 @@
 <blockquote>
 <p>A map of <code>User</code> objects. <strong>key</strong> is <code>uid</code> and <strong>value</strong> is the 
   <code>User</code> object.</p>
+<p><code>game.users[1]</code> will give you the <code>User</code> object of user with uid
+  <code>1</code>.</p>
 </blockquote>
 </li>
 <li>
@@ -46,30 +57,39 @@
 <blockquote>
 <p>A map of error <code>string</code>. <strong>key</strong> is <code>uid</code> and <strong>value</strong> is a list
   of error strings for this user from last round</p>
+<p>Your action could fail due to many reasons. This is the error messages
+  from last round. You can do <code>print(game.error[game.me.uid])</code> to 
+  print out all your error messages to debug you bot.</p>
 </blockquote>
 </li>
 <li>
 <p><code>game_map</code></p>
 <blockquote>
 <p><code>GameMap</code> object for current game map.</p>
+<p>This is an important object that saves all the information of the game
+  map, including all the cell info. You can save a shortcut just like 
+  <code>me</code>, with <code>game_map = game.game_map</code></p>
 </blockquote>
 </li>
 </ul>
-<h2>methods</h2>
+<h2>methods of <code>Colorfight</code></h2>
 <ul>
 <li>
 <p><code>.connect(url)</code> </p>
 <blockquote>
 <p>Establish connection to the server. <code>url</code> is the url of the game room
   you want to join.</p>
+<p>You should always connect first. <code>game.connect("http://colorfightii.herokuapp.com/gameroom/public")</code> is the default way to connect to the default
+public room</p>
 </blockquote>
 </li>
 <li>
 <p><code>.update_turn()</code></p>
 <blockquote>
-<p>Wait until next turn, and update the game info.
-  You should use this command after you send the command list to get the 
-  latest info from the game.</p>
+<p>Wait until next turn, and update the game info. This method will change
+  the data of <code>Colorfight</code> object.</p>
+<p>You should use <code>game.update_turn()</code> after you send the command list 
+  to get the latest info from the game.</p>
 </blockquote>
 </li>
 <li>
@@ -78,16 +98,21 @@
 <p>Register to the game with <code>username</code> and <code>password</code>. Duplicate 
   <code>username</code> is not allowed. If you already joined the game and somehow
   disconnected. Using the same <code>username</code> and <code>password</code> will allow
-  you to continue with previous account.</p>
+  you to continue with previous account. Returns <code>True</code> if success.</p>
+<p>This should happen after you connect to the server and before you start
+  you game loop.</p>
 </blockquote>
 </li>
 <li>
 <p><code>.attack(position, energy)</code></p>
 <blockquote>
 <p>Returns a <code>string</code> for attacking a certain position. <code>position</code> 
-  should be a <code>Position</code> object and energy should be an integer.</p>
+  should be a <code>Position</code> object or a tuple, <code>energy</code> should be an 
+  integer.</p>
 <p><strong> This string is a command that you should put in your command list
   and send with <code>send_cmd</code> </strong></p>
+<p>example: <code>game.attack((2, 2), 250)</code> will spend 250 energy to attack
+  (2, 2). It's equivalent to <code>game.attack(Position(2, 2), 250)</code>.</p>
 </blockquote>
 </li>
 <li>
@@ -98,6 +123,9 @@
   a character(Global const variable) representing the building type.</p>
 <p><strong> This string is a command that you should put in your command list
   and send with <code>send_cmd</code> </strong></p>
+<p>example: <code>game.build((5, 8), BLD_GOLD_MINE)</code> will build a gold mine
+  on (5, 8) under the condition that you already occupied (5, 8) and you
+  have enough gold to build the gold mine. </p>
 </blockquote>
 </li>
 <li>
@@ -107,6 +135,9 @@
   <code>position</code> should be a <code>Position</code> object.</p>
 <p><strong> This string is a command that you should put in your command list
   and send with <code>send_cmd</code> </strong></p>
+<p>example: <code>game.upgrade((5, 8))</code> will upgrade the building on 
+  <code>(5, 8)</code> under the condition that you have a building on 
+  <code>(5, 8)</code> and it can be upgraded. </p>
 </blockquote>
 </li>
 <li>
@@ -116,7 +147,101 @@
   to the server in a single round, the latter one will overlap the former
   ones. Only the last command list the server receives is valid. In theory,
   you should only send one command list every round. </p>
+<p>All the commands(attack, build, upgrade) above will only return a 
+  <code>string</code> representing the command. So * nothing will happen * if you
+  do not send the commands to the server. 
+  You should keep a <code>cmd_list</code> and do something like
+  <code>cmd_list.append(game.attack((1, 1), 250))</code> and 
+  <code>cmd_list.append(game.build((2, 5), BLD_ENERGY_WELL))</code>
+  Then do a <code>game.send_cmd(cmd_list)</code></p>
 </blockquote>
+</li>
+</ul>
+<h1>GameMap</h1>
+<h2>attributes of <code>GameMap</code></h2>
+<ul>
+<li>
+<p><code>width</code></p>
+<blockquote>
+<p>Width of the game map</p>
+</blockquote>
+</li>
+<li>
+<p><code>height</code></p>
+<blockquote>
+<p>Height of the game map</p>
+</blockquote>
+</li>
+</ul>
+<h2>methods</h2>
+<ul>
+<li>
+<p><code>game_map[position]</code></p>
+<blockquote>
+<p>Get the <code>MapCell</code> object on <code>position</code>. <code>position</code> should be
+  a <code>Position</code> Object or a <code>tuple</code> <code>(x, y)</code>.</p>
+<p>example: <code>game_map[(1, 2)]</code> will get you the <code>MapCell</code> object of
+  <code>(1, 2)</code>, which is equivalent to <code>game_map[Position(1, 2)]</code></p>
+</blockquote>
+</li>
+</ul>
+<h1>MapCell</h1>
+<p>This is the object representing a cell. <code>cell = game.game_map[Position(3, 4)]</code> 
+stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code></p>
+<h2>attributes</h2>
+<ul>
+<li>
+<p><code>position</code></p>
+<blockquote>
+<p><code>Position</code> object representing the position of the cell.</p>
+</blockquote>
+</li>
+<li>
+<p><code>building</code></p>
+<blockquote>
+<p>An object for the current building. <code>Empty</code> if nothing on the cell.
+  You should check the <code>name</code> of the <code>building</code> to determine what
+  kind of building it is. The possible names are <code>empty</code>, <code>home</code>, 
+  <code>energy_well</code> and <code>gold_mine</code>.</p>
+<p><code>cell.building.name == home</code> will return a boolean whether the cell
+  has a home on it</p>
+</blockquote>
+</li>
+<li>
+<p><code>gold</code></p>
+<blockquote>
+<p>The amount of gold the cell produces for each round.</p>
+</blockquote>
+</li>
+<li>
+<p><code>energy</code></p>
+<blockquote>
+<p>The amount of energy the cell produces for each round.</p>
+</blockquote>
+</li>
+<li>
+<p><code>owner</code></p>
+<blockquote>
+<p><code>uid</code> of the owner of this cell.</p>
+</blockquote>
+</li>
+<li>
+<p><code>attack_cost</code></p>
+<blockquote>
+<p>The minimum energy you should use to attack this cell</p>
+</blockquote>
+</li>
+<li>
+<p><code>natural_cost</code></p>
+</li>
+<li>
+<p><code>natural_gold</code></p>
+</li>
+<li>
+<p><code>natural_energy</code></p>
+</li>
+<li>
+<p><code>force_field</code></p>
 </li>
 </ul>
 <h1>Building</h1>
@@ -139,81 +264,6 @@
 <blockquote>
 <p>Level of the building</p>
 </blockquote>
-</li>
-</ul>
-<h1>GameMap</h1>
-<h2>attributes</h2>
-<ul>
-<li>
-<p><code>width</code></p>
-<blockquote>
-<p>Width of the game map</p>
-</blockquote>
-</li>
-<li>
-<p><code>height</code></p>
-<blockquote>
-<p>Height of the game map</p>
-</blockquote>
-</li>
-</ul>
-<h2>methods</h2>
-<ul>
-<li>
-<p><code>game_map[position]</code></p>
-<blockquote>
-<p>Get the <code>MapCell</code> object on <code>position</code>. <code>position</code> should be
-  a <code>Position</code> Object or a <code>tuple</code> <code>(x, y)</code>.</p>
-</blockquote>
-</li>
-</ul>
-<h1>MapCell</h1>
-<h2>attributes</h2>
-<ul>
-<li>
-<p><code>position</code></p>
-<blockquote>
-<p><code>Position</code> object representing the position of the cell.</p>
-</blockquote>
-</li>
-<li>
-<p><code>building</code></p>
-<blockquote>
-<p>An object for the current building. <code>Empty</code> if nothing on the cell.
-  You should check the <code>name</code> of the <code>building</code> to determine what
-  kind of building it is. The possible names are <code>empty</code>, <code>home</code>, 
-  <code>energy_well</code> and <code>gold_mine</code>.</p>
-</blockquote>
-</li>
-<li>
-<p><code>gold</code></p>
-<blockquote>
-<p>The amount of gold the cell produces for each round.</p>
-</blockquote>
-</li>
-<li>
-<p><code>energy</code></p>
-<blockquote>
-<p>The amount of energy the cell produces for each round.</p>
-</blockquote>
-</li>
-<li>
-<p><code>owner</code></p>
-<blockquote>
-<p><code>uid</code> of the owner of this cell.</p>
-</blockquote>
-</li>
-<li>
-<p><code>natural_cost</code></p>
-</li>
-<li>
-<p><code>natural_gold</code></p>
-</li>
-<li>
-<p><code>natural_energy</code></p>
-</li>
-<li>
-<p><code>force_field</code></p>
 </li>
 </ul>
 <h1>Position</h1>
@@ -239,6 +289,9 @@
 <blockquote>
 <p>Returns a <code>Position</code> object to the direction. <code>direction</code> should 
   be a <code>Direction</code> object.</p>
+<p>example: if <code>pos = Position(2, 3)</code>,<br />
+<code>pos.directional_offset(Direction.North)</code> will return 
+  <code>Position(2, 2)</code></p>
 </blockquote>
 </li>
 <li>
@@ -246,6 +299,10 @@
 <blockquote>
 <p>Returns a list of the <code>Position</code> objects that are right adjacent to
   this position.</p>
+<p>example: if <code>pos = Position(2, 3)</code>. 
+  <code>pos.get_surrounding_cardinals()</code> will return
+  <code>[Position(2, 2), Position(2, 4), Position(1, 3), Position(3, 3)]</code>.
+  This function is helpful to find the attackable cells.</p>
 </blockquote>
 </li>
 </ul>
@@ -320,6 +377,19 @@
 </blockquote>
 </li>
 <li>
+<p><code>tech_level</code></p>
+<blockquote>
+<p>The tech_level of the user. This limits the highest level of building
+  the user can upgrade to.</p>
+</blockquote>
+</li>
+<li>
+<p><code>tax_level</code></p>
+<blockquote>
+<p>The tax_level of the user.</p>
+</blockquote>
+</li>
+<li>
 <p><code>cells</code></p>
 <blockquote>
 <p>A map of <code>MapCell</code> objects. <strong>key</strong> is <code>Position</code> object and 
@@ -329,6 +399,12 @@
 </ul>
 <h1>constants</h1>
 <ul>
+<li>
+<p><code>BLD_HOME</code></p>
+<blockquote>
+<p>Build character for home</p>
+</blockquote>
+</li>
 <li>
 <p><code>BLD_GOLD_MINE</code></p>
 <blockquote>
