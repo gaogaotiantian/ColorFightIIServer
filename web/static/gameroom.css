@@ -1,8 +1,6 @@
 html, body {
 	margin: 0px;
 	padding: 0px;
-	height: 100%;
-	width: 100%;
 	background: url( "background.jpg" );
 	background-size: cover;
 	background-position: center;
@@ -10,7 +8,7 @@ html, body {
 }
 
 #cf-game-col {
-	font-size: 0px;
+    font-size: 0px;
     padding: 0px;
     margin: 0px;
 }
