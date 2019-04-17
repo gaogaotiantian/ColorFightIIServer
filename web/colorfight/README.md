@@ -59,7 +59,7 @@ most energy will be the attacker and the equivalent attack energy will be
 a player spends and the ```total_energy``` will be all the energy spent on this
 cell. 
 
-In this case, the ```equivalent_energy``` has to be at least ```attack_cost```
+In this case, the equivalent attack energy has to be at least ```attack_cost```
 to successfully attack the cell. 
 
 The more energy the player uses to attack the cell, the more ```force_field```
@@ -76,7 +76,7 @@ No matter whether the attack is successful, all the energy will be spent.
   
 > Case 2, if player A spent 150 energy to attack it, the attack would succeed and
   player A will occupy the cell with 150 energy spent. The cell will also have 300
-  ```force_field``` so the ```attack_cost``` will be higher. 
+  ```force_field``` so the ```attack_cost``` will be 400. 
   
 > Case 3, if player A spent 150 energy and player B spent 150 energy. The 
   ```equivalent_energy``` will be 0 so the attack would fail. Both A and B lose
@@ -153,8 +153,8 @@ can produce per round.
 However, the actual energy and gold a player gets may be taxed if the player
 owns too many cells.
 
-For every 100 cells the player owns, a 10% tax will be applied to the energy
-and gold income.
+For every 100 cells the player owns, 2 gold and 2 energy will be taxed for each
+cell the player has.
 
 #### Building
 
@@ -227,10 +227,11 @@ needs to upgrade their home to a higher level, therefore achieves a higher
 #### Tax Level
 
 ```tax_level``` is determined by the cell number the player owns. For every
-100 cells, a 10% tax will be applied to the energy and gold income. 
+100 cells, 2 gold and 2 energy will be taxed for each cell the player owns. 
 
-For example, if the player has 298 cells, the ```tax_level``` will be 2 and a 
-20% tax will be applied to the player's energy and gold income. 
+For example, if the player has 298 cells, the ```tax_level``` will be 2 and for
+each round, 298*2 = 596 energy and gold will be subtracted from player's gold
+and energy.
 
 ## Communication
 

@@ -42,7 +42,7 @@ most energy will be the attacker and the equivalent attack energy will be
 <code>max_energy * 2 - total_energy</code> where <code>max_energy</code> is the maximum energy
 a player spends and the <code>total_energy</code> will be all the energy spent on this
 cell. </p>
-<p>In this case, the <code>equivalent_energy</code> has to be at least <code>attack_cost</code>
+<p>In this case, the equivalent attack energy has to be at least <code>attack_cost</code>
 to successfully attack the cell. </p>
 <p>The more energy the player uses to attack the cell, the more <code>force_field</code>
 will be generated after the cell is occupied so it is harder for other players 
@@ -55,7 +55,7 @@ spent on the cell times 2. The upper limit of <code>force_field</code> is 1000.<
   player A will lose 50 energy(which is not a wise move). </p>
 <p>Case 2, if player A spent 150 energy to attack it, the attack would succeed and
   player A will occupy the cell with 150 energy spent. The cell will also have 300
-  <code>force_field</code> so the <code>attack_cost</code> will be higher. </p>
+  <code>force_field</code> so the <code>attack_cost</code> will be 400. </p>
 <p>Case 3, if player A spent 150 energy and player B spent 150 energy. The 
   <code>equivalent_energy</code> will be 0 so the attack would fail. Both A and B lose
   150 energy(bad for them but this is not a stupid move for them because they
@@ -119,8 +119,8 @@ other aspects. </p>
 can produce per round.</p>
 <p>However, the actual energy and gold a player gets may be taxed if the player
 owns too many cells.</p>
-<p>For every 100 cells the player owns, a 10% tax will be applied to the energy
-and gold income.</p>
+<p>For every 100 cells the player owns, 2 gold and 2 energy will be taxed for each
+cell the player has.</p>
 <h4>Building</h4>
 <p>Players can build on a <code>MapCell</code> that's owned by them. Only one building
 is allowed on one <code>MapCell</code></p>
@@ -179,6 +179,7 @@ needs to upgrade their home to a higher level, therefore achieves a higher
 <code>tech_level</code>, before they upgrade other buildings.</p>
 <h4>Tax Level</h4>
 <p><code>tax_level</code> is determined by the cell number the player owns. For every
-100 cells, a 10% tax will be applied to the energy and gold income. </p>
-<p>For example, if the player has 298 cells, the <code>tax_level</code> will be 2 and a 
-20% tax will be applied to the player's energy and gold income. </p>
+100 cells, 2 gold and 2 energy will be taxed for each cell the player owns. </p>
+<p>For example, if the player has 298 cells, the <code>tax_level</code> will be 2 and for
+each round, 298*2 = 596 energy and gold will be subtracted from player's gold
+and energy.</p>

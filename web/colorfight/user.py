@@ -20,8 +20,8 @@ class User:
 
     def update(self):
         self.tax_level = int(len(self.cells) / 100)
-        self.energy += int((1 - self.tax_level * 0.1) * self.energy_source)
-        self.gold   += int((1 - self.tax_level * 0.1) * self.gold_source)
+        self.energy += self.energy_source - 2 * self.tax_level * len(self.cells)
+        self.gold   += self.gold_source - 2 * self.tax_level * len(self.cells)
         if len(self.cells) == 0:
             self.dead = True
 
@@ -35,4 +35,5 @@ class User:
                 "gold_source": self.gold_source, \
                 "tech_level": self.tech_level, \
                 "tax_level": self.tax_level, \
+                "tax_amount": 2 *self.tax_level * len(self.cells), \
                 "cells": [cell.position.info() for cell in self.cells.values()]}
