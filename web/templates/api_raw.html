@@ -157,6 +157,60 @@ public room</p>
 </blockquote>
 </li>
 </ul>
+<h1>User</h1>
+<h2>attributes of <code>User</code></h2>
+<ul>
+<li>
+<p><code>uid</code></p>
+<blockquote>
+<p>User id </p>
+</blockquote>
+</li>
+<li>
+<p><code>energy</code></p>
+<blockquote>
+<p>Current energy the user has.</p>
+</blockquote>
+</li>
+<li>
+<p><code>gold</code></p>
+<blockquote>
+<p>Current gold the user has.</p>
+</blockquote>
+</li>
+<li>
+<p><code>energy_source</code></p>
+<blockquote>
+<p>The amount of energy the user can produce each round</p>
+</blockquote>
+</li>
+<li>
+<p><code>gold_source</code></p>
+<blockquote>
+<p>The amount of gold the user can produce each round</p>
+</blockquote>
+</li>
+<li>
+<p><code>tech_level</code></p>
+<blockquote>
+<p>The tech_level of the user. This limits the highest level of building
+  the user can upgrade to.</p>
+</blockquote>
+</li>
+<li>
+<p><code>tax_level</code></p>
+<blockquote>
+<p>The tax_level of the user.</p>
+</blockquote>
+</li>
+<li>
+<p><code>cells</code></p>
+<blockquote>
+<p>A map of <code>MapCell</code> objects. <strong>key</strong> is <code>Position</code> object and 
+  <strong>value</strong> is <code>MapCell</code> object.</p>
+</blockquote>
+</li>
+</ul>
 <h1>GameMap</h1>
 <h2>attributes of <code>GameMap</code></h2>
 <ul>
@@ -173,7 +227,7 @@ public room</p>
 </blockquote>
 </li>
 </ul>
-<h2>methods</h2>
+<h2>methods of <code>GameMap</code></h2>
 <ul>
 <li>
 <p><code>game_map[position]</code></p>
@@ -188,7 +242,7 @@ public room</p>
 <h1>MapCell</h1>
 <p>This is the object representing a cell. <code>cell = game.game_map[Position(3, 4)]</code> 
 stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code></p>
-<h2>attributes</h2>
+<h2>attributes of <code>MapCell</code></h2>
 <ul>
 <li>
 <p><code>position</code></p>
@@ -245,7 +299,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </li>
 </ul>
 <h1>Building</h1>
-<h2>attributes</h2>
+<h2>attributes of <code>Building</code></h2>
 <ul>
 <li>
 <p><code>cost</code></p>
@@ -265,9 +319,45 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 <p>Level of the building</p>
 </blockquote>
 </li>
+<li>
+<p><code>is_empty</code></p>
+<blockquote>
+<p>Whether the building is empty</p>
+</blockquote>
+</li>
+<li>
+<p><code>is_home</code></p>
+<blockquote>
+<p>Whether the building is home </p>
+</blockquote>
+</li>
+<li>
+<p><code>max_level</code></p>
+<blockquote>
+<p>Maximum level this building can reach</p>
+</blockquote>
+</li>
+<li>
+<p><code>can_upgrade</code></p>
+<blockquote>
+<p>If the building can be upgraded</p>
+</blockquote>
+</li>
+<li>
+<p><code>upgrade_gold</code></p>
+<blockquote>
+<p>Amount of gold to upgrade the building. Invalid if cannot upgrade</p>
+</blockquote>
+</li>
+<li>
+<p><code>upgrade_energy</code></p>
+<blockquote>
+<p>Amount of energy to upgrade the building. Invalid if cannot upgrade</p>
+</blockquote>
+</li>
 </ul>
 <h1>Position</h1>
-<h2>attributes</h2>
+<h2>attributes of <code>Position</code></h2>
 <ul>
 <li>
 <p><code>x</code></p>
@@ -276,7 +366,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 <p><code>y</code></p>
 </li>
 </ul>
-<h2>methods</h2>
+<h2>methods of <code>Position</code></h2>
 <ul>
 <li>
 <p><code>.is_valid()</code></p>
@@ -307,7 +397,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </li>
 </ul>
 <h1>Direction</h1>
-<h2>attributes</h2>
+<h2>attributes of <code>Direction</code></h2>
 <ul>
 <li>
 <p><code>North</code></p>
@@ -334,66 +424,12 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </blockquote>
 </li>
 </ul>
-<h2>methods</h2>
+<h2>methods of <code>Direction</code></h2>
 <ul>
 <li>
 <p><code>get_all_cardinals()</code></p>
 <blockquote>
 <p>Returns a list of all directions. </p>
-</blockquote>
-</li>
-</ul>
-<h1>User</h1>
-<h2>attributes</h2>
-<ul>
-<li>
-<p><code>uid</code></p>
-<blockquote>
-<p>User id </p>
-</blockquote>
-</li>
-<li>
-<p><code>energy</code></p>
-<blockquote>
-<p>Current energy the user has.</p>
-</blockquote>
-</li>
-<li>
-<p><code>gold</code></p>
-<blockquote>
-<p>Current gold the user has.</p>
-</blockquote>
-</li>
-<li>
-<p><code>energy_source</code></p>
-<blockquote>
-<p>The amount of energy the user can produce each round</p>
-</blockquote>
-</li>
-<li>
-<p><code>gold_source</code></p>
-<blockquote>
-<p>The amount of gold the user can produce each round</p>
-</blockquote>
-</li>
-<li>
-<p><code>tech_level</code></p>
-<blockquote>
-<p>The tech_level of the user. This limits the highest level of building
-  the user can upgrade to.</p>
-</blockquote>
-</li>
-<li>
-<p><code>tax_level</code></p>
-<blockquote>
-<p>The tax_level of the user.</p>
-</blockquote>
-</li>
-<li>
-<p><code>cells</code></p>
-<blockquote>
-<p>A map of <code>MapCell</code> objects. <strong>key</strong> is <code>Position</code> object and 
-  <strong>value</strong> is <code>MapCell</code> object.</p>
 </blockquote>
 </li>
 </ul>
@@ -415,6 +451,12 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 <p><code>BLD_ENERGY_WELL</code></p>
 <blockquote>
 <p>Build character for energy well</p>
+</blockquote>
+</li>
+<li>
+<p><code>BLD_FORTRESS</code></p>
+<blockquote>
+<p>Build character for fortress</p>
 </blockquote>
 </li>
 </ul>
