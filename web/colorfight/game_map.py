@@ -144,6 +144,7 @@ class GameMap:
                             surrounding_self_number  += 1
                 cell.force_field += surrounding_self_number * 5 
                 cell.force_field -= surrounding_enemy_number * 30
+                cell.force_field += cell.building.get_force_field_increase(cell)
                 cell.force_field  = clip(cell.force_field, 0, 1000)
 
     def info(self):

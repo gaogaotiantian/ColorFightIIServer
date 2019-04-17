@@ -1,4 +1,4 @@
-from .constants import BLD_ENERGY_WELL, BLD_GOLD_MINE, BLD_HOME
+from .constants import BLD_ENERGY_WELL, BLD_GOLD_MINE, BLD_HOME, BLD_FORTRESS
 
 class BaseBuilding:
     cost = 0
@@ -14,6 +14,9 @@ class BaseBuilding:
 
     def get_attack_cost(self, cell):
         return int(cell.natural_cost + cell.force_field)
+
+    def get_force_field_increase(self, cell):
+        return 0
 
     def upgrade(self):
         self.level += 1
@@ -77,6 +80,18 @@ class GoldMine(BaseBuilding):
     def get_gold(self, cell):
         return cell.natural_gold * (1 + self.level)
 
+class Fortress(BaseBuilding):
+    name = "fortress"
+    cost = 100
+    upgrade_cost = [(200, 0), (400, 0)]
+
+    def get_attack_cost(self, cell):
+        return (cell.natural_cost + cell.force_field) * (1 + self.level)
+
+    def get_force_field_increase(self, cell):
+        return self.level * 10
+
+
 def get_building_class(building):
     '''
         return a class based on the string
@@ -87,5 +102,7 @@ def get_building_class(building):
         return GoldMine
     elif building == BLD_HOME:
         return Home
+    elif building == BLD_FORTRESS:
+        return Fortress
     else:
         return None

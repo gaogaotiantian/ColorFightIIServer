@@ -33,13 +33,13 @@ def test_invalid_building_type():
     result = attack(game, uid, x, attack_y, 1000)
     assert (result["success"])
     game.update(True)
-    building = 'f' # wrong building type
+    building = 'r' # wrong building type
     result = build(game,uid,x,attack_y,building)
     assert(result['success'])
     game.update(True)
     info = game.get_game_info()
     assert(info['error'])
-    expected_err_msg = 'b ' + str(x) + ' ' + str(attack_y) + ' ' + 'f failed, Not a correct building.'
+    expected_err_msg = 'b ' + str(x) + ' ' + str(attack_y) + ' ' + 'r failed, Not a correct building.'
     assert(info['error'][1][0] == expected_err_msg)
 
 def test_build_on_invalid_cell():

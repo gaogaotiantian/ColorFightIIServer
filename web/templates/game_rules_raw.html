@@ -64,6 +64,13 @@ spent on the cell times 2. The upper limit of <code>force_field</code> is 1000.<
   <code>equivalent_energy</code> will be 200(350-150) and player A will take the cell.
   player B will lose 150 energy and the <code>force_field</code> would be 400.</p>
 </blockquote>
+<p>Notice that players can attack their own cells as a strategy.</p>
+<blockquote>
+<p>For example, assume the <code>attack_cost</code> of a cell is <code>100</code> and Player A
+  owns it. Player B decided to use 100 energy to attack the cell and Player A
+  attack that cell with 1 energy on the same round. Then the equivalent energy
+  would be 99 and Player B would fail to attack that cell.</p>
+</blockquote>
 <h4>build</h4>
 <p>A player could build on occupied cells.</p>
 <p>A player needs <code>cost</code> amount of gold to build the building. </p>
@@ -74,6 +81,8 @@ The maximum level of the building(except for home) is limited by the level of
 home. You need to upgrade your home before upgrading other buildings. </p>
 <p>All buildings including home start at level 1. After each upgrade, the level
 will increase by 1. </p>
+<p>Notice the player can build and upgrade the building on the same round. The 
+commands will be parsed in order.</p>
 <h3>Update</h3>
 <h4>Order</h4>
 <ol>

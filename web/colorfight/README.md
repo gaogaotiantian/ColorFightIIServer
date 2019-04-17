@@ -87,6 +87,13 @@ No matter whether the attack is successful, all the energy will be spent.
   ```equivalent_energy``` will be 200(350-150) and player A will take the cell.
   player B will lose 150 energy and the ```force_field``` would be 400.
 
+Notice that players can attack their own cells as a strategy.
+
+> For example, assume the ```attack_cost``` of a cell is ```100``` and Player A
+  owns it. Player B decided to use 100 energy to attack the cell and Player A
+  attack that cell with 1 energy on the same round. Then the equivalent energy
+  would be 99 and Player B would fail to attack that cell.
+
 #### build
 
 A player could build on occupied cells.
@@ -103,6 +110,9 @@ home. You need to upgrade your home before upgrading other buildings.
 
 All buildings including home start at level 1. After each upgrade, the level
 will increase by 1. 
+
+Notice the player can build and upgrade the building on the same round. The 
+commands will be parsed in order.
 
 ### Update
 
