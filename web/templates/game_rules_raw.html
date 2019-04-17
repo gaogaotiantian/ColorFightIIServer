@@ -75,9 +75,6 @@ home. You need to upgrade your home before upgrading other buildings. </p>
 <p>All buildings including home start at level 1. After each upgrade, the level
 will increase by 1. </p>
 <h3>Update</h3>
-<h4>Force field</h4>
-<p>For each enemy's cell around the cell, <code>force_field</code> will lose 5% for each
-round.</p>
 <h4>Order</h4>
 <ol>
 <li>Parse all the commands<ol>
@@ -133,25 +130,25 @@ cell provides. </p>
 <ul>
 <li><code>Home</code> is automatically built on the cell that the player spawns. <ul>
 <li><code>attack_cost</code> 1000</li>
-<li><code>upgrade_cost</code> = <code>[(1000, 1000), (2000, 2000), (4000, 4000)]</code></li>
+<li><code>upgrade_cost</code> = <code>[(1000, 1000), (2000, 2000)]</code></li>
 <li><code>energy</code> = <code>10 * level</code></li>
 <li><code>gold</code> = <code>10 * level</code></li>
 </ul>
 </li>
 <li><code>EnergyWell</code> is the building to increase the energy production.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> = <code>[(200, 0), (400, 0), (800, 0)]</code></li>
+<li><code>upgrade_cost</code> = <code>[(200, 0), (400, 0)]</code></li>
 <li><code>energy</code> = <code>natural_energy * (1 + level)</code></li>
 </ul>
 </li>
 <li><code>GoldMine</code> is the building to increase the gold production.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0), (800, 0)]</code></li>
+<li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0)]</code></li>
 <li><code>gold</code> = <code>natural_gold * (1 + level)</code> </li>
 </ul>
 </li>
 </ul>
-<p><code>upgrade_cost</code> = [level1 cost(gold, energy), level2 cost(gold, energy), level3 cost(gold, energy)]</p>
+<p><code>upgrade_cost</code> = [level2 cost(gold, energy), level3 cost(gold, energy)]</p>
 <p>A building will be destroyed if the cell is occupied by another player.</p>
 <h4>Force Field</h4>
 <p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player. 
@@ -161,6 +158,16 @@ be harder for other players to occupy it.
 and the total energy all players put to attack this cell in that round. </p>
 <p><code>force_field = int(min(1000, 2*(energy*2 - total_energy)))</code></p>
 <p><code>force_field</code> will be added to <code>attack_cost</code></p>
+<p>After each round, <code>force_field</code> will be updated based on surrounding cells.
+For each enemy surrounding cell, <code>force_field</code> will reduce <code>30</code>. For
+each self cell, <code>force_field</code> will increase <code>5</code>.</p>
+<blockquote>
+<p>For example. Player A owns cell (2, 2) and currently the cell has 100 
+  <code>force_field</code>. Player A owns (2, 1) and (1, 2), too. (2, 3) is empty and
+  Player B owns (3, 2). Therefore the cell (2, 2) has 2 self cells and 1 emeny
+  cell around, so for each round, the <code>force_field</code> will reduce 30 - 2 * 5
+  = 20.</p>
+</blockquote>
 <h3>GameMap</h3>
 <p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
 <p>In the beginning of the game, the game will generate a <code>GameMap</code> and blur

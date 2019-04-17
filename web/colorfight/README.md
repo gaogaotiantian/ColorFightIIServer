@@ -106,11 +106,6 @@ will increase by 1.
 
 ### Update
 
-#### Force field
-
-For each enemy's cell around the cell, ```force_field``` will lose 5% for each
-round.
-
 #### Order
 
 1. Parse all the commands
@@ -171,19 +166,19 @@ cell provides.
 
 * ```Home``` is automatically built on the cell that the player spawns. 
     * ```attack_cost``` 1000
-    * ```upgrade_cost``` = ```[(1000, 1000), (2000, 2000), (4000, 4000)]```
+    * ```upgrade_cost``` = ```[(1000, 1000), (2000, 2000)]```
     * ```energy``` = ```10 * level```
     * ```gold``` = ```10 * level```
 * ```EnergyWell``` is the building to increase the energy production.
     * ```cost``` = ```100 gold```
-    * ```upgrade_cost``` = ```[(200, 0), (400, 0), (800, 0)]```
+    * ```upgrade_cost``` = ```[(200, 0), (400, 0)]```
     * ```energy``` = ```natural_energy * (1 + level)```
 * ```GoldMine``` is the building to increase the gold production.
     * ```cost``` = ```100 gold```
-    * ```upgrade_cost``` =  ```[(200, 0), (400, 0), (800, 0)]```
+    * ```upgrade_cost``` =  ```[(200, 0), (400, 0)]```
     * ```gold ``` = ```natural_gold * (1 + level)``` 
 
-```upgrade_cost``` = [level1 cost(gold, energy), level2 cost(gold, energy), level3 cost(gold, energy)]
+```upgrade_cost``` = [level2 cost(gold, energy), level3 cost(gold, energy)]
 
 A building will be destroyed if the cell is occupied by another player.
 
@@ -198,6 +193,16 @@ and the total energy all players put to attack this cell in that round.
 ```force_field = int(min(1000, 2*(energy*2 - total_energy)))```
 
 ```force_field``` will be added to ```attack_cost```
+
+After each round, ```force_field``` will be updated based on surrounding cells.
+For each enemy surrounding cell, ```force_field``` will reduce ```30```. For
+each self cell, ```force_field``` will increase ```5```.
+
+> For example. Player A owns cell (2, 2) and currently the cell has 100 
+  ```force_field```. Player A owns (2, 1) and (1, 2), too. (2, 3) is empty and
+  Player B owns (3, 2). Therefore the cell (2, 2) has 2 self cells and 1 emeny
+  cell around, so for each round, the ```force_field``` will reduce 30 - 2 * 5
+  = 20.
 
 ### GameMap
 

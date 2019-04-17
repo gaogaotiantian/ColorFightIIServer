@@ -1,5 +1,6 @@
 from .position import Position
 from .building import Home, Empty
+from .util import clip
 import random
 import copy
 
@@ -45,7 +46,6 @@ class MapCell:
             total_energy = sum([x[1] for x in self.attacker_list])
             equivalent_energy = max_energy * 2 - total_energy 
             if equivalent_energy >= self.attack_cost:
-                # more than 50% of the energy, success
                 self.force_field = int(min(1000, 2*(equivalent_energy)))
                 if self.owner != max_id:
                     self.building = Empty()
@@ -135,10 +135,16 @@ class GameMap:
             for y in range(self.height):
                 cell = self._cells[y][x]
                 surrounding_enemy_number = 0
+                surrounding_self_number  = 0
                 for pos in cell.position.get_surrounding_cardinals():
-                    if self[pos].owner != 0 and self[pos].owner != cell.owner:
-                        surrounding_enemy_number += 1
-                cell.force_field -= int(cell.force_field * (0.05 * surrounding_enemy_number))
+                    if self[pos].owner != 0:
+                        if self[pos].owner != cell.owner:
+                            surrounding_enemy_number += 1
+                        else:
+                            surrounding_self_number  += 1
+                cell.force_field += surrounding_self_number * 5 
+                cell.force_field -= surrounding_enemy_number * 30
+                cell.force_field  = clip(cell.force_field, 0, 1000)
 
     def info(self):
         info = [[None for _ in range(self.width)] for _ in range(self.height)]
