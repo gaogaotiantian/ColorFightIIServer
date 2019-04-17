@@ -122,29 +122,6 @@ body {
     font-weight: 600;
 }
 
-.game-status-header{
-    color: #fff;
-}
-
-.game-status-section {
-    background-color: #eee;
-    border-radius: 6px;
-    padding: 8px;
-    min-width: 200px;
-}
-
-.game-status-section p {
-    margin: 2px;
-}
-
-.game-status-value {
-    color: #356131;
-}
-
-.game-control a {
-    color: #000;
-}
-
 code {
     background-color: #f9f2f4;
     border-radius: 4px;
@@ -165,6 +142,7 @@ thead {
     display: table-header-group;
     vertical-align: middle;
     background: rgba(2, 82, 30, 0.05);
+    color: #333;
 }
 
 th {

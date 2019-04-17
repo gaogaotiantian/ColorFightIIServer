@@ -4,7 +4,7 @@ html, body {
 	background: url( "background.jpg" );
 	background-size: cover;
 	background-position: center;
-	background-repeat: no-repeat;
+	background-repeat: repeat;
 }
 
 #cf-game-col {
@@ -19,6 +19,33 @@ html, body {
 	padding: 10px;
 	border-radius: 7px;
 }
+
+.game-status-header{
+    color: #fff;
+    margin-bottom: 0.3rem;
+}
+
+.game-status-section {
+    background-color: #eee;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.game-status-section p {
+    margin: 2px;
+}
+
+.game-status-value {
+    color: #356131;
+}
+
+.game-control a {
+    color: #000;
+}
+
 
 .user-color-box {
 	/* Small margin to username */
