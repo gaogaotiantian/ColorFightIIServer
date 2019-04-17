@@ -35,7 +35,7 @@ const BLD_ENERGY_WELL   = 'e';
 
 // Derive the maximum board size. 
 const GAME_MAX_CELLS        = GAME_WIDTH * GAME_HEIGHT;
-const GAME_MAX_LEVEL        = 4;
+const GAME_MAX_LEVEL        = 3;
 
 const GAME_MAX_FORCE_FIELD  = 1000; 
 // Force field is min(1000, 2 * energy) if we are the only attacker. 
@@ -210,9 +210,6 @@ function draw_cell(x, y, currentCell) {
                 break;
             case 3:
                 home_image = PIXI.Sprite.from('/static/assets/homeIII.png');
-                break;
-            case 4:
-                home_image = PIXI.Sprite.from('/static/assets/homeIV.png');
                 break;
         }
         home_image.x = x * cellSize;

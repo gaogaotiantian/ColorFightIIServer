@@ -51,7 +51,7 @@ class Empty(BaseBuilding):
 class Home(BaseBuilding):
     name = 'home'
     cost = 1000
-    upgrade_cost = [(1000, 1000), (2000, 2000), (4000, 4000)]
+    upgrade_cost = [(1000, 1000), (2000, 2000)]
     def get_energy(self, cell):
         return 10 * self.level
 
@@ -64,7 +64,7 @@ class Home(BaseBuilding):
 class EnergyWell(BaseBuilding):
     name = "energy_well"
     cost = 100
-    upgrade_cost = [(200, 0), (400, 0), (800, 0)]
+    upgrade_cost = [(200, 0), (400, 0)]
 
     def get_energy(self, cell):
         return cell.natural_energy * (1 + self.level)
@@ -72,7 +72,7 @@ class EnergyWell(BaseBuilding):
 class GoldMine(BaseBuilding):
     name = "gold_mine"
     cost = 100
-    upgrade_cost = [(200, 0), (400, 0), (800, 0)]
+    upgrade_cost = [(200, 0), (400, 0)]
 
     def get_gold(self, cell):
         return cell.natural_gold * (1 + self.level)
