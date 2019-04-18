@@ -1,41 +1,42 @@
 html, body {
-	margin: 0px;
-	padding: 0px;
-	background: url( "background.jpg" );
-	background-size: cover;
-	background-position: center;
-	background-repeat: repeat;
+	margin  : 0px;
+	padding : 0px;
+	background          : url( "background.jpg" );
+	background-size     : cover;
+	background-position : center;
+	background-repeat   : repeat;
 }
 
 #cf-game-col {
-    font-size: 0px;
-    padding: 0px;
-    margin: 0px;
+    font-size : 0px;
+    padding   : 0px;
+    margin    : 0px;
 }
 
 #game-div {
-	margin: 0px;
 	background: black;
-	padding: 10px;
+	margin  : 0px;
+	padding : 10px;
 	border-radius: 7px;
 }
 
 .game-status-header{
     color: #fff;
-    margin-bottom: 0.3rem;
+    font-size: 1.3vw;
+    margin-bottom: 0.1vw;
 }
 
 .game-status-section {
     background-color: #eee;
-    border-radius: 6px;
-    padding: 8px;
+    border-radius : 0.1vw;
+    padding       : 0.3vw;
+    margin-bottom : 0.1vw;
     font-family: 'Space Mono', monospace;
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
+    font-size  : 1vw;
 }
 
 .game-status-section p {
-    margin: 2px;
+    margin: 0.1vw;
 }
 
 .game-status-value {
@@ -46,25 +47,22 @@ html, body {
     color: #000;
 }
 
-
 .user-color-box {
-	/* Small margin to username */
-	margin-right:4px;
-	/* Divs default to ~30 px */
-	width :30px;
-	height:30px;
+	margin  : 0.1vw;
+	width   : 1.5vw;
+	height  : 1.5vw;
 }
 
 .user-list-line {
 	/* Black line break. Reduced margins above/below. */
 	border:none;
 	background-color:#000000;
-	height:2px;
-	margin-top:4px;
-	margin-bottom:4px;
+	height        : 2px;
+	margin-top    : 4px;
+	margin-bottom : 4px;
 }
 
 input.row-input {
 	/* Full div-width input box */
-	width:100%;
+	width: 100%;
 }

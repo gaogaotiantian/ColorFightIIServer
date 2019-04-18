@@ -136,15 +136,11 @@ function draw_game(ts) {
     let animationProgress = animationStartTime - ts;
 
     // Limit the dimension by width. 
-    gameDim = gameCol.clientWidth;
-    
     // We have a 10px padding, so the game dimension needs to minus 10*2 = 20 
-    gameDim -= 20
+    gameDim = gameCol.clientWidth - 20;
 
     // Limit the dimension by height. 
-    if (gameDim + gameRenderer.view.offsetTop > window.innerHeight) {
-        gameDim = window.innerHeight - gameRow.offsetTop;
-    }
+    gameDim = Math.min(gameDim, window.innerHeight - gameRow.offsetTop); 
 
     if (gameDiv.clientWidth != gameDim) {
         gameDiv.setAttribute("style", "width:" + gameDim + "px; height:" + gameDim + "px");
@@ -441,6 +437,11 @@ function draw_user_list() {
         userDiv.onclick     = user_click_handler;
         userDiv.onmouseover = user_hover_handler; 
         userDiv.onmouseout  = user_out_handler; 
+
+        userGold = create_p(user['gold']);
+        // Align the gold value to the right of the entry. 
+        userGold.style = 'margin-left: auto';
+        userDiv.appendChild(userGold);
 
         // Append the row to the list. 
         listHTML.appendChild(userDiv);
