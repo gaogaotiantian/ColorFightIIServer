@@ -46,23 +46,24 @@ cell. </p>
 to successfully attack the cell. </p>
 <p>The more energy the player uses to attack the cell, the more <code>force_field</code>
 will be generated after the cell is occupied so it is harder for other players 
-to take it back. The generated <code>force_field</code> will be the equivalent energy
-spent on the cell times 2. The upper limit of <code>force_field</code> is 1000.</p>
+to take it back. The generated <code>force_field</code> will be
+ <code>(equivalent_energy - attack_cost) * 2</code>. The upper limit of <code>force_field</code> is 1000.</p>
 <p>No matter whether the attack is successful, all the energy will be spent.</p>
 <blockquote>
 <p>For example, assume the <code>attack_cost</code> of a cell is <code>100</code>.</p>
 <p>Case 1, if player A spent 50 energy to attack it, the attack would fail and 
   player A will lose 50 energy(which is not a wise move). </p>
 <p>Case 2, if player A spent 150 energy to attack it, the attack would succeed and
-  player A will occupy the cell with 150 energy spent. The cell will also have 300
-  <code>force_field</code> so the <code>attack_cost</code> will be 400. </p>
+  player A will occupy the cell with 150 energy spent. The cell will also have 100
+  <code>force_field</code> because 50 extra energy is spent to attack it, 
+so the <code>attack_cost</code> will be 200. </p>
 <p>Case 3, if player A spent 150 energy and player B spent 150 energy. The 
   <code>equivalent_energy</code> will be 0 so the attack would fail. Both A and B lose
   150 energy(bad for them but this is not a stupid move for them because they
   would not have known).</p>
 <p>Case 4, if the player A spent 350 energy and player B spent 150 energy, the 
-  <code>equivalent_energy</code> will be 200(350-150) and player A will take the cell.
-  player B will lose 150 energy and the <code>force_field</code> would be 400.</p>
+  <code>equivalent_energy</code> will be 350 - 150 = 200 and player A will take the cell.
+  player B will lose 150 energy and the <code>force_field</code> would be (200 - 100) * 2 = 200.</p>
 </blockquote>
 <p>Notice that players can attack their own cells as a strategy.</p>
 <blockquote>
@@ -165,7 +166,7 @@ This will equivalently add <code>attack_cost</code> to the <code>MapCell</code> 
 be harder for other players to occupy it.
 <code>force_field</code> is determined by the energy a player puts to attack the cell 
 and the total energy all players put to attack this cell in that round. </p>
-<p><code>force_field = int(min(1000, 2*(energy*2 - total_energy)))</code></p>
+<p><code>force_field = int(min(1000, 2*(energy*2 - total_energy - attack_cost)))</code></p>
 <p><code>force_field</code> will be added to <code>attack_cost</code></p>
 <p>After each round, <code>force_field</code> will be updated based on surrounding cells.
 For each enemy surrounding cell, <code>force_field</code> will reduce <code>30</code>. For
