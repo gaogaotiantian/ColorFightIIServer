@@ -46,7 +46,7 @@ class MapCell:
             total_energy = sum([x[1] for x in self.attacker_list])
             equivalent_energy = max_energy * 2 - total_energy 
             if equivalent_energy >= self.attack_cost:
-                self.force_field = int(min(1000, 2*(equivalent_energy)))
+                self.force_field = int(min(1000, 2*(equivalent_energy - self.attack_cost)))
                 if self.owner != max_id:
                     self.building = Empty()
                 self.owner = max_id

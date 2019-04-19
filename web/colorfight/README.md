@@ -64,8 +64,8 @@ to successfully attack the cell.
 
 The more energy the player uses to attack the cell, the more ```force_field```
 will be generated after the cell is occupied so it is harder for other players 
-to take it back. The generated ```force_field``` will be the equivalent energy
-spent on the cell times 2. The upper limit of ```force_field``` is 1000.
+to take it back. The generated ```force_field``` will be
+ ```(equivalent_energy - attack_cost) * 2```. The upper limit of ```force_field``` is 1000.
 
 No matter whether the attack is successful, all the energy will be spent.
 
@@ -75,8 +75,9 @@ No matter whether the attack is successful, all the energy will be spent.
   player A will lose 50 energy(which is not a wise move). 
   
 > Case 2, if player A spent 150 energy to attack it, the attack would succeed and
-  player A will occupy the cell with 150 energy spent. The cell will also have 300
-  ```force_field``` so the ```attack_cost``` will be 400. 
+  player A will occupy the cell with 150 energy spent. The cell will also have 100
+  ```force_field``` because 50 extra energy is spent to attack it, 
+so the ```attack_cost``` will be 200. 
   
 > Case 3, if player A spent 150 energy and player B spent 150 energy. The 
   ```equivalent_energy``` will be 0 so the attack would fail. Both A and B lose
@@ -84,8 +85,8 @@ No matter whether the attack is successful, all the energy will be spent.
   would not have known).
   
 > Case 4, if the player A spent 350 energy and player B spent 150 energy, the 
-  ```equivalent_energy``` will be 200(350-150) and player A will take the cell.
-  player B will lose 150 energy and the ```force_field``` would be 400.
+  ```equivalent_energy``` will be 350 - 150 = 200 and player A will take the cell.
+  player B will lose 150 energy and the ```force_field``` would be (200 - 100) * 2 = 200.
 
 Notice that players can attack their own cells as a strategy.
 
@@ -200,7 +201,7 @@ be harder for other players to occupy it.
 ```force_field``` is determined by the energy a player puts to attack the cell 
 and the total energy all players put to attack this cell in that round. 
 
-```force_field = int(min(1000, 2*(energy*2 - total_energy)))```
+```force_field = int(min(1000, 2*(energy*2 - total_energy - attack_cost)))```
 
 ```force_field``` will be added to ```attack_cost```
 
