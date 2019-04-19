@@ -28,5 +28,8 @@ function getConfig() {
 $(function() {
     $( '#create-gameroom-button' ).click( function() {
         createGameroom( getConfig() );
-    })
+    });
+    $('body').on('click', '.game-room-tr', function() {
+        window.location.replace($(this).attr('href'));
+    });
 })

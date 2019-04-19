@@ -2,6 +2,7 @@
 <html>
   <head>
     {% include 'header.html' %}
+    <link rel="stylesheet" href='/static/gameroom_list.css'>
   </head>
   <body>
     {% include 'navbar.html' %}
@@ -9,34 +10,46 @@
       <div class="main-content">
         <div class="row">
           <div class="col-md-12">
-            <button class="btn btn-primary" data-toggle="modal" data-target="#gameroom-create-modal">Create Gameroom</button>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12">
             <div class="table-container">
-              <table>
-                <thead>
-                  <tr>
+              <div class="table-div">
+                <div class="table-head">
+                  <div class="table-row table-row-head row">
                     {% for header in headers %}
-                    <th>
+                      {% if header == 'Name' %}
+                        <div class="table-column th-name col-md-7">
+                      {% else %}
+                        <div class="table-column col">
+                      {% endif %}
                       {{ header }}
-                    </th>
+                    </div>
                     {% endfor %}
-                  </tr>
-                </thead>
-                <tbody>
+                  </div>
+                </div>
+                <div>
                   {% for room in gamerooms %}
-                  <tr>
+                  <div href={{room.link}} class="game-room-tr table-row table-row-content row">
                     {% for header in headers %}
-                    <td>
+                      {% if header == 'Name' %}
+                        <div class="table-column col-md-7">
+                      {% else %}
+                        <div class="table-column col">
+                      {% endif %}
                       {{ room[header] | safe }}
-                    </td>
+                    </div>
                     {% endfor %}
-                  <tr>
+                  </div>
                   {% endfor %}
-                </tbody>
-              </table>
+                  <div href='#' data-toggle="modal" data-target="#gameroom-create-modal" class="add-room-tr table-row table-row-content row">
+                    <div class="table-column col-md-12 text-center">
+                      <a id="gameroom-create-fa"><i class="fas fa-lg fa-plus-circle"></i></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

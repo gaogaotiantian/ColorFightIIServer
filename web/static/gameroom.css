@@ -28,8 +28,8 @@ html, body {
 
 .game-status-section {
     background-color: #eee;
-    border-radius : 0.1vw;
-    padding       : 0.3vw;
+    border-radius : 0.4vw;
+    padding       : 0.5vw;
     margin-bottom : 0.1vw;
     font-family: 'Space Mono', monospace;
     font-size  : 1vw;

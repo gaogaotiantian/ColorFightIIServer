@@ -31,9 +31,10 @@ async def gameroom_list(request):
     gamerooms = []
     for name, game in request.app['game'].items():
         gameroom = {}
-        gameroom['Name'] = '<a href="/gameroom/{0}">{0}</a>'.format(name)
+        gameroom['Name'] = '{0}'.format(name)
         gameroom['Players'] = len(game.users)
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
+        gameroom['link'] = '/gameroom/{0}'.format(name)
         gamerooms.append(gameroom)
     return {'gamerooms': gamerooms, 'headers': headers}
 
