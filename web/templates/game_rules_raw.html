@@ -1,5 +1,5 @@
-<h1>ColorfightII Rules</h1>
-<h2>Overview</h2>
+<h1 id="colorfightii-rules">ColorfightII Rules</h1>
+<h2 id="overview">Overview</h2>
 <p>ColorfightII is a round based game where players try to expand their territory 
 and collect resource to win the game. </p>
 <p>There are two kinds of resources:</p>
@@ -15,16 +15,16 @@ therefore collect more gold and energy source.</p>
 <p>Players use gold to build different buildings on their own cells to help the
 game process.</p>
 <p>At the end of the game, the player with the highest amount of gold wins.</p>
-<h2>Game Flow</h2>
-<h3>Preparation</h3>
+<h2 id="game-flow">Game Flow</h2>
+<h3 id="preparation">Preparation</h3>
 <p>In the beginning of each game, a 30x30 map will be generated. Each cell of the map
 will have <code>natural_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
 attributes. </p>
-<h3>Register</h3>
+<h3 id="register">Register</h3>
 <p>During anytime of the game, a player is allowed to register to the
 game. The player will be assigned to a cell, this cell will be the home of
 the player. A player will have 1000 <code>energy</code> when register to the game.</p>
-<h3>Command</h3>
+<h3 id="command">Command</h3>
 <p>For each round, a player could give a list of valid commands. The possible 
 commands are:</p>
 <ul>
@@ -32,7 +32,7 @@ commands are:</p>
 <li>build</li>
 <li>upgrade</li>
 </ul>
-<h4>attack</h4>
+<h4 id="attack">attack</h4>
 <p>Players could use a certain amount of energy to attack a cell that's adjacent
 to their already occupied cells. </p>
 <p>To successfully attack(or occupy) the cell, the player has to spend at least
@@ -72,11 +72,11 @@ so the <code>attack_cost</code> will be 200. </p>
   attack that cell with 1 energy on the same round. Then the equivalent energy
   would be 99 and Player B would fail to attack that cell.</p>
 </blockquote>
-<h4>build</h4>
+<h4 id="build">build</h4>
 <p>A player could build on occupied cells.</p>
 <p>A player needs <code>cost</code> amount of gold to build the building. </p>
 <p>The buildings will take affect the round they are built. </p>
-<h4>upgrade</h4>
+<h4 id="upgrade">upgrade</h4>
 <p>A player could upgrade their buildings to have better effects from them. 
 The maximum level of the building(except for home) is limited by the level of
 home. You need to upgrade your home before upgrading other buildings. </p>
@@ -84,8 +84,8 @@ home. You need to upgrade your home before upgrading other buildings. </p>
 will increase by 1. </p>
 <p>Notice the player can build and upgrade the building on the same round. The 
 commands will be parsed in order.</p>
-<h3>Update</h3>
-<h4>Order</h4>
+<h3 id="update">Update</h3>
+<h4 id="order">Order</h4>
 <ol>
 <li>Parse all the commands<ol>
 <li>building will be built</li>
@@ -107,8 +107,8 @@ commands will be parsed in order.</p>
 </ol>
 </li>
 </ol>
-<h2>Game Feature</h2>
-<h3>MapCell</h3>
+<h2 id="game-feature">Game Feature</h2>
+<h3 id="mapcell">MapCell</h3>
 <p>A <code>MapCell</code> represents a cell that a user can occupy. </p>
 <p><code>MapCell</code> can produce energy and gold for each round. It has three natural
 attributes:</p>
@@ -128,7 +128,7 @@ can produce per round.</p>
 owns too many cells.</p>
 <p>For every 100 cells the player owns, 2 gold and 2 energy will be taxed for each
 cell the player has.</p>
-<h4>Building</h4>
+<h4 id="building">Building</h4>
 <p>Players can build on a <code>MapCell</code> that's owned by them. Only one building
 is allowed on one <code>MapCell</code></p>
 <p>Each building has a <code>level</code>. When the building is built, the <code>level</code>
@@ -160,7 +160,7 @@ cell provides. </p>
 </ul>
 <p><code>upgrade_cost</code> = [level2 cost(gold, energy), level3 cost(gold, energy)]</p>
 <p>A building will be destroyed if the cell is occupied by another player.</p>
-<h4>Force Field</h4>
+<h4 id="force-field">Force Field</h4>
 <p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player. 
 This will equivalently add <code>attack_cost</code> to the <code>MapCell</code> so it would 
 be harder for other players to occupy it.
@@ -178,23 +178,23 @@ each self cell, <code>force_field</code> will increase <code>5</code>.</p>
   cell around, so for each round, the <code>force_field</code> will reduce 30 - 2 * 5
   = 20.</p>
 </blockquote>
-<h3>GameMap</h3>
+<h3 id="gamemap">GameMap</h3>
 <p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
 <p>In the beginning of the game, the game will generate a <code>GameMap</code> and blur
 it so the <code>natural_cost</code> will be smooth.</p>
 <p><code>natural_cost</code> is moderately related to <code>natural_energy</code> and 
 <code>natural_gold</code></p>
-<h3>User</h3>
+<h3 id="user">User</h3>
 <p>Each player enters the game with a <code>username</code> and a <code>password</code>. If a
 player register with the same <code>username</code> and <code>password</code>, it will be 
 treated as the same user. Duplicate usernames are not allowed.</p>
 <p>A player starts with 1000 <code>energy</code> and 0 <code>gold</code>. </p>
-<h4>Tech Level</h4>
+<h4 id="tech-level">Tech Level</h4>
 <p><code>tech_level</code> is determined by the highest level of <code>home</code> buildings the
 player has. <code>tech_level</code> limits the level of all other buildings. The player
 needs to upgrade their home to a higher level, therefore achieves a higher
 <code>tech_level</code>, before they upgrade other buildings.</p>
-<h4>Tax Level</h4>
+<h4 id="tax-level">Tax Level</h4>
 <p><code>tax_level</code> is determined by the cell number the player owns. For every
 100 cells, 2 gold and 2 energy will be taxed for each cell the player owns. </p>
 <p>For example, if the player has 298 cells, the <code>tax_level</code> will be 2 and for

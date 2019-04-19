@@ -1,6 +1,6 @@
-<h1>Overview</h1>
+<h1 id="overview">Overview</h1>
 <p>This is the API document for ColorFightII</p>
-<h1>Colorfight</h1>
+<h1 id="colorfight">Colorfight</h1>
 <p>The <code>Colorfight</code> object holds all the useful information for the game. </p>
 <blockquote>
 <p><code>game = Colorfight()</code> will create the instance. You should always have
@@ -8,7 +8,7 @@
 <p>After instantiate the object, you can access the attributes like 
   <code>game.uid</code>, and use the methods like <code>game.update_turn()</code></p>
 </blockquote>
-<h2>attributes of <code>Colorfight</code></h2>
+<h2 id="attributes-of-colorfight">attributes of <code>Colorfight</code></h2>
 <ul>
 <li>
 <p><code>uid</code> </p>
@@ -72,7 +72,7 @@
 </blockquote>
 </li>
 </ul>
-<h2>methods of <code>Colorfight</code></h2>
+<h2 id="methods-of-colorfight">methods of <code>Colorfight</code></h2>
 <ul>
 <li>
 <p><code>.connect(url)</code> </p>
@@ -157,8 +157,8 @@ public room</p>
 </blockquote>
 </li>
 </ul>
-<h1>User</h1>
-<h2>attributes of <code>User</code></h2>
+<h1 id="user">User</h1>
+<h2 id="attributes-of-user">attributes of <code>User</code></h2>
 <ul>
 <li>
 <p><code>uid</code></p>
@@ -217,8 +217,8 @@ public room</p>
 </blockquote>
 </li>
 </ul>
-<h1>GameMap</h1>
-<h2>attributes of <code>GameMap</code></h2>
+<h1 id="gamemap">GameMap</h1>
+<h2 id="attributes-of-gamemap">attributes of <code>GameMap</code></h2>
 <ul>
 <li>
 <p><code>width</code></p>
@@ -233,22 +233,22 @@ public room</p>
 </blockquote>
 </li>
 </ul>
-<h2>methods of <code>GameMap</code></h2>
+<h2 id="methods-of-gamemap">methods of <code>GameMap</code></h2>
 <ul>
 <li>
 <p><code>game_map[position]</code></p>
 <blockquote>
 <p>Get the <code>MapCell</code> object on <code>position</code>. <code>position</code> should be
-  a <code>Position</code> Object or a <code>tuple</code> <code>(x, y)</code>.</p>
+  a <code>Position</code> object or a <code>tuple</code> <code>(x, y)</code>.</p>
 <p>example: <code>game_map[(1, 2)]</code> will get you the <code>MapCell</code> object of
   <code>(1, 2)</code>, which is equivalent to <code>game_map[Position(1, 2)]</code></p>
 </blockquote>
 </li>
 </ul>
-<h1>MapCell</h1>
+<h1 id="mapcell">MapCell</h1>
 <p>This is the object representing a cell. <code>cell = game.game_map[Position(3, 4)]</code> 
 stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code></p>
-<h2>attributes of <code>MapCell</code></h2>
+<h2 id="attributes-of-mapcell">attributes of <code>MapCell</code></h2>
 <ul>
 <li>
 <p><code>position</code></p>
@@ -263,7 +263,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
   You should check the <code>name</code> of the <code>building</code> to determine what
   kind of building it is. The possible names are <code>empty</code>, <code>home</code>, 
   <code>energy_well</code> and <code>gold_mine</code>.</p>
-<p><code>cell.building.name == home</code> will return a boolean whether the cell
+<p><code>cell.building.name == "home"</code> will return a boolean whether the cell
   has a home on it</p>
 </blockquote>
 </li>
@@ -304,8 +304,8 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 <p><code>force_field</code></p>
 </li>
 </ul>
-<h1>Building</h1>
-<h2>attributes of <code>Building</code></h2>
+<h1 id="building">Building</h1>
+<h2 id="attributes-of-building">attributes of <code>Building</code></h2>
 <ul>
 <li>
 <p><code>cost</code></p>
@@ -362,8 +362,8 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </blockquote>
 </li>
 </ul>
-<h1>Position</h1>
-<h2>attributes of <code>Position</code></h2>
+<h1 id="position">Position</h1>
+<h2 id="attributes-of-position">attributes of <code>Position</code></h2>
 <ul>
 <li>
 <p><code>x</code></p>
@@ -372,7 +372,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 <p><code>y</code></p>
 </li>
 </ul>
-<h2>methods of <code>Position</code></h2>
+<h2 id="methods-of-position">methods of <code>Position</code></h2>
 <ul>
 <li>
 <p><code>.is_valid()</code></p>
@@ -402,8 +402,8 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </blockquote>
 </li>
 </ul>
-<h1>Direction</h1>
-<h2>attributes of <code>Direction</code></h2>
+<h1 id="direction">Direction</h1>
+<h2 id="attributes-of-direction">attributes of <code>Direction</code></h2>
 <ul>
 <li>
 <p><code>North</code></p>
@@ -430,7 +430,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </blockquote>
 </li>
 </ul>
-<h2>methods of <code>Direction</code></h2>
+<h2 id="methods-of-direction">methods of <code>Direction</code></h2>
 <ul>
 <li>
 <p><code>get_all_cardinals()</code></p>
@@ -439,7 +439,7 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </blockquote>
 </li>
 </ul>
-<h1>constants</h1>
+<h1 id="constants">constants</h1>
 <ul>
 <li>
 <p><code>BLD_HOME</code></p>

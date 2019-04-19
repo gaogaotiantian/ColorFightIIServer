@@ -12,7 +12,7 @@
 .table-head {
     vertical-align: middle;
     background: rgba(217, 208, 235, 0.8);
-    background-image: linear-gradient(-180deg, rgb(227, 218, 231), rgb(215, 204, 223));
+    background-image: linear-gradient(-180deg, rgb(217, 218, 241), rgb(205, 204, 233));
     font-size: 1.3rem;
     font-weight: 700;
     color: #000;
@@ -33,7 +33,7 @@
 }
 
 .table-row-content {
-    background-image: linear-gradient(-180deg, rgb(227, 218, 231), rgb(215, 204, 223));
+    background-image: linear-gradient(-180deg, rgb(217, 218, 241), rgb(205, 204, 233));
     color: #000;
     border-radius: 20px 20px 5px 5px;
     border-top: solid 10px rgba(13, 6, 7, 1);

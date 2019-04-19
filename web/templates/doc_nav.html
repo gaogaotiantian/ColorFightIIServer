@@ -2,9 +2,47 @@
   <ul>
     <li class="nav-item">
       <a class="nav-link" href="/document/game_rules">GAME RULES</a>
+      {% if game_rules_display == True %}
+        <ul>
+          <li class="nav-item">
+            <a class="nav-link" href="#overview">Overview</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#game-flow">Game Flow</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#game-feature">Game Feature</a>
+          </li>
+        </ul>
+      {% endif %}
     </li>
     <li class="nav-item">
       <a class="nav-link" href="/document/api">API DOCUMENTATION</a>
+      {% if api_display == True %}
+        <ul>
+          <li class="nav-item">
+            <a class="nav-link" href="#colorfight">Colorfight</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#user">User</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#gamemap">GameMap</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#mapcell">MapCell</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#building">Building</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#position">Position</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#direction">Direction</a>
+          </li>
+        </ul>
+      {% endif %}
     </li>
   </ul>
 </nav>
