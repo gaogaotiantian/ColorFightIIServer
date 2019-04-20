@@ -38,7 +38,7 @@ function getConfig() {
     }
 
     var finish_time = $( "#finish-time-sel option:selected" ).val();
-    if( first_round_time != "same" ) {
+    if( finish_time != "same" ) {
         config[ "finish_time" ] = parseFloat( finish_time );
     }
 
