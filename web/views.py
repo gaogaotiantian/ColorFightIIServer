@@ -70,7 +70,7 @@ async def game_channel(request):
                 if curr_turn != game.turn:
                     curr_turn = game.turn
                     await ws.send_json(game.get_game_info())
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.04)
         finally:
             pass
     return ws
