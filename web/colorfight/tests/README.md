@@ -4,7 +4,7 @@
 The coverage tool should have been installed previously when install the requirements.txt file.
 If not, the simplest way is with pip
 ```
-$ pip install coverage
+$ pip install coverage3
 ```
 
 ## Execution
