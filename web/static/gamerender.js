@@ -32,6 +32,7 @@ const CMD_BUILD         = 'b';
 const CMD_UPGRADE       = 'u';
 const BLD_GOLD_MINE     = 'g';
 const BLD_ENERGY_WELL   = 'e';
+const BLD_FORTRESS      = 'f';
 
 // Derive the maximum board size. 
 const GAME_MAX_CELLS        = GAME_WIDTH * GAME_HEIGHT;
@@ -254,6 +255,26 @@ function draw_cell(x, y, currentCell) {
         }
     }
 
+    if (currentCell[ "building" ][ "name" ] == "fortress") {
+        let gold_mine_image = null;
+        switch(currentCell[ "building" ][ "level" ]) {
+            case 1:
+                fortress_image = PIXI.Sprite.from("/static/assets/fortressI.png");
+                break;
+            case 2:
+                fortress_image = PIXI.Sprite.from("/static/assets/fortressII.png");
+                break;
+            case 3:
+                fortress_image = PIXI.Sprite.from("/static/assets/fortressIII.png");
+                break;
+        }
+        if (fortress_image) {
+            fortress_image.x = x * cellSize;
+            fortress_image.y = y * cellSize;
+            gameStage.addChild(fortress_image);
+        }
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -403,6 +424,10 @@ function queue_mine(x, y) {
 
 function queue_well(x, y) {
     turnCommands.cmd_list.push(CMD_BUILD   + ' ' + x + ' ' + y + ' ' + BLD_ENERGY_WELL);
+}
+
+function queue_fortress(x, y) {
+    turnCommands.cmd_list.push(CMD_BUILD   + ' ' + x + ' ' + y + ' ' + BLD_FORTRESS);
 }
 
 function queue_upgrade(x, y) {
@@ -760,6 +785,8 @@ function create_cell_info(x, y) {
                     BASE_BUILD_COST, function(){queue_well(x, y);})); 
                 buttonDiv.appendChild(create_cost_button('Create Mine', 
                     BASE_BUILD_COST, function(){queue_mine(x, y);})); 
+                buttonDiv.appendChild(create_cost_button('Create Fortress', 
+                    BASE_BUILD_COST, function(){queue_fortress(x, y);})); 
             }
             else {
                 // There is a building. Draw upgrade choice. 
