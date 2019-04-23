@@ -99,6 +99,17 @@ gameRenderer.interactive = true;
 gameRenderer.plugins.interaction.on('mousedown', cell_click_handler);
 gameRenderer.plugins.interaction.on('mousemove', cell_hover_handler); 
 
+// An array to store the cell containers
+let cellContainers = new Array(GAME_HEIGHT);
+let cellContainersEmpty = true;
+for (var i = 0; i < cellContainers.length; i++) {
+    cellContainers[i] = new Array(GAME_WIDTH);
+    for (var j = 0; j < cellContainers[i].length; j++) {
+        cellContainers[i][j] = new PIXI.Container();
+        gameStage.addChild(cellContainers[i][j]);
+    }
+}
+
 // Coordinates are canvas coordinates, so rescaling is automatically handled. 
 
 function cell_hover_handler(hover) {
@@ -140,6 +151,7 @@ const assets = [
     "/static/assets/buildEffect.json",
     "/static/assets/upgradeEffect.json"
 ]
+
 PIXI.loader
     .add(assets)
     .load(setup)
@@ -155,6 +167,7 @@ function setup() {
         let asset_name = asset.split('/').pop().split('.')[0];
         animations[asset_name] = PIXI.loader.resources[asset].spritesheet.animations[asset_name];
     }
+    main();
 }
 
 let animationStartTime  = false;
@@ -198,17 +211,16 @@ function draw_game(ts) {
         maxTurn  = gameData["info"]["max_turn"];
         gameTurn.innerHTML = lastTurn + "/" + maxTurn;
 
-        // Clear the game board for redrawing. 
-        while (gameStage.children[0]) {
-            gameStage.removeChild(gameStage.children[0]);
-        }
-
         // Draw the game board. 
         for (let y = 0; y < 30; y++) {
             for (let x = 0; x < 30; x++) {
-                draw_cell(x, y, gameData["game_map"][y][x], prevGameData["game_map"][y][x]);
+                if (cellContainersEmpty || 
+                        has_changed(gameData["game_map"][y][x], prevGameData["game_map"][y][x])) {
+                    draw_cell(x, y, gameData["game_map"][y][x], prevGameData["game_map"][y][x]);
+                }
             }
         }
+        cellContainersEmpty = false;
     }
 
     // Always render the game for the animation
@@ -217,8 +229,22 @@ function draw_game(ts) {
     requestAnimationFrame(draw_game);
 }
 
+function has_changed(currentCell, prevCell) {
+    if (currentCell["building"]["name"] != prevCell["building"]["name"] || 
+            currentCell["building"]["level"] != prevCell["building"]["level"] ||
+            currentCell["owner"] != prevCell["owner"]) {
+        return true;
+    }
+    return false;
+}
+
 /* Draw Cell */
 function draw_cell(x, y, currentCell, prevCell) {
+    // Clear the cell container
+    while (cellContainers[y][x].children[0]) {
+        cellContainers[y][x].removeChild(cellContainers[y][x].children[0]);
+    }
+
     let base = new PIXI.Graphics();
 
     // Draw energy border. 
@@ -238,7 +264,7 @@ function draw_cell(x, y, currentCell, prevCell) {
 
     // TODO: Highlight clicked cell. 
 
-    gameStage.addChild( base );
+    cellContainers[y][x].addChild( base );
 
     // Draw building
     if (currentCell[ "building" ][ "name" ] != "empty") {
@@ -253,15 +279,14 @@ function draw_cell(x, y, currentCell, prevCell) {
 }
 
 function draw_building(x, y, building_name, building_level) {
-    let building_image = null;
     let file_name = building_name + building_level.toString();
     if (animations[file_name]) {
-        building_image = new PIXI.extras.AnimatedSprite(animations[file_name]);
+        let building_image = new PIXI.extras.AnimatedSprite(animations[file_name]);
         building_image.x = x * cellSize;
         building_image.y = y * cellSize;
         building_image.animationSpeed = (animations[file_name].length) / 60;
         building_image.play();
-        gameStage.addChild(building_image);
+        cellContainers[y][x].addChild(building_image);
     }
 }
 
@@ -273,7 +298,7 @@ function draw_building_effect(x, y) {
         build_effect_image.animationSpeed = animations["buildEffect"].length / 60;
         build_effect_image.loop = false;
         build_effect_image.play()
-        gameStage.addChild(build_effect_image);
+        cellContainers[y][x].addChild(build_effect_image);
     }
 }
 
@@ -285,7 +310,7 @@ function draw_upgrade_effect(x, y) {
         upgrade_effect_image.animationSpeed = animations["upgradeEffect"].length / 60;
         upgrade_effect_image.loop = false;
         upgrade_effect_image.play()
-        gameStage.addChild(upgrade_effect_image);
+        cellContainers[y][x].addChild(upgrade_effect_image);
     }
 }
 
@@ -325,11 +350,6 @@ function combine_color( src, dst, per ) {
                   + hex_combine(src.slice(3, 5), dst.slice(3, 5), per) 
                   + hex_combine(src.slice(5)   , dst.slice(5)   , per), 16);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Start the game board animation loop. 
-
-main();
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -27,6 +27,8 @@ class Colorfight:
             "register": [("username", "password"), ("uid",)],
             "command": [("cmd_list",), ()]
         }
+        self.dirty      = True
+        self._game_info = None
 
     def config(self, data):
         """
@@ -81,8 +83,10 @@ class Colorfight:
             if force or (time.time() - self.last_update > self.round_time):
                 do_update = True
         if do_restart:
+            self.dirty = True
             self.restart()
         elif do_update:
+            self.dirty = True
             self.last_update = time.time() 
             self.turn += 1
             self.errors = self.do_all_commands()
@@ -296,6 +300,8 @@ class Colorfight:
             if arg not in data:
                 return {"success": False, "err_msg": "{} is missing".format(arg)}
             arg_list.append(data[arg])
+
+        self.dirty = True
         
         # should be a tuple 
         success, result = getattr(self, action)(uid, *arg_list)
@@ -317,12 +323,17 @@ class Colorfight:
                 "width": GAME_WIDTH, \
                 "height": GAME_HEIGHT, \
                 "round_time": self.round_time}
+
     def get_game_info(self):
-        return {\
-                "turn": self.turn, \
-                "info": self.info(), \
-                "error": self.errors, \
-                "game_map":self.game_map.info(), \
-                "users": {user.uid: user.info() for user in self.users.values()} \
-        }
+        if self.dirty or self._game_info == None:
+            self.dirty = False
+            self._game_info = {\
+                    "turn": self.turn, \
+                    "info": self.info(), \
+                    "error": self.errors, \
+                    "game_map":self.game_map.info(), \
+                    "users": {user.uid: user.info() for user in self.users.values()} \
+            }
+
+        return self._game_info
 
