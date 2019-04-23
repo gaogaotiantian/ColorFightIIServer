@@ -66,6 +66,7 @@ class Colorfight:
 
     def restart(self):
         self.turn = 0
+        self.dirty = True
         self.users = {}
         self.errors = {}
         self.game_map = GameMap(self.height, self.width) 

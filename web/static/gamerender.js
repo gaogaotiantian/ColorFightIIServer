@@ -205,6 +205,8 @@ function draw_game(ts) {
     // frequently for animation, we need to take care of the sprites. We can not
     // simply clear and redraw for everything because animated sprites will not 
     // work with it.
+    //
+    // TODO: we probably have a race condition here for checking diff
     if (gameData && gameData["turn"] != lastTurn ) {
         currentTurnStartTime = ts;
         lastTurn = gameData["turn"];
