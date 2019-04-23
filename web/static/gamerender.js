@@ -48,9 +48,10 @@ const BASE_BUILD_COST       = 100;
 ////////////////////////////////////////////////////////////////////////////////
 // Game Variables
 
-let gameData    = false;
-let lastTurn    = -1;
-let maxTurn     = 500;
+let gameData     = false;
+let prevGameData = false;
+let lastTurn     = -1;
+let maxTurn      = 500;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Rendering Variables
@@ -122,7 +123,42 @@ function clamp(val, lower, upper) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Load assets here
+const assets = [
+    "/static/assets/energy_well1.json",
+    "/static/assets/energy_well2.json",
+    "/static/assets/energy_well3.json",
+    "/static/assets/gold_mine1.json",
+    "/static/assets/gold_mine2.json",
+    "/static/assets/gold_mine3.json",
+    "/static/assets/home1.json",
+    "/static/assets/home2.json",
+    "/static/assets/home3.json",
+    "/static/assets/fortress1.json",
+    "/static/assets/fortress2.json",
+    "/static/assets/fortress3.json",
+    "/static/assets/buildEffect.json",
+    "/static/assets/upgradeEffect.json"
+]
+PIXI.loader
+    .add(assets)
+    .load(setup)
+
+var energySheet = false;
+var buildEffectSheet = false;
+var animations = {};
+
+function setup() {
+    for (let i in assets) {
+        let asset = assets[i];
+        // This is evil
+        let asset_name = asset.split('/').pop().split('.')[0];
+        animations[asset_name] = PIXI.loader.resources[asset].spritesheet.animations[asset_name];
+    }
+}
+
 let animationStartTime  = false;
+let currentTurnStartTime = false;
 
 /* Appending the PIXI renderer to the DOM */
 function main() {
@@ -150,7 +186,14 @@ function draw_game(ts) {
         gameRenderer.view.style.height = (gameDim - 20) + "px";
     }
 
+    // We only draw the whole game for a new turn.
+    // Currently all the animations are sprites so we do not need to write our
+    // own animation functions. However, if we need to change some objects very
+    // frequently for animation, we need to take care of the sprites. We can not
+    // simply clear and redraw for everything because animated sprites will not 
+    // work with it.
     if (gameData && gameData["turn"] != lastTurn ) {
+        currentTurnStartTime = ts;
         lastTurn = gameData["turn"];
         maxTurn  = gameData["info"]["max_turn"];
         gameTurn.innerHTML = lastTurn + "/" + maxTurn;
@@ -163,17 +206,19 @@ function draw_game(ts) {
         // Draw the game board. 
         for (let y = 0; y < 30; y++) {
             for (let x = 0; x < 30; x++) {
-                draw_cell(x, y, gameData["game_map"][y][x]);
+                draw_cell(x, y, gameData["game_map"][y][x], prevGameData["game_map"][y][x]);
             }
         }
-
-        gameRenderer.render(gameStage);
     }
+
+    // Always render the game for the animation
+    gameRenderer.render(gameStage);
+    
     requestAnimationFrame(draw_game);
 }
 
 /* Draw Cell */
-function draw_cell(x, y, currentCell) {
+function draw_cell(x, y, currentCell, prevCell) {
     let base = new PIXI.Graphics();
 
     // Draw energy border. 
@@ -195,86 +240,54 @@ function draw_cell(x, y, currentCell) {
 
     gameStage.addChild( base );
 
-    // Draw home image if it's home
-    if (currentCell[ "building" ][ "name" ] == "home") {
-        let home_image = PIXI.Sprite.from('/static/assets/homeI.png');
-        switch(currentCell[ "building" ][ "level" ]) {
-            case 1:
-                home_image = PIXI.Sprite.from('/static/assets/homeI.png');
-                break;
-            case 2:
-                home_image = PIXI.Sprite.from('/static/assets/homeII.png');
-                break;
-            case 3:
-                home_image = PIXI.Sprite.from('/static/assets/homeIII.png');
-                break;
-        }
-        home_image.x = x * cellSize;
-        home_image.y = y * cellSize;
-        gameStage.addChild(home_image);
-    }
-
-    // Draw energy well and gold mine
-    if (currentCell[ "building" ][ "name" ] == "energy_well") {
-        let energy_well_image = null;
-        switch(currentCell[ "building" ][ "level" ]) {
-            case 1:
-                energy_well_image = PIXI.Sprite.from("/static/assets/energyI.png");
-                break;
-            case 2:
-                energy_well_image = PIXI.Sprite.from("/static/assets/energyII.png");
-                break;
-            case 3:
-                energy_well_image = PIXI.Sprite.from("/static/assets/energyIII.png");
-                break;
-        }
-        if (energy_well_image) {
-            energy_well_image.x = x * cellSize;
-            energy_well_image.y = y * cellSize;
-            gameStage.addChild(energy_well_image);
+    // Draw building
+    if (currentCell[ "building" ][ "name" ] != "empty") {
+        draw_building(x, y, currentCell["building"]["name"], currentCell["building"]["level"]);
+        if (prevCell["building"]["name"] == "empty") {
+            draw_building_effect(x, y);
+        } else if (prevCell["building"]["name"] == currentCell["building"]["name"] &&
+                prevCell["building"]["level"] != currentCell["building"]["level"]) {
+            console.log("upgrade")
+            draw_upgrade_effect(x, y)
         }
     }
+}
 
-    if (currentCell[ "building" ][ "name" ] == "gold_mine") {
-        let gold_mine_image = null;
-        switch(currentCell[ "building" ][ "level" ]) {
-            case 1:
-                gold_mine_image = PIXI.Sprite.from("/static/assets/goldI.png");
-                break;
-            case 2:
-                gold_mine_image = PIXI.Sprite.from("/static/assets/goldII.png");
-                break;
-            case 3:
-                gold_mine_image = PIXI.Sprite.from("/static/assets/goldIII.png");
-                break;
-        }
-        if (gold_mine_image) {
-            gold_mine_image.x = x * cellSize;
-            gold_mine_image.y = y * cellSize;
-            gameStage.addChild(gold_mine_image);
-        }
+function draw_building(x, y, building_name, building_level) {
+    let building_image = null;
+    let file_name = building_name + building_level.toString();
+    if (animations[file_name]) {
+        building_image = new PIXI.extras.AnimatedSprite(animations[file_name]);
+        building_image.x = x * cellSize;
+        building_image.y = y * cellSize;
+        building_image.animationSpeed = (animations[file_name].length) / 60;
+        building_image.play();
+        gameStage.addChild(building_image);
     }
+}
 
-    if (currentCell[ "building" ][ "name" ] == "fortress") {
-        let gold_mine_image = null;
-        switch(currentCell[ "building" ][ "level" ]) {
-            case 1:
-                fortress_image = PIXI.Sprite.from("/static/assets/fortressI.png");
-                break;
-            case 2:
-                fortress_image = PIXI.Sprite.from("/static/assets/fortressII.png");
-                break;
-            case 3:
-                fortress_image = PIXI.Sprite.from("/static/assets/fortressIII.png");
-                break;
-        }
-        if (fortress_image) {
-            fortress_image.x = x * cellSize;
-            fortress_image.y = y * cellSize;
-            gameStage.addChild(fortress_image);
-        }
+function draw_building_effect(x, y) {
+    if (animations["buildEffect"]) {
+        let build_effect_image = new PIXI.extras.AnimatedSprite(animations["buildEffect"]);
+        build_effect_image.x = x * cellSize;
+        build_effect_image.y = y * cellSize;
+        build_effect_image.animationSpeed = animations["buildEffect"].length / 60;
+        build_effect_image.loop = false;
+        build_effect_image.play()
+        gameStage.addChild(build_effect_image);
     }
+}
 
+function draw_upgrade_effect(x, y) {
+    if (animations["upgradeEffect"]) {
+        let upgrade_effect_image = new PIXI.extras.AnimatedSprite(animations["upgradeEffect"]);
+        upgrade_effect_image.x = x * cellSize;
+        upgrade_effect_image.y = y * cellSize;
+        upgrade_effect_image.animationSpeed = animations["upgradeEffect"].length / 60;
+        upgrade_effect_image.loop = false;
+        upgrade_effect_image.play()
+        gameStage.addChild(upgrade_effect_image);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -322,7 +335,11 @@ main();
 ////////////////////////////////////////////////////////////////////////////////
 
 gameSocket.onmessage = function( msg ) {
-    gameData = JSON.parse( msg.data );
+    prevGameData = gameData;
+    gameData     = JSON.parse( msg.data );
+    if (!prevGameData) {
+        prevGameData = gameData;
+    }
 
     // Update the user-list sidebar. 
     draw_user_list();
