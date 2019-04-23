@@ -247,7 +247,6 @@ function draw_cell(x, y, currentCell, prevCell) {
             draw_building_effect(x, y);
         } else if (prevCell["building"]["name"] == currentCell["building"]["name"] &&
                 prevCell["building"]["level"] != currentCell["building"]["level"]) {
-            console.log("upgrade")
             draw_upgrade_effect(x, y)
         }
     }
