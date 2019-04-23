@@ -120,5 +120,5 @@ def test_upgrade():
     assert(len(info['error'][uid]) == 0)
     cell = info['game_map'][y][x]
     assert(cell['building']['level'] == 2)
-    assert[info['users'][uid]['tech_level'] == 2]
+    assert(info['users'][uid]['tech_level'] == 2)
 

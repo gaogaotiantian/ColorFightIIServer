@@ -4,13 +4,13 @@
 The coverage tool should have been installed previously when install the requirements.txt file.
 If not, the simplest way is with pip
 ```
-$ pip install coverage
+$ pip install coverage3
 ```
 
 ## Execution
 When running the test code, use the following command 
 ```
-$ coverage run -m pytest test_file_name
+$ coverage3 run -m pytest test_file_name
 ```
 Your program runs just as if it had been invoked with the Python command line.
 The -m flag shows the line numbers of missing statements.
@@ -19,7 +19,7 @@ Otherwise only statement coverage is measured.
 
 In order to see the basic report of the test, use the following report command.
 ```
-$ coverage report -m
+$ coverage3 report -m
 ```
 
 ## Data file
@@ -27,7 +27,7 @@ Coverage.py collects execution data in a file called ”.coverage”.
 By default, each run of your program starts with an empty data set.
 To erase the collected data, use the erase command:
 ```
-$ coverage erase
+$ coverage3 erase
 ```
 
 ## Reporting
@@ -37,7 +37,7 @@ Each module name links to the source file decorated to show the status of each l
 For example, if you prefer a style of HTML report, the following command 
 
 ```
-$ coverage html
+$ coverage3 html
 ```
 specifies an output directory defaulting to “htmlcov”.
 You will be able to see all your html report in that directory.
