@@ -8,6 +8,8 @@ function restartGame( data ) {
         success: function(msg) {
             if (!msg['success']) {
                 alert(msg['err_msg']);
+            } else {
+                location.reload();
             }
         }
     } );
