@@ -122,9 +122,10 @@ commands will be parsed in order.
 1. Parse all the commands
     1. building will be built
     2. upgrade will finish
+    3. resource will be spent
 2. Update cells
     1. parse all the attack commands, calculate the owner of the cell for next
-       round.
+       round. if buildings are destroyed, compute effects
     2. ```gold``` and ```energy``` income will be calculated based on the new
        possessions.
     3. ```tech_level``` will be determined.
@@ -176,18 +177,42 @@ A building on a ```MapCell``` will change the amount of energy and gold the
 cell provides. 
 
 * ```Home``` is automatically built on the cell that the player spawns. 
-    * ```attack_cost``` 1000
+  ```Home``` has a very high ```attack_cost``` which is determined by the 
+  ```level``` of the building and the ```energy``` the user owns. ```Home```
+  also provides fixed amount of ```energy``` and ```gold```. As ```home``` 
+  stores the gold of the user, ```1/3``` of the total ```gold``` the user owns
+  will be stolen if ```Home``` is destroyed.
+    * ```attack_cost``` = ```(1000 + user.energy + force_field) * level```
     * ```upgrade_cost``` = ```[(1000, 1000), (2000, 2000)]```
     * ```energy``` = ```10 * level```
     * ```gold``` = ```10 * level```
-* ```EnergyWell``` is the building to increase the energy production.
+    * Destroy effect: ```1/3``` of ```gold``` will be stolen by attacker
+* ```EnergyWell``` is the building to increase the energy production. When 
+  ```EnergyWell``` is destroyed, the energy it is producing will become the 
+  ```force_field``` of the cell after it's taken.
     * ```cost``` = ```100 gold```
     * ```upgrade_cost``` = ```[(200, 0), (400, 0)]```
     * ```energy``` = ```natural_energy * (1 + level)```
-* ```GoldMine``` is the building to increase the gold production.
+    * Destroy effect: ```(50, 150, 350)[level - 1]``` ```force_field``` will be
+      added to the cell
+* ```GoldMine``` is the building to increase the gold production. When 
+  ```GoldMine``` is destoyed, the gold left in there will become the trophy of 
+  the attacker.
     * ```cost``` = ```100 gold```
     * ```upgrade_cost``` =  ```[(200, 0), (400, 0)]```
     * ```gold ``` = ```natural_gold * (1 + level)``` 
+    * Destroy effect: ```(50, 150, 350)[level-1]``` ```gold``` will be added to
+      the attacker
+* ```Fortress``` is the building to improve the defense of the territory. A 
+  ```Fortress``` will increase the amount of ```force_field``` of both the cell
+  it's on and all the adjacent owned cells. It will also decrease the amount of
+  ```force_field``` of all the adjacent enemy cells.
+    * ```cost``` = ```100 gold```
+    * ```upgrade_cost``` =  ```[(200, 0), (400, 0)]```
+    * ```adjacent_forcefield_incr``` = ```2 + level```
+    * ```self_forcefield_incr``` = ```5 * level```
+    * ```adjacent_forcefield_decr``` = ```10 * (1 + level)```
+
 
 ```upgrade_cost``` = [level2 cost(gold, energy), level3 cost(gold, energy)]
 
@@ -206,14 +231,20 @@ and the total energy all players put to attack this cell in that round.
 ```force_field``` will be added to ```attack_cost```
 
 After each round, ```force_field``` will be updated based on surrounding cells.
-For each enemy surrounding cell, ```force_field``` will reduce ```30```. For
-each self cell, ```force_field``` will increase ```5```.
+For each enemy surrounding cell, ```force_field``` will reduce ```10```. For
+each self cell, ```force_field``` will increase ```2```.
 
 > For example. Player A owns cell (2, 2) and currently the cell has 100 
   ```force_field```. Player A owns (2, 1) and (1, 2), too. (2, 3) is empty and
   Player B owns (3, 2). Therefore the cell (2, 2) has 2 self cells and 1 emeny
-  cell around, so for each round, the ```force_field``` will reduce 30 - 2 * 5
-  = 20.
+  cell around, so for each round, the ```force_field``` will reduce 10 - 2 * 2
+  = 6.
+
+> ```Fortress``` will affect the change of ```force_field```. If Player A owns
+  cell (2, 2) and has a level 1 ```Fortress``` on it. Player A owns (2, 1) with
+  a level 2 ```Fortress``` and (1, 2) with nothing. Player B owns (2, 3) with
+  a level 1 ```Fortress``` and (3, 2) with nothing. The cell (2, 2) will have 
+  a ```force_field``` change for ```5 + 4 + 2 - 20 - 10``` = ```-19```
 
 ### GameMap
 
