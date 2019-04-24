@@ -17,6 +17,7 @@ class Colorfight:
         self.height = GAME_HEIGHT
         self.round_time = ROUND_TIME
         self.first_round_time = ROUND_TIME
+        self.allow_join_after_start = True
         self.admin_password = None
         self.finish_time = 0
         self.last_update = time.time()
@@ -57,6 +58,11 @@ class Colorfight:
                         self.finish_time = val
                     else:
                         return False, "finish_time value invalid"
+                elif field == "allow_join_after_start":
+                    if val == True or val == False:
+                        self.allow_join_after_start = val
+                    else:
+                        return False, "allow_join_after_start value invalid"
                 else:
                     return False, "Invalid field {}".format(field)
         except Exception as e:
@@ -247,15 +253,18 @@ class Colorfight:
                     return True, (user.uid,)
                 else:
                     return False, "Username exists"
-        for uid in range(1, len(self.users) + 2):
-            if uid not in self.users:
-                user = User(uid, username, password)
-                if self.game_map.born(user):
-                    self.users[uid] = user
-                    return True, (uid,)
-                else:
-                    return False, "Map is full"
-        raise Exception("Should never be here")
+        if self.allow_join_after_start or self.turn == 0:
+            for uid in range(1, len(self.users) + 2):
+                if uid not in self.users:
+                    user = User(uid, username, password)
+                    if self.game_map.born(user):
+                        self.users[uid] = user
+                        return True, (uid,)
+                    else:
+                        return False, "Map is full"
+            raise Exception("Should never be here")
+        else:
+            return False, "You are not allowed to join after the game starts"
 
     def command(self, uid, cmd_list):
         if type(cmd_list) != list:

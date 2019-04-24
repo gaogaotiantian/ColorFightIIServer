@@ -42,6 +42,11 @@ function getConfig() {
         config[ "finish_time" ] = parseFloat( finish_time );
     }
 
+    var allow_join_after_start = $( "#allow-join-after-start-sel option:selected" ).val();
+    if( allow_join_after_start != "same" ) {
+        config[ "allow_join_after_start" ] = (allow_join_after_start == "true");
+    }
+
     data['config'] = config;
     data['gameroom_id'] = window.location.pathname.substr(window.location.pathname.lastIndexOf('/')+1);
 

@@ -33,6 +33,10 @@ class MapCell:
     def is_home(self):
         return self.building.is_home
 
+    @property
+    def is_empty(self):
+        return self.building.is_empty
+
     def attack(self, uid, energy):
         self.attacker_list.append((uid, energy))
 
@@ -112,6 +116,7 @@ class GameMap:
             user.energy_source = 0
             user.gold_source = 0
             user.tech_level = 0
+            user.building_number = {}
 
         for x in range(self.width):
             for y in range(self.height):
@@ -125,6 +130,10 @@ class GameMap:
                     # Update tech_level
                     if cell.is_home and cell.building.level > users[uid].tech_level:
                         users[uid].tech_level = cell.building.level
+                    # Update building number
+                    if not cell.is_empty:
+                        users[uid].building_number[cell.building.name] = \
+                                users[uid].building_number.get(cell.building.name, 0) + 1
                 else:
                     if cell.owner != 0:
                         print(cell.owner)

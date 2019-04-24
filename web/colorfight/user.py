@@ -9,6 +9,7 @@ class User:
         self.gold_source = 0
         self.tech_level = 1
         self.tax_level = 0
+        self.building_number = {}
         self.dead = False
         self.cells = {}
         self.cmd_list = []
@@ -36,4 +37,5 @@ class User:
                 "tech_level": self.tech_level, \
                 "tax_level": self.tax_level, \
                 "tax_amount": 2 *self.tax_level * len(self.cells), \
+                "building_number": self.building_number, \
                 "cells": [cell.position.info() for cell in self.cells.values()]}
