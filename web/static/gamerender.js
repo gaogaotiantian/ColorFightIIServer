@@ -671,7 +671,7 @@ function create_user_info(uid, user) {
         [create_p(user['cells'].length + '/' + GAME_MAX_CELLS)],
         [create_p(user['building_number']['energy_well'] || 0, '/static/assets/energy_well_icon.png')],
         [create_p(user['building_number']['gold_mine'] || 0, '/static/assets/gold_mine_icon.png')],
-        [create_p(user['building_number']['fortress_icon'] || 0, '/static/assets/fortress_icon.png')],
+        [create_p(user['building_number']['fortress'] || 0, '/static/assets/fortress_icon.png')],
     ];
 
     // Create a set of nodes by [column][row]. 
