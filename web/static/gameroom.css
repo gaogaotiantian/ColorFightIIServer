@@ -22,7 +22,7 @@ html, body {
 
 .game-status-header{
     color: #fff;
-    font-size: 1.3vw;
+    font-size: 1.2vw;
     margin-bottom: 0.1vw;
 }
 
@@ -32,8 +32,8 @@ html, body {
     padding       : 0.5vw;
     margin-bottom : 0.1vw;
     font-family: 'Space Mono', monospace;
-    font-size  : 1vw;
-    min-width  : 16vw;
+    font-size  : 0.9vw;
+    min-width  : 17vw;
 }
 
 .game-status-section p {

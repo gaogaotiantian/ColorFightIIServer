@@ -579,7 +579,7 @@ const defaultUser = {
     'energy_source'   : 0, 
     'gold_source'     : 0, 
     'tax_amount'      : 0,
-    'building_number' : {},
+    'building_number' : {"energy_well":100000000},
     'cells'           : [], 
 };
 
@@ -695,7 +695,7 @@ function create_user_info(uid, user) {
     // Construct the tech level info. 
     userDiv.appendChild(create_p('Tech Level: ' + user['tech_level']));
     // Construct the cell count info. 
-    userDiv.appendChild(create_flex_table(userCellTable, colClass = "pr-2"));
+    userDiv.appendChild(create_flex_table(userCellTable, colClass = "pr-1"));
     // Construct the resource table as specified above. 
     userDiv.appendChild(create_flex_table(userResourceTable));
 
@@ -996,7 +996,7 @@ function create_p(text, args = {}) {
 function add_img_before(node, src) {
     node.style.backgroundImage = 'url("' + src + '")';
     node.style.backgroundRepeat = 'no-repeat';
-    node.style.paddingLeft = "1.7vw";
+    node.style.paddingLeft = "1.5vw";
     node.style.backgroundSize  = "contain";
     return node;
 }
