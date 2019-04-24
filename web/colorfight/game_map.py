@@ -37,23 +37,38 @@ class MapCell:
     def is_empty(self):
         return self.building.is_empty
 
+    @property
+    def adjacent_forcefield_incr(self):
+        return self.building.adjacent_forcefield_incr
+
+    @property
+    def adjacent_forcefield_decr(self):
+        return self.building.adjacent_forcefield_decr
+
+    @property
+    def self_forcefield_incr(self):
+        return self.building.self_forcefield_incr
+
     def attack(self, uid, energy):
         self.attacker_list.append((uid, energy))
 
     def upgrade(self):
         self.building.upgrade()
 
-    def update(self):
+    def update(self, users):
+        if self.is_home:
+            self.building.stored_energy = users[self.owner].energy
         # Change owner based on attacker list
         if self.attacker_list:
             max_id, max_energy = max(self.attacker_list, key = lambda x: x[1])
             total_energy = sum([x[1] for x in self.attacker_list])
             equivalent_energy = max_energy * 2 - total_energy 
             if equivalent_energy >= self.attack_cost:
-                self.force_field = int(min(1000, 2*(equivalent_energy - self.attack_cost)))
+                self.force_field = 2*(equivalent_energy - self.attack_cost)
                 if self.owner != max_id:
-                    self.building = Empty()
-                self.owner = max_id
+                    # this cell changed owner. Do the callback 
+                    self.building.taken(self, users, self.owner, max_id)
+                self.force_field = min(1000, self.force_field)
             self.attacker_list = []
 
     def info(self):
@@ -121,7 +136,7 @@ class GameMap:
         for x in range(self.width):
             for y in range(self.height):
                 cell = self._cells[y][x]
-                cell.update()
+                cell.update(users)
                 uid = cell.owner
                 if uid in users:
                     users[uid].cells[cell.position] = cell
@@ -148,12 +163,10 @@ class GameMap:
                 for pos in cell.position.get_surrounding_cardinals():
                     if self[pos].owner != 0:
                         if self[pos].owner != cell.owner:
-                            surrounding_enemy_number += 1
+                            cell.force_field -= cell.adjacent_forcefield_decr
                         else:
-                            surrounding_self_number  += 1
-                cell.force_field += surrounding_self_number * 5 
-                cell.force_field -= surrounding_enemy_number * 30
-                cell.force_field += cell.building.get_force_field_increase(cell)
+                            cell.force_field += cell.adjacent_forcefield_incr
+                cell.force_field += cell.self_forcefield_incr
                 cell.force_field  = clip(cell.force_field, 0, 1000)
 
     def info(self):

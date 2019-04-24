@@ -785,11 +785,7 @@ function create_cell_info(x, y) {
     // Construct the attack cost string. 
 
     let costString = 'Cost: ';
-    let attackCost = cell['natural_cost'];
-    if (building['name'] == 'home') {
-        // Home has a base attack cost of 1000. 
-        attackCost = 1000; 
-    }
+    let attackCost = cell['attack_cost'];
     costString += String(attackCost); 
 
     const forceField = cell['force_field'];

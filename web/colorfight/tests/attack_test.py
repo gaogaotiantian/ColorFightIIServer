@@ -59,7 +59,7 @@ def test_update_attack_cost():
     game.update(True)
     expected_energy = 10000 - 300 + 10 + game.game_map._cells[attack_y][x].natural_energy
     assert (game.users[uid].energy == expected_energy)
-    expected_force_field = 2 * (300-200) + 5
+    expected_force_field = 2 * (300-200) + 2
     assert (game.game_map._cells[attack_y][x].force_field == min(1000,expected_force_field))
     expected_attack_cost = expected_force_field + 200
     assert(len(game.errors[uid]) == 0)
