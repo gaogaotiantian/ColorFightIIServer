@@ -580,6 +580,7 @@ const defaultUser = {
     'tech_level'      : 0, 
     'energy_source'   : 0, 
     'gold_source'     : 0, 
+    'tax_amount'      : 0,
     'building_number' : {},
     'cells'           : [], 
 };
@@ -646,9 +647,9 @@ function get_user_info(uid) {
 function create_user_info(uid, user) {
     // [color box] username (dead/in-game)
     // tech_level
-    // cells owned / total cells
-    // energy + energy_source
-    //   gold + gold_source
+    // cells owned / total cells  energy_well num  gold_mine num  fortress num
+    // energy_icon energy + energy_source - tax_amount
+    // gold_icon   gold   + gold_source   - tax_amount
 
     const userDiv       = document.createElement('div');
     userDiv.className   = 'game-status-section';
@@ -661,24 +662,31 @@ function create_user_info(uid, user) {
     // | Total | + | Rate | Type |
 
     // Construct the internal node strings. 
-    const energyTotal   = create_p(user['energy'], '/static/assets/energy_icon.png');
-    const goldTotal     = create_p(user['gold'], '/static/assets/gold_icon.png');
+    const energyTotal   = create_p(user['energy'], {'img_src': '/static/assets/energy_icon.png'});
+    const goldTotal     = create_p(user['gold'],   {'img_src': '/static/assets/gold_icon.png'});
     // Right align toward the '+'. 
     energyTotal.className   = 'text-right';
     goldTotal.className     = 'text-right';
 
     const userCellTable = [
         [create_p(user['cells'].length + '/' + GAME_MAX_CELLS)],
-        [create_p(user['building_number']['energy_well'] || 0, '/static/assets/energy_well_icon.png')],
-        [create_p(user['building_number']['gold_mine'] || 0, '/static/assets/gold_mine_icon.png')],
-        [create_p(user['building_number']['fortress'] || 0, '/static/assets/fortress_icon.png')],
+        [create_p(user['building_number']['energy_well'] || 0, {'img_src': '/static/assets/energy_well_icon.png'})],
+        [create_p(user['building_number']['gold_mine']   || 0, {'img_src': '/static/assets/gold_mine_icon.png'})],
+        [create_p(user['building_number']['fortress']    || 0, {'img_src': '/static/assets/fortress_icon.png'})],
     ];
 
     // Create a set of nodes by [column][row]. 
     const userResourceTable = [
-        [energyTotal                    , goldTotal                     ], 
-        [create_p('+')                  , create_p('+')                 ], 
-        [create_p(user['energy_source']), create_p(user['gold_source']) ], 
+        [energyTotal,                    
+                      goldTotal                     ], 
+        [create_p('+'),                  
+                      create_p('+')                 ], 
+        [create_p(user['energy_source'], {"color":"#008000"}), 
+                      create_p(user['gold_source'], {"color":"#008000"}) ], 
+        [create_p('-'), 
+                      create_p('-')                 ], 
+        [create_p(user['tax_amount'], {"color":"#E00000"}), 
+                      create_p(user['tax_amount'], {"color":"#E00000"}) ], 
     ]; 
 
     ///////////////////////////////////////////////////////
@@ -751,8 +759,8 @@ function create_cell_info(x, y) {
     // | Rate | Base | Type |
 
     // Construct the internal node strings. 
-    const energyRate        = create_p(cell['energy'], '/static/assets/energy_icon.png');
-    const goldRate          = create_p(cell['gold'], '/static/assets/gold_icon.png');
+    const energyRate        = create_p(cell['energy'], {'img_src': '/static/assets/energy_icon.png'});
+    const goldRate          = create_p(cell['gold'],   {'img_src': '/static/assets/gold_icon.png'});
     // Right align toward the base. 
     energyRate.className    = 'text-right';
     goldRate.className      = 'text-right';
@@ -973,11 +981,14 @@ function create_flex_table(tableNodes, colClass = "")
 }
 
 // Create a basic <p> node with a text body. 
-function create_p(text, img_src = null) {
+function create_p(text, args = {}) {
     const node = document.createElement('p');
     node.appendChild(document.createTextNode(text));
-    if (img_src != null) {
-        add_img_before(node, img_src)
+    if ('img_src' in args) {
+        add_img_before(node, args['img_src'])
+    }
+    if ('color' in args) {
+        node.style.color = args['color'];
     }
     return node; 
 }
