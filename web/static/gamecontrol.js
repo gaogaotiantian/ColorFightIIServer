@@ -53,8 +53,57 @@ function getConfig() {
     return data;
 }
 
+/* View in fullscreen */
+function openFullscreen(elem) {
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+    } else if (elem.mozRequestFullScreen) { /* Firefox */
+        elem.mozRequestFullScreen();
+    } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+        elem.msRequestFullscreen();
+    }
+}
+
+/* Close fullscreen */
+function closeFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.mozCancelFullScreen) { /* Firefox */
+        document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) { /* IE/Edge */
+        document.msExitFullscreen();
+    }
+}
+
+function fullScreenHandler() {
+    if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+        ///fire your event
+        $(' #expand-button ').show();
+        $(' #compress-button' ).hide();
+    } else {
+        $(' #expand-button ').hide();
+        $(' #compress-button' ).show();
+    }
+}  
 $( function() {
     $( '#restart-button' ).click( function() {
         restartGame( getConfig() );
+    } );
+
+    document.addEventListener('fullscreenchange', fullScreenHandler);
+    document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+    document.addEventListener('mozfullscreenchange', fullScreenHandler);
+    document.addEventListener('MSFullscreenChange', fullScreenHandler);
+
+    $( '#expand-button' ).click( function() {
+        openFullscreen(document.documentElement);
+    } );
+
+    $( '#compress-button ').click( function() {
+        closeFullscreen();
     } );
 } );
