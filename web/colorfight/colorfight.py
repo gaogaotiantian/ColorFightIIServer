@@ -81,6 +81,7 @@ class Colorfight:
         self.dirty = True
         self.users = {}
         self.errors = {}
+        self.last_update = time.time() 
         self.game_map = GameMap(self.height, self.width) 
 
     def update(self, force = False):
@@ -100,7 +101,6 @@ class Colorfight:
             self.restart()
         elif do_update:
             self.dirty = True
-            self.last_update = time.time() 
             self.turn += 1
             self.errors = self.do_all_commands()
             # 1. Update all the cells based on attackers
@@ -109,6 +109,7 @@ class Colorfight:
             self.update_cells()
             # 2. Update all the users for gold and energy
             self.update_users()
+            self.last_update = time.time() 
 
     def update_cells(self):
         self.game_map.update_cells(self.users)
