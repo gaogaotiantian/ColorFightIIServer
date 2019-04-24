@@ -572,15 +572,16 @@ function create_user_box(uid, username) {
 
 // Default user when no UID is specified, but we want to fill in the infos. 
 const defaultUser = { 
-    'uid'           : 0, 
-    'username'      : 'None', 
-    'energy'        : 0, 
-    'gold'          : 0, 
-    'dead'          : false, 
-    'tech_level'    : 0, 
-    'energy_source' : 0, 
-    'gold_source'   : 0, 
-    'cells'         : [], 
+    'uid'             : 0, 
+    'username'        : 'None', 
+    'energy'          : 0, 
+    'gold'            : 0, 
+    'dead'            : false, 
+    'tech_level'      : 0, 
+    'energy_source'   : 0, 
+    'gold_source'     : 0, 
+    'building_number' : {},
+    'cells'           : [], 
 };
 
 // Draw the USER INFO section. 
@@ -660,18 +661,24 @@ function create_user_info(uid, user) {
     // | Total | + | Rate | Type |
 
     // Construct the internal node strings. 
-    const energyTotal   = create_p(user['energy']);
-    const goldTotal     = create_p(user['gold']);
+    const energyTotal   = create_p(user['energy'], '/static/assets/energy_icon.png');
+    const goldTotal     = create_p(user['gold'], '/static/assets/gold_icon.png');
     // Right align toward the '+'. 
     energyTotal.className   = 'text-right';
     goldTotal.className     = 'text-right';
+
+    const userCellTable = [
+        [create_p(user['cells'].length + '/' + GAME_MAX_CELLS)],
+        [create_p(user['building_number']['energy_well'] || 0, '/static/assets/energy_well_icon.png')],
+        [create_p(user['building_number']['gold_mine'] || 0, '/static/assets/gold_mine_icon.png')],
+        [create_p(user['building_number']['fortress_icon'] || 0, '/static/assets/fortress_icon.png')],
+    ];
 
     // Create a set of nodes by [column][row]. 
     const userResourceTable = [
         [energyTotal                    , goldTotal                     ], 
         [create_p('+')                  , create_p('+')                 ], 
         [create_p(user['energy_source']), create_p(user['gold_source']) ], 
-        [create_p('Energy')             , create_p('Gold')              ], 
     ]; 
 
     ///////////////////////////////////////////////////////
@@ -682,7 +689,7 @@ function create_user_info(uid, user) {
     // Construct the tech level info. 
     userDiv.appendChild(create_p('Tech Level: ' + user['tech_level']));
     // Construct the cell count info. 
-    userDiv.appendChild(create_p(user['cells'].length + '/' + GAME_MAX_CELLS));
+    userDiv.appendChild(create_flex_table(userCellTable, colClass = "pr-2"));
     // Construct the resource table as specified above. 
     userDiv.appendChild(create_flex_table(userResourceTable));
 
@@ -744,8 +751,8 @@ function create_cell_info(x, y) {
     // | Rate | Base | Type |
 
     // Construct the internal node strings. 
-    const energyRate        = create_p(cell['energy']);
-    const goldRate          = create_p(cell['gold']);
+    const energyRate        = create_p(cell['energy'], '/static/assets/energy_icon.png');
+    const goldRate          = create_p(cell['gold'], '/static/assets/gold_icon.png');
     // Right align toward the base. 
     energyRate.className    = 'text-right';
     goldRate.className      = 'text-right';
@@ -760,7 +767,6 @@ function create_cell_info(x, y) {
     const cellResourceTable = [
         [energyRate         , goldRate          ], 
         [energyBase         , goldBase          ], 
-        [create_p('Energy') , create_p('Gold')  ], 
     ]; 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -939,7 +945,7 @@ function create_button(text, click_handler)
 ////////////////////////////////////////////////////////////////////////////////
 
 // Create a 2D vertical-aligned flex table from a 2D table of nodes. 
-function create_flex_table(tableNodes)
+function create_flex_table(tableNodes, colClass = "")
 {
     // Create a d-flex table. 
     const tableDiv      = document.createElement('div');
@@ -949,6 +955,12 @@ function create_flex_table(tableNodes)
     for (let i = 0; i < tableNodes.length; i++) {
         let colDiv      = document.createElement('div');
         let colNodes    = tableNodes[i]; 
+        
+        // Apply column classes
+        if (colClass) {
+            colDiv.className += " " + colClass;
+        }
+
         // Construct one row per resource type. 
         for (let j = 0; j < colNodes.length; j++) {
             colDiv.appendChild(colNodes[j]);
@@ -961,10 +973,21 @@ function create_flex_table(tableNodes)
 }
 
 // Create a basic <p> node with a text body. 
-function create_p(text) {
+function create_p(text, img_src = null) {
     const node = document.createElement('p');
     node.appendChild(document.createTextNode(text));
+    if (img_src != null) {
+        add_img_before(node, img_src)
+    }
     return node; 
+}
+
+function add_img_before(node, src) {
+    node.style.backgroundImage = 'url("' + src + '")';
+    node.style.backgroundRepeat = 'no-repeat';
+    node.style.paddingLeft = "1.7vw";
+    node.style.backgroundSize  = "contain";
+    return node;
 }
 
 // Clear an entire div. 
