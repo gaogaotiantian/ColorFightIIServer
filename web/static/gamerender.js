@@ -579,7 +579,7 @@ const defaultUser = {
     'energy_source'   : 0, 
     'gold_source'     : 0, 
     'tax_amount'      : 0,
-    'building_number' : {"energy_well":100000000},
+    'building_number' : {},
     'cells'           : [], 
 };
 
