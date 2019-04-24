@@ -185,12 +185,9 @@ function draw_game(ts) {
 
     let animationProgress = animationStartTime - ts;
 
-    // Limit the dimension by width. 
-    // We have a 10px padding, so the game dimension needs to minus 10*2 = 20 
-    gameDim = gameCol.clientWidth - 20;
-
-    // Limit the dimension by height. 
-    gameDim = Math.min(gameDim, window.innerHeight - gameRow.offsetTop); 
+    // For any reasonable screens, we should expect the height be the limit
+    // Limit the dimension by height and screen width. 
+    gameDim = Math.min(window.innerWidth * 0.6, window.innerHeight - gameRow.offsetTop); 
 
     if (gameDiv.clientWidth != gameDim) {
         gameDiv.setAttribute("style", "width:" + gameDim + "px; height:" + gameDim + "px");
@@ -501,9 +498,10 @@ function draw_user_list() {
         userDiv.onmouseover = user_hover_handler; 
         userDiv.onmouseout  = user_out_handler; 
 
-        userGold = create_p(user['gold']);
+        userGold = create_p(user['gold'], {'color':'#555500'});
         // Align the gold value to the right of the entry. 
-        userGold.style = 'margin-left: auto';
+        userGold.style.marginLeft = 'auto';
+        userGold.className += ' pl-1';
         userDiv.appendChild(userGold);
 
         // Append the row to the list. 
@@ -833,11 +831,11 @@ function create_cell_info(x, y) {
             // We are the owner. We can either build or upgrade. 
             if (building['name'] == 'empty') {
                 // There is no building. Draw building choices. 
-                buttonDiv.appendChild(create_cost_button('Create Well', 
+                buttonDiv.appendChild(create_cost_button('Build Well', 
                     BASE_BUILD_COST, function(){queue_well(x, y);})); 
-                buttonDiv.appendChild(create_cost_button('Create Mine', 
+                buttonDiv.appendChild(create_cost_button('Build Mine', 
                     BASE_BUILD_COST, function(){queue_mine(x, y);})); 
-                buttonDiv.appendChild(create_cost_button('Create Fortress', 
+                buttonDiv.appendChild(create_cost_button('Build Fort', 
                     BASE_BUILD_COST, function(){queue_fortress(x, y);})); 
             }
             else {
@@ -944,10 +942,12 @@ function create_cost_button(name, cost, click_handler) {
 
 function create_button(text, click_handler)
 {
+    let p = document.createElement('p');
     let button = document.createElement('BUTTON');
     button.innerHTML    = text; 
     button.onclick      = click_handler; 
-    return button; 
+    p.appendChild(button);
+    return p; 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
