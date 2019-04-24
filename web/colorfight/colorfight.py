@@ -18,6 +18,7 @@ class Colorfight:
         self.round_time = ROUND_TIME
         self.first_round_time = ROUND_TIME
         self.allow_join_after_start = True
+        self.allow_manual_mode      = True
         self.admin_password = None
         self.finish_time = 0
         self.last_update = time.time()
@@ -63,6 +64,11 @@ class Colorfight:
                         self.allow_join_after_start = val
                     else:
                         return False, "allow_join_after_start value invalid"
+                elif field == "allow_manual_mode":
+                    if val == True or val == False:
+                        self.allow_manual_mode = val
+                    else:
+                        return False, "allow_manual_mode value invalid"
                 else:
                     return False, "Invalid field {}".format(field)
         except Exception as e:
@@ -332,7 +338,9 @@ class Colorfight:
         return {"max_turn": self.max_turn, \
                 "width": GAME_WIDTH, \
                 "height": GAME_HEIGHT, \
-                "round_time": self.round_time}
+                "round_time": self.round_time, \
+                "allow_manual_mode": self.allow_manual_mode, \
+        }
 
     def get_game_info(self):
         if self.dirty or self._game_info == None:
