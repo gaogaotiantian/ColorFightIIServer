@@ -22,7 +22,8 @@ async def index(request):
 
 @aiohttp_jinja2.template('gameroom.html')
 async def game_room(request):
-    return {}
+    gameroom_id = request.match_info['gameroom_id']
+    return {'allow_manual_mode': request.app['game'][gameroom_id].allow_manual_mode}
 
 @aiohttp_jinja2.template('gameroom_list.html')
 async def gameroom_list(request):

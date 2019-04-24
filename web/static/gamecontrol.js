@@ -49,6 +49,11 @@ function getConfig() {
         config[ "allow_join_after_start" ] = (allow_join_after_start == "true");
     }
 
+    var allow_manual_mode = $( "#allow-manual-mode-sel option:selected" ).val();
+    if( allow_manual_mode != "same" ) {
+        config[ "allow_manual_mode" ] = (allow_manual_mode == "true");
+    }
+
     data['config'] = config;
     data['gameroom_id'] = window.location.pathname.substr(window.location.pathname.lastIndexOf('/')+1);
 
