@@ -163,9 +163,9 @@ class GameMap:
                 for pos in cell.position.get_surrounding_cardinals():
                     if self[pos].owner != 0:
                         if self[pos].owner != cell.owner:
-                            cell.force_field -= cell.adjacent_forcefield_decr
+                            cell.force_field -= self[pos].adjacent_forcefield_decr
                         else:
-                            cell.force_field += cell.adjacent_forcefield_incr
+                            cell.force_field += self[pos].adjacent_forcefield_incr
                 cell.force_field += cell.self_forcefield_incr
                 cell.force_field  = clip(cell.force_field, 0, 1000)
 
