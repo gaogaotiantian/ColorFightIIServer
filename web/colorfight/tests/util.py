@@ -1,6 +1,6 @@
 import json
 from ..constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
-from ..constants import BLD_GOLD_MINE, BLD_ENERGY_WELL
+from ..constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS
 
 def msg_register(username, password):
     return json.dumps({"action":"register", "username": username, "password": password})
