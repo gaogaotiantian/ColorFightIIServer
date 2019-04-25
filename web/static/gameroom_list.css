@@ -48,3 +48,7 @@
 #gameroom-create-fa {
     color: rgb(30, 30, 30);
 }
+
+.gameroom-name-div>a {
+    color: black;
+}

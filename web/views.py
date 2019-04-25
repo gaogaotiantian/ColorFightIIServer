@@ -106,7 +106,7 @@ async def restart(request):
     gameroom_id = data['gameroom_id']
     config = data['config']
 
-    admin_password = None
+    admin_password = ""
     if 'admin_password' in data:
         admin_password = data['admin_password']
 
@@ -115,7 +115,7 @@ async def restart(request):
 
     game = request.app['game'][gameroom_id]
 
-    if admin_password == game.admin_password:
+    if admin_password == game.admin_password or admin_password == request.app['admin_password']:
         result, err_msg = game.config(data['config'])
         if result:
             game.restart()
@@ -131,10 +131,34 @@ async def create_gameroom(request):
         gameroom_id = data['gameroom_id']
         if gameroom_id in request.app['game']:
             return web.json_response({"success": False, "err_msg": "Same id exists"})
+
+        if len(request.app['game']) >= 10:
+            return web.json_response({"success": False, "err_msg": "Max room number reached"})
+
         request.app['game'][gameroom_id] = Colorfight()
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
+
+    except Exception as e:
+        return web.json_response({"success": False, "err_msg": str(e)})
+
+    return web.json_response({"success": True})
+
+async def delete_gameroom(request):
+    data = await request.json()
+    try:
+        gameroom_id = data['gameroom_id']
+        if gameroom_id not in request.app['game']:
+            return web.json_response({"success": False, "err_msg": "No such room"})
+
+        admin_password = data.get('admin_password', "")
+
+        if request.app['game'][gameroom_id].admin_password == admin_password or \
+                request.app['admin_password'] == admin_password:
+            request.app['game'].pop(gameroom_id)
+        else:
+            return web.json_response({"success": False, "err_msg": "Wrong password"})
 
     except Exception as e:
         return web.json_response({"success": False, "err_msg": str(e)})

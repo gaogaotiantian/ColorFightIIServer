@@ -18,6 +18,7 @@ def setup_routes(app):
     # RPC
     app.router.add_post('/restart', restart)
     app.router.add_post('/creategameroom', create_gameroom)
+    app.router.add_post('/deletegameroom', delete_gameroom)
 
     # Gameroom related
     app.router.add_get('/gameroom/{gameroom_id}', game_room)

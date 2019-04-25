@@ -18,6 +18,7 @@ async def init_app():
     app['game'] = {}
     app['game']['public'] = Colorfight()
     app['game_sockets'] = []
+    app['admin_password'] = os.getenv('ADMIN_PASSWORD', "")
     setup_routes(app)
     setup_static_routes(app)
     

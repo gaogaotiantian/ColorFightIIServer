@@ -19,7 +19,7 @@ class Colorfight:
         self.first_round_time = ROUND_TIME
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
-        self.admin_password = None
+        self.admin_password = ""
         self.finish_time = 0
         self.last_update = time.time()
         self.users = {}
@@ -253,6 +253,8 @@ class Colorfight:
         command
     '''
     def register(self, uid, username, password):
+        if len(username) >= 15:
+            return False, "Username can't exceed 15 characters."
         # Check whether user exists first
         for user in self.users.values():
             if user.username == username:

@@ -1,3 +1,5 @@
+let delete_room_name = "";
+
 function createGameroom( data ) {
     if (data && data['gameroom_id']) {
         $.ajax( {
@@ -7,7 +9,30 @@ function createGameroom( data ) {
             contentType: "application/json;charset=UTF-8",
             data: JSON.stringify( data ),
             success: function(msg) {
-                document.location.reload()
+                if (msg['success']) {
+                    document.location.reload();
+                } else {
+                    alert(msg['err_msg']);
+                }
+            }
+        } );
+    }
+}
+
+function deleteGameroom( data ) {
+    if (data && data['gameroom_id']) {
+        $.ajax( {
+            url: "/deletegameroom",
+            method: "POST",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8",
+            data: JSON.stringify( data ),
+            success: function(msg) {
+                if (msg['success']) {
+                    document.location.reload();
+                } else {
+                    alert(msg['err_msg']);
+                }
             }
         } );
     }
@@ -29,7 +54,19 @@ $(function() {
     $( '#create-gameroom-button' ).click( function() {
         createGameroom( getConfig() );
     });
-    $('body').on('click', '.game-room-tr', function() {
-        window.location.replace($(this).attr('href'));
+
+    $( '#delete-gameroom-button' ).click( function() {
+        deleteGameroom( {
+            "admin_password": $('#delete-admin-password-input').val(),
+            "gameroom_id": delete_room_name
+        } )
+    });
+
+    $('body').on('click', '.game-room-tr', function(e) {
+        if (!$(e.target).hasClass('delete-room-icon')) {
+            window.location.replace($(this).attr('href'));
+        } else {
+            delete_room_name = $(this).find(".gameroom-name-div").text().trim();
+        }
     });
 })
