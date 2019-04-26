@@ -140,6 +140,9 @@ async def create_gameroom(request):
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
 
+        if 'join_key' in data:
+            request.app['game'][gameroom_id].join_key = data['join_key']
+
     except Exception as e:
         return web.json_response({"success": False, "err_msg": str(e)})
 

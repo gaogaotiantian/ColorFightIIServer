@@ -47,6 +47,11 @@ function getConfig() {
         data['admin_password'] = admin_password;
     }
 
+    var join_key = $( '#join-key-input' ).val();
+    if (join_key) {
+        data['join_key'] = join_key;
+    }
+
     return data;
 }
 

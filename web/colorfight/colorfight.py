@@ -20,14 +20,16 @@ class Colorfight:
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
         self.admin_password = ""
+        self.join_key = ""
         self.finish_time = 0
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
         self.game_map = GameMap(self.width, self.height)
         self.valid_actions = {
-            "register": [("username", "password"), ("uid",)],
-            "command": [("cmd_list",), ()]
+            # Action     # Required Args           # Optional Args # Return val
+            "register": [("username", "password"), ("join_key",),  ("uid",)],
+            "command":  [("cmd_list",),            (),             ()]
         }
         self.dirty      = True
         self._game_info = None
@@ -252,9 +254,13 @@ class Colorfight:
         register
         command
     '''
-    def register(self, uid, username, password):
+    def register(self, uid, username, password, join_key = ""):
         if len(username) >= 15:
             return False, "Username can't exceed 15 characters."
+
+        if join_key != self.join_key:
+            return False, "You need the correct join key for the room"
+
         # Check whether user exists first
         for user in self.users.values():
             if user.username == username:
@@ -313,17 +319,22 @@ class Colorfight:
             return {"success": False, "err_msg":"You need to join the game first"}
 
         required_args = self.valid_actions[action][0]
-        expected_results = self.valid_actions[action][1]
-        arg_list = []
+        optional_args = self.valid_actions[action][1]
+        expected_results = self.valid_actions[action][2]
+        arg_list = {}
         for arg in required_args:
             if arg not in data:
                 return {"success": False, "err_msg": "{} is missing".format(arg)}
-            arg_list.append(data[arg])
+            arg_list[arg] = data[arg]
+        
+        for arg in optional_args:
+            if arg in data:
+                arg_list[arg] = data[arg]
 
         self.dirty = True
         
         # should be a tuple 
-        success, result = getattr(self, action)(uid, *arg_list)
+        success, result = getattr(self, action)(uid, **arg_list)
         if not success:
             return {"success": False, "err_msg": result}
         if len(result) != len(expected_results):
