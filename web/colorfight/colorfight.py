@@ -1,5 +1,6 @@
 import json
 import time
+import sys
 
 from .game_map import GameMap
 from .user import User
@@ -356,16 +357,35 @@ class Colorfight:
                 "allow_manual_mode": self.allow_manual_mode, \
         }
 
+    def compress_game_info(self, info):
+        def name_to_letter(name):
+            if name == "empty":
+                return " "
+            return name[0]
+        game_map = {"data":[[None for _ in range(self.width)] for _ in range(self.height)]}
+        game_map['headers'] = [key for key in info['game_map'][0][0]]
+        for x in range(self.game_map.width):
+            for y in range(self.game_map.height):
+                temp_info = info["game_map"][y][x]
+                temp_info["building"] = [name_to_letter(temp_info["building"]["name"]), 
+                        temp_info["building"]["level"]]
+                game_map["data"][y][x] = [temp_info[key] for key in game_map['headers']]
+        info['game_map'] = game_map
+
     def get_game_info(self):
+        return {\
+                "turn": self.turn, \
+                "info": self.info(), \
+                "error": self.errors, \
+                "game_map":self.game_map.info(), \
+                "users": {user.uid: user.info() for user in self.users.values()} \
+        }
+
+    def get_game_info_str(self):
         if self.dirty or self._game_info == None:
             self.dirty = False
-            self._game_info = {\
-                    "turn": self.turn, \
-                    "info": self.info(), \
-                    "error": self.errors, \
-                    "game_map":self.game_map.info(), \
-                    "users": {user.uid: user.info() for user in self.users.values()} \
-            }
-
-        return self._game_info
+            self._game_info = self.get_game_info()
+            self.compress_game_info(self._game_info)
+            self._game_info_str = json.dumps(self._game_info,separators=[',',':'])
+        return self._game_info_str
 

@@ -355,6 +355,30 @@ function combine_color( src, dst, per ) {
 gameSocket.onmessage = function( msg ) {
     prevGameData = gameData;
     gameData     = JSON.parse( msg.data );
+
+    // We need to unpack some of the data
+    let game_map = [];
+    let headers = gameData['game_map']['headers'];
+    for (let y = 0; y < gameData['game_map']['data'].length; y++) {
+        game_map.push([])
+        for (let x = 0; x < gameData['game_map']['data'][y].length; x++) {
+            game_map[y].push([]);
+            let data = gameData['game_map']['data'][y][x];
+            for (let hidx = 0; hidx < headers.length; hidx++) {
+                let header = headers[hidx];
+                if (header == 'building') {
+                    let building = {};
+                    building['name'] = letter_to_name(data[hidx][0]);
+                    building['level'] = data[hidx][1];
+                    game_map[y][x]['building'] = building;
+                } else {
+                    game_map[y][x][header] = data[hidx];
+                }
+            }
+        }
+    }
+    gameData['game_map'] = game_map;
+
     if (!prevGameData) {
         prevGameData = gameData;
     }
@@ -371,6 +395,23 @@ gameSocket.onmessage = function( msg ) {
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
     flush_commands(); 
+}
+
+function letter_to_name(letter) {
+    switch(letter) {
+        case ' ':
+            return 'empty';
+        case 'g':
+            return 'gold_mine';
+        case 'h':
+            return 'home';
+        case 'e':
+            return 'energy_well';
+        case 'f':
+            return 'fortress';
+        default:
+            console.log(letter);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
