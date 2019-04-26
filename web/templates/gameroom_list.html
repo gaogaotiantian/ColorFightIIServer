@@ -36,12 +36,17 @@
                       {% if header == 'Name' %}
                         <div class="table-column col-md-7 gameroom-name-div">
                           {% if room[header] != 'public' %}
-                            <a href="#" data-toggle="modal" data-target="#gameroom-delete-modal" class="delete-room-icon"><i class="fas fa-lg fa-trash-alt delete-room-icon"></i></a>
+                            <a href="#" data-toggle="modal" data-target="#gameroom-delete-modal" class="delete-room-icon"><i class="fas  fa-trash-alt delete-room-icon"></i></a>
                           {% endif %}
+                          {{ room[header]}}
                       {% else %}
                         <div class="table-column col">
+                          {% if header != 'Lock' %}
+                            {{ room[header]}}
+                          {% elif room['Lock'] %}
+                            <i class="fas fa-lock"></i>
+                          {% endif %}
                       {% endif %}
-                      {{ room[header] | safe }}
                     </div>
                     {% endfor %}
                   </div>

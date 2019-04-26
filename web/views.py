@@ -28,7 +28,7 @@ async def game_room(request):
 @aiohttp_jinja2.template('gameroom_list.html')
 async def gameroom_list(request):
     clean_gameroom(request)
-    headers = ['Name', 'Players', 'Turns']
+    headers = ['Name', 'Players', 'Turns', 'Lock']
     gamerooms = []
     for name, game in request.app['game'].items():
         gameroom = {}
@@ -36,6 +36,7 @@ async def gameroom_list(request):
         gameroom['Players'] = len(game.users)
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
         gameroom['link'] = '/gameroom/{0}'.format(name)
+        gameroom['Lock'] = game.join_key != ""
         gamerooms.append(gameroom)
     return {'gamerooms': gamerooms, 'headers': headers}
 
