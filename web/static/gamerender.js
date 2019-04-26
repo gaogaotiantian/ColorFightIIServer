@@ -974,11 +974,11 @@ function create_cell_info(x, y) {
             // We are the owner. We can either build or upgrade. 
             if (building['name'] == 'empty') {
                 // There is no building. Draw building choices. 
-                buttonDiv.appendChild(create_cost_button('Build Well', 
+                buttonDiv.appendChild(create_build_button('Build Well', 
                     BASE_BUILD_COST, function(){queue_well(x, y);})); 
-                buttonDiv.appendChild(create_cost_button('Build Mine', 
+                buttonDiv.appendChild(create_build_button('Build Mine', 
                     BASE_BUILD_COST, function(){queue_mine(x, y);})); 
-                buttonDiv.appendChild(create_cost_button('Build Fort', 
+                buttonDiv.appendChild(create_build_button('Build Fort', 
                     BASE_BUILD_COST, function(){queue_fortress(x, y);})); 
             }
             else {
