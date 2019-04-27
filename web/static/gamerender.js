@@ -974,11 +974,11 @@ function create_cell_info(x, y) {
             // We are the owner. We can either build or upgrade. 
             if (building['name'] == 'empty') {
                 // There is no building. Draw building choices. 
-                buttonDiv.appendChild(create_build_button('Build Well', 
+                buttonDiv.appendChild(create_cell_button('Build Well', 
                     BASE_BUILD_COST, function(){queue_well(x, y);})); 
-                buttonDiv.appendChild(create_build_button('Build Mine', 
+                buttonDiv.appendChild(create_cell_button('Build Mine', 
                     BASE_BUILD_COST, function(){queue_mine(x, y);})); 
-                buttonDiv.appendChild(create_build_button('Build Fort', 
+                buttonDiv.appendChild(create_cell_button('Build Fort', 
                     BASE_BUILD_COST, function(){queue_fortress(x, y);})); 
             }
             else {
@@ -987,26 +987,19 @@ function create_cell_info(x, y) {
                 if (upgradeLevel < GAME_MAX_LEVEL) {
                     // Can upgrade further. 
                     let canUpgrade  = true; 
-                    let upgradeCost = 0; 
                     if (building['name'] == 'home') {
                         // Home has a base cost of 1000. 
                         // Cost doubles per level. 
-                        upgradeCost = 1000 * Math.pow(2, upgradeLevel - 1); 
+                        let cost = 1000 * Math.pow(2, upgradeLevel - 1); 
+                        buttonDiv.appendChild(create_button(
+                            'Upgrade: (' + cost + ', ' + cost + ')', 
+                            function(){queue_upgrade(x, y);}));
                     }
-                    else {
-                        // We are not upgrading a home. 
-                        if (upgradeLevel >= selfData['tech_level']) {
-                            // Home not high enough level. 
-                            canUpgrade = false; 
-                        }
+                    else if (upgradeLevel < selfData['tech_level']) {
                         // Cost doubles per level. 
-                        upgradeCost = BASE_BUILD_COST * Math.pow(2, upgradeLevel);
-                    }
-
-                    if (canUpgrade) {
-                        // Enough resources. 
-                        buttonDiv.appendChild(create_upgrade_button('Upgrade', 
-                            upgradeCost, function(){queue_upgrade(x, y);})); 
+                        let cost = BASE_BUILD_COST * Math.pow(2, upgradeLevel);
+                        buttonDiv.appendChild(create_cell_button('Upgrade', 
+                            cost, function(){queue_upgrade(x, y);})); 
                     }
                 }
             }
@@ -1079,12 +1072,8 @@ function get_adjacent_cells(x, y) {
     return adjCells; 
 }
 
-function create_build_button(name, cost, click_handler) {
-    return create_button(name + ': ' + '(' + cost + ', 0)', click_handler); 
-}
-
-function create_upgrade_button(name, cost, click_handler) {
-    return create_button(name + ': ' + '(' + cost + ', ' + cost + ')', click_handler); 
+function create_cell_button(name, cost, click_handler) {
+    return create_button(name + ': ' + '(0, ' + cost + ')', click_handler); 
 }
 
 function create_button(text, click_handler)
