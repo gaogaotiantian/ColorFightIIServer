@@ -21,7 +21,7 @@ class Colorfight:
         self.first_round_time = ROUND_TIME
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
-        self.replay_enable = "always"
+        self.replay_enable = "never"
         self.admin_password = ""
         self.join_key = ""
         self.finish_time = 0
