@@ -4,6 +4,12 @@ import asyncio
 import aiohttp_jinja2
 from colorfight import Colorfight
 import time
+import re
+
+def url_safe(s):
+    if re.search('[^0-9a-zA-Z-_.]', s):
+        return False
+    return True
 
 def clean_gameroom(request):
     delete_rooms = []
@@ -137,6 +143,9 @@ async def create_gameroom(request):
     data = await request.json()
     try:
         gameroom_id = data['gameroom_id']
+        if not url_safe(gameroom_id):
+            return web.json_response({"success": False, "err_msg": "You have illegal special characters in you gameroom id"})
+
         if gameroom_id in request.app['game']:
             return web.json_response({"success": False, "err_msg": "Same id exists"})
 
