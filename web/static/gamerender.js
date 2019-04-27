@@ -243,7 +243,7 @@ function draw_game(ts) {
         // Animate the cells per frame. 
         for (let y = 0; y < GAME_HEIGHT; y++) {
             for (let x = 0; x < GAME_WIDTH; x++) {
-                if (has_changed(gameMap[y][x], prevMap[y][x])) {
+                if (owner_changed(gameMap[y][x], prevMap[y][x])) {
                     animate_cell(x, y, gameMap[y][x], prevMap[y][x], turnProgress);
                 }
             }
@@ -262,6 +262,10 @@ function has_changed(currCell, prevCell) {
         || (currCell["owner"]             != prevCell["owner"]);
 }
 
+function owner_changed(currCell, prevCell) {
+    return (currCell["owner"] != prevCell["owner"]);
+}
+
 function per_turn_draw_cell(x, y, currCell, prevCell)
 {
     // Clear the cell container
@@ -271,11 +275,11 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
 
     let base = new PIXI.Graphics();
     // Draw energy border. 
-    draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 0);
+    draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 1);
     // Draw gold border. 
-    draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 2);
+    draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 3);
     // Fill in owner color. Unowned corresponds to black. 
-    draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 4);
+    draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
 
     // Add a child to do animations. 
     base.addChild(new PIXI.Graphics()); 
@@ -306,11 +310,11 @@ function animate_cell(x, y, currCell, prevCell, progress) {
     let capture_cell    = base.children[0];
 
     if (capture_cell) {
-        const   ownerShrink = 4; 
+        const   ownerShrink = 5; 
         let     prevMap     = prevGameData['game_map'];
         // Cell was captured the previous round. 
 
-        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 4);
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
 
         // Draw a shrinking rectangle of the old color.
 
@@ -360,7 +364,7 @@ function animate_cell(x, y, currCell, prevCell, progress) {
         // No adjacent blocks is possible if we are just joining the game or 
         // the game refreshed. In both cases, do no animation. 
         if ((xScale != 0) || (yScale != 0)) {
-            base.beginFill(id_to_color(prevCell['owner'])); 
+            base.beginFill(combine_color(id_to_color(prevCell['owner']), id_to_color(currCell['owner']), progress)); 
             base.drawRect((cellSize * x) + ownerShrink + (drawSize * xLeft), 
                           (cellSize * y) + ownerShrink + (drawSize * yTop), 
                           drawSize * (1 - (xLeft + xRight)), 
