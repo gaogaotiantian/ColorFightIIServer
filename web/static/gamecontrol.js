@@ -54,8 +54,13 @@ function getConfig() {
         config[ "allow_manual_mode" ] = (allow_manual_mode == "true");
     }
 
+    var replay_enable = $( "#replay-enable-sel option:selected" ).val();
+    if( replay_enable != "same" ) {
+        config[ "replay_enable" ] = replay_enable;
+    }
+
     data['config'] = config;
-    data['gameroom_id'] = window.location.pathname.substr(window.location.pathname.lastIndexOf('/')+1);
+    data['gameroom_id'] = window.location.pathname.split('/')[2];
 
     return data;
 }
@@ -113,4 +118,17 @@ $( function() {
     $( '#compress-button ').click( function() {
         closeFullscreen();
     } );
+
+    $( '#download-button' ).click( function() {
+        console.log($(this).attr('enable_condition'))
+        if ($(this).attr('enable_condition') == 'always' || 
+                ($(this).attr('enable_condition') == 'end' && lastTurn == maxTurn)) {
+            let a = document.createElement('a');
+            a.href = './replay';
+            a.download = 'replay.cfr';
+            a.click();
+        } else {
+            alert("You can't download replay now!");
+        }
+    })
 } );

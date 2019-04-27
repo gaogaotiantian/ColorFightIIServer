@@ -67,3 +67,16 @@ input.row-input {
 	/* Full div-width input box */
 	width: 100%;
 }
+
+#replay-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 0.7vh;
+    background: #b3b3b3;
+    outline: none;
+    opacity: 0.5;
+}
+
+#replay-slider:hover {
+    opacity:0.8;
+}

@@ -1,8 +1,17 @@
+// Master switch for replay mode, now is kind of stupid
+var gameRoomMode = 'play';
+if (window.location.pathname.indexOf('replay') > 0) {
+    gameRoomMode = 'replay';
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // WebSocket Variables
+const gameProtocol = window.location.protocol=='https:'&&'wss://'||'ws://';
+var gameSocket;
 
-const gameProtocol  = window.location.protocol=='https:'&&'wss://'||'ws://';
-const gameSocket    = new WebSocket( gameProtocol + window.location.host + window.location.pathname + "/game_channel" );
+if (gameRoomMode == 'play') {
+    gameSocket   = new WebSocket( gameProtocol + window.location.host + window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/')) + "/game_channel" );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // DOM Variables
@@ -351,11 +360,20 @@ function combine_color( src, dst, per ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Get data and start draw loop
 
-gameSocket.onmessage = function( msg ) {
-    prevGameData = gameData;
-    gameData     = JSON.parse( msg.data );
+// Play, get data from websockets
+if (gameRoomMode == 'play') {
+    gameSocket.onmessage = function( msg ) {
+        prevGameData = gameData;
+        gameData     = JSON.parse( msg.data );
+    
+        parse_game_data_and_draw();
+    }
+}
 
+// Parse gameData and draw the game, replay will use this function to draw
+function parse_game_data_and_draw() {
     // We need to unpack some of the data
     let game_map = [];
     let headers = gameData['game_map']['headers'];
@@ -391,7 +409,9 @@ gameSocket.onmessage = function( msg ) {
     draw_selected_user_info(); 
 
     // Draw our own info or the join game info.
-    draw_self_user_info(); 
+    if (document.getElementById('user-info')) {
+        draw_self_user_info(); 
+    }
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
     flush_commands(); 
@@ -438,7 +458,7 @@ function join_game_button() {
 
     if (actionChannel == null) {
         // Open a socket to the action channel. 
-        actionChannel = new WebSocket(gameProtocol + window.location.host + window.location.pathname + "/action_channel");
+        actionChannel = new WebSocket(gameProtocol + window.location.host + window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/')) + "/action_channel");
         // Register ourselves when the socket finishes initializing. 
         actionChannel.onopen = function() {
             send_join_command(username, password); 

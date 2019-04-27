@@ -23,8 +23,15 @@
                 <p id="turn-stat" class="game-status-value">0/500</p>
               </div>
               <div class="game-control">
+                {% if replay_enable == 'always' %}
+                <a id="download-button" href="#" enable_condition="always"><i class="fas fa-download"></i></a>
+                {% elif replay_enable == 'end' %}
+                <a id="download-button" href="#" enable_condition="end"><i class="fas fa-download"></i></a>
+                {% endif %}
+                {% if not replay_mode %}
                 <a id="restart-button" href="#"><i class="fas fa-redo"></i></a>
                 <a id="config-button" href="#" data-toggle="modal" data-target="#config-modal"><i class="fas fa-cog "></i></a>
+                {% endif %}
                 <a id="expand-button" href="#"><i class="fas fa-expand"></i></a>
                 <a id="compress-button" href="#" class="collapse"><i class="fas fa-compress"></i></a>
               </div>
@@ -46,6 +53,30 @@
             </div>
           </div>
           {% endif %}
+          {% if replay_mode %}
+          <p class="game-status-header">REPLAY</p>
+          <div id="replay-info">
+            <div id="replay-section" class="game-status-section">
+              <form>
+                <input type="file" id="replay-file-input" class="form-control d-none">
+                <button id="replay-file-load-button" class="btn btn-success btn-sm form-control" type="button">LOAD REPLAY</button>
+              </form>
+              <div id="replay-control-section" class="pt-2">
+                <div class="slidecontainer">
+                  <input type="range" min="0" max="0" value="0" class="slider" id="replay-slider">
+                </div>
+                <div class="game-control d-flex justify-content-around">
+                  <div><a id="replay-slow-button" href="#"><i class="fas fa-angle-double-down"></i></a></div>
+                  <div><a id="replay-step-back-button" href="#"><i class="fas fa-chevron-left"></i></a></div>
+                  <div id="replay-play-button-div"><a id="replay-play-button" href="#"><i class="fas fa-play"></i></a></div>
+                  <div id="replay-pause-button-div" class="collapse"><a id="replay-pause-button" href="#"><i class="fas fa-pause"></i></a></div>
+                  <div><a id="replay-step-forward-button" href="#"><i class="fas fa-chevron-right"></i></a></div>
+                  <div><a id="replay-fast-button" href="#"><i class="fas fa-angle-double-up"></i></a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
           <p class="game-status-header">SELECTED USER INFO</p>
           <div id="selected-user-info">
           </div>
@@ -57,6 +88,10 @@
     </div>
     {% include 'config_modal.html' %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.6/pixi.min.js"></script>
+    {% if replay_mode %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.10/pako_inflate.js"></script>
+    <script src="/static/replay.js"></script>
+    {% endif %}
     <script src="/static/gamerender.js"></script>
     <script src="/static/gamecontrol.js"></script>
   </body>

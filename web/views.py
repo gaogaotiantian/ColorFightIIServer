@@ -22,8 +22,15 @@ async def index(request):
 
 @aiohttp_jinja2.template('gameroom.html')
 async def game_room(request):
+    if 'replay' in request.url.path:
+        return {'allow_manual_mode': False, 'replay_mode': True}
+
     gameroom_id = request.match_info['gameroom_id']
-    return {'allow_manual_mode': request.app['game'][gameroom_id].allow_manual_mode}
+    if gameroom_id in request.app['game']:
+        return {'allow_manual_mode': request.app['game'][gameroom_id].allow_manual_mode, 
+                'replay_enable'    : request.app['game'][gameroom_id].replay_enable}
+    else:
+        return {}
 
 @aiohttp_jinja2.template('gameroom_list.html')
 async def gameroom_list(request):
@@ -35,7 +42,7 @@ async def gameroom_list(request):
         gameroom['Name'] = '{0}'.format(name)
         gameroom['Players'] = len(game.users)
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
-        gameroom['link'] = '/gameroom/{0}'.format(name)
+        gameroom['link'] = '/gameroom/{0}/play'.format(name)
         gameroom['Lock'] = game.join_key != ""
         gamerooms.append(gameroom)
     return {'gamerooms': gamerooms, 'headers': headers}
@@ -168,3 +175,20 @@ async def delete_gameroom(request):
         return web.json_response({"success": False, "err_msg": str(e)})
 
     return web.json_response({"success": True})
+
+async def download_replay(request):
+    gameroom_id = request.match_info['gameroom_id']
+    if gameroom_id not in request.app['game']:
+        return web.Response(status = 400)
+    else:
+        game = request.app['game'][gameroom_id]
+        if ((game.replay_enable == 'end' and game.turn == game.max_turn) or \
+                game.replay_enable == 'always'):
+            return web.Response(body = request.app['game'][gameroom_id].get_log())
+        else:
+            return web.Response(status = 400)
+
+
+
+    
+

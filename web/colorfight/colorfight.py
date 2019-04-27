@@ -1,6 +1,7 @@
 import json
 import time
 import sys
+import gzip
 
 from .game_map import GameMap
 from .user import User
@@ -20,13 +21,13 @@ class Colorfight:
         self.first_round_time = ROUND_TIME
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
+        self.replay_enable = "always"
         self.admin_password = ""
         self.join_key = ""
         self.finish_time = 0
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
-        self.game_map = GameMap(self.width, self.height)
         self.valid_actions = {
             # Action     # Required Args           # Optional Args # Return val
             "register": [("username", "password"), ("join_key",),  ("uid",)],
@@ -34,6 +35,7 @@ class Colorfight:
         }
         self.dirty      = True
         self._game_info = None
+        self.restart()
 
     def config(self, data):
         """
@@ -72,6 +74,11 @@ class Colorfight:
                         self.allow_manual_mode = val
                     else:
                         return False, "allow_manual_mode value invalid"
+                elif field == "replay_enable":
+                    if val in ["always", "never", "end"]:
+                        self.replay_enable = val
+                    else:
+                        return False, "replay_enable value invalid"
                 else:
                     return False, "Invalid field {}".format(field)
         except Exception as e:
@@ -86,6 +93,8 @@ class Colorfight:
         self.errors = {}
         self.last_update = time.time() 
         self.game_map = GameMap(self.height, self.width) 
+        self.clear_log()
+        self.add_log()
 
     def update(self, force = False):
         do_update = False
@@ -112,6 +121,8 @@ class Colorfight:
             self.update_cells()
             # 2. Update all the users for gold and energy
             self.update_users()
+            start = time.time()
+            self.add_log()
             self.last_update = time.time() 
 
     def update_cells(self):
@@ -389,3 +400,14 @@ class Colorfight:
             self._game_info_str = json.dumps(self._game_info,separators=[',',':'])
         return self._game_info_str
 
+    def add_log(self):
+        if self.replay_enable:
+            self.log.append(self.get_game_info_str())
+
+    def clear_log(self):
+        self.log = []
+
+    def get_log(self):
+        if self.turn == self.max_turn:
+            return gzip.compress(json.dumps(self.log).encode('utf-8'), compresslevel = 5)
+        return gzip.compress(json.dumps(self.log).encode('utf-8'), compresslevel = 5)
