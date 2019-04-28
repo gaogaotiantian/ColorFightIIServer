@@ -647,10 +647,10 @@ function draw_user_list() {
         userDiv.onmouseover = user_hover_handler; 
         userDiv.onmouseout  = user_out_handler; 
 
-        userGold = create_p(user['gold'], {'color':'#555500'});
+        userGold = create_p(user['gold']);
         // Align the gold value to the right of the entry. 
         userGold.style.marginLeft = 'auto';
-        userGold.className += ' pl-1';
+        userGold.className += ' pl-1 user-gold-p';
         userDiv.appendChild(userGold);
 
         // Append the row to the list. 
@@ -660,7 +660,7 @@ function draw_user_list() {
         if (uid != users[users.length - 1][0]) {
             // Draw a bottom border. 
             userDiv.style.borderStyle = "solid";
-            userDiv.style.borderColor = "#000000";
+            userDiv.style.borderColor = "#C5D3D4";
             userDiv.style.borderWidth = "0px 0px 1px 0px";
         }
     }
