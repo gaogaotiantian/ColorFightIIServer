@@ -1,6 +1,19 @@
+@font-face {
+    font-family: Conthrax;
+    src: url(./fonts/conthrax-sb.ttf);
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url(./fonts/Roboto-Medium.ttf);
+}
+
+
 .table-container {
-    background-color: rgba(13, 6, 7, 0.7);
-    border: solid 15px rgba(13, 6, 7, 0.7);
+    /* background-color: rgba(13, 6, 7, 0.7);
+    border: solid 15px rgba(13, 6, 7, 0.7); */
+    padding: 1rem 0rem;
+
 }
 
 .table-div {
@@ -11,11 +24,32 @@
 
 .table-head {
     vertical-align: middle;
-    background: rgba(217, 208, 235, 0.8);
-    background-image: linear-gradient(-180deg, rgb(217, 218, 241), rgb(205, 204, 233));
+    /* background: rgba(217, 208, 235, 0.8); */
+    /* background-image:  #373A49; */
     font-size: 1.3rem;
     font-weight: 700;
-    color: #000;
+}
+
+.table-head .table-divider {
+    margin-top: 0px;
+    width: 100%;
+    height: 1px;
+    display: block;
+    border: solid  1px rgba(201, 247, 255, 0.856);
+    margin-bottom: 1.5rem;
+    box-shadow: 
+        -2px 0px 5px 2px #a6dbff,
+        -10px 0px 10px 4px #249bfc9c,
+        10px 0px 10px 4px #249bfc9c;
+}
+
+.table-head h1 {
+    font-family: Conthrax;
+    font-size: 1rem;
+    color: rgb(225, 239, 255);
+    text-shadow: 
+    0px 0px 5px #bea6ff,
+    0px 0px 10px #249bfc;
 }
 
 .th-name {
@@ -33,16 +67,29 @@
 }
 
 .table-row-content {
-    background-image: linear-gradient(-180deg, rgb(217, 218, 241), rgb(205, 204, 233));
-    color: #000;
+    /* background-image: linear-gradient(-180deg, rgb(217, 218, 241), rgb(205, 204, 233)); */
+    /* color: #000;
     border-radius: 20px 20px 5px 5px;
     border-top: solid 10px rgba(13, 6, 7, 1);
     border-left: solid 5px rgba(13, 6, 7, 1);
-    border-right: solid 5px rgba(13, 6, 7, 1);
+    border-right: solid 5px rgba(13, 6, 7, 1); */
+    font-family: Roboto;
+    vertical-align: center;
+    margin: 0.8rem 0rem;
+    border-radius: 10px;
+    box-shadow:
+        inset 0px 0px 2000px rgba(102, 182, 219, 0.250);
+    -webkit-transition: box-shadow 0.2s;
+    transition: box-shadow 0.2s;
 }
 
 .table-row-content:hover {
-    background-image: linear-gradient(-180deg, #fbe971, #f77b2c);
+    /* background-image: linear-gradient(-180deg, #fbe971, #f77b2c); */
+    box-shadow:
+        inset 0px 0px 2000px rgba(189, 234, 255, 0.6),
+        -7px 0px 10px rgba(110, 141, 189, 0.808),
+        7px 0px 10px rgba(110, 141, 189, 0.808),
+        inset 0px 0px 5px rgba(102, 149, 219, 0.25);
 }
 
 #gameroom-create-fa {
@@ -50,5 +97,5 @@
 }
 
 .gameroom-name-div>a {
-    color: black;
+    color: rgb(150, 200, 209);
 }

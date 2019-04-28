@@ -1,7 +1,18 @@
+@font-face {
+    font-family: Conthrax;
+    src: url(./fonts/conthrax-sb.ttf);
+}
+
+@font-face {
+    font-family: Comfortaa;
+    src: url(./fonts/Comfortaa-Regular.ttf);
+}
+
 html, body {
     height : 100%;
     width  : 100%;
-	background          : url( "background.jpg" );
+    /* background          : url( "background.jpg" ); */
+    background: #373A49;
 	background-size     : cover;
 	background-position : center;
 	background-repeat   : repeat;
@@ -12,6 +23,7 @@ body {
     font-family: "Nunito Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
     font-size: 1.2rem;
 }
+
 
 .navbar {
     background: rgba(13, 16, 7, 0.5);
@@ -24,14 +36,19 @@ body {
 }
 
 .nav-link {
-    color: #B7AEC9;
-    font-size: 1.2rem;
+    color: rgb(200, 197, 207);
+    font-family: Conthrax;
+    font-size: 1.1rem;
     padding: 0.5rem 0.2rem;
+    text-shadow: 0px 0px 1px #473670;
+    -webkit-transition: color 0.3s, text-shadow 0.5s;
+    transition: color 0.3s, text-shadow 0.5s;
 }
 
 .nav-link:hover {
-    color: #C7BED9;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+    color: rgb(255, 255, 255);
+    /* background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3)); */
+    text-shadow: 0px 0px 5px #5c26d8;
 }
 
 .nav ul li {
@@ -76,39 +93,91 @@ body {
 
 .doc-header {
     color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 1px 3px #A5E8B7;
     padding: 10px 0;
 }
 
+.doc-header h1{
+    font-family: Conthrax;
+    font-size: 2rem;
+    color: rgb(228, 240, 255);
+    text-shadow: 
+        0px 0px 10px #66b5ff,
+        0px 0px 20px #0084ff;
+}
+
 .doc-section {
-    background-color: #fff;
+    /* background-color: rgb(105, 106, 126); */
+    font-family: Comfortaa;
+    color: rgb(228, 247, 255);
     border-radius: 8px;
     padding: 20px 35px 40px;
     margin-bottom: 20px;
+    border: solid 2px rgba(201, 247, 255, 0.705);
+    text-shadow: 
+        0px 0px 2px #005ca7;
+    box-shadow: 
+        0px 0px 15px 2px #249bfc9c,
+        inset 0px 0px 10px 2px #249bfc9c,
+        inset 0px 0px 5000px #6092ff1c;
 }
 
 .doc-section p {
+    color: #cacaca;
+    text-shadow: 0px 0px 4px #0084ff;
     margin-bottom: 0.5rem;
+}
+
+.doc-section a{
+    color: #91c2ff;
+}
+
+.doc-section button {
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.4rem;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+}
+
+.doc-section button:hover {
+    box-shadow: 
+        0px 0px 2px 1px #84bdff,
+        0px 0px 10px 2px #497297;
 }
 
 .doc-section h1 {
     margin-top: 1.5rem;
     border-bottom: 2px solid #e0e2e4;
     padding-bottom: 0.3rem;
+    text-shadow: 
+        0px 0px 3px #ffc46c,
+        0px 0px 10px #af3891;
 }
 
 .doc-section h2 {
     margin-top: 1.4rem;
     border-bottom: 2px solid #eaecef;
     padding-bottom: 0.3rem;
+    text-shadow: 
+        0px 0px 3px #608aff,
+        0px 0px 10px #6200ff;
 }
 
 .doc-section h3 {
     margin-top: 1.3rem;
+    color: rgb(228, 247, 255);
+    font-family: Comfortaa;
+    text-shadow: 
+        0px 0px 10px #0084ff;
 }
 
 .doc-section h4 {
     margin-top: 1.2rem;
+    text-shadow: 
+    0px 0px 3px #60b7ff,
+    0px 0px 10px #005aad;
 }
 
 .doc-section h1,h2,h3,h4 {
@@ -116,8 +185,11 @@ body {
 }
 
 code {
-    background-color: #f9f2f4;
-    border-radius: 4px;
-    padding: 2px 4px;
+    background-color: rgb(81, 78, 92);
+    color: #f3cae3;
+    text-shadow: 0px 0px 4px #ff18b280;
+    border-radius: 5px;
+    padding: 2px 10px;
+    box-shadow: 0px 0px 5px 1px #2600ff2c;
 }
 
