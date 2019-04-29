@@ -317,6 +317,8 @@ class Colorfight:
             return False, "You are not allowed to join after the game starts"
 
     def command(self, uid, cmd_list):
+        if self.turn == 0 or self.turn == self.max_turn:
+            return False, "The game has not started or it ended already."
         if type(cmd_list) != list:
             return False, "Wrong type"
         if uid not in self.users:
@@ -337,6 +339,7 @@ class Colorfight:
         return a json object
         
         '''
+
         try:
             data = json.loads(msg)
         except:

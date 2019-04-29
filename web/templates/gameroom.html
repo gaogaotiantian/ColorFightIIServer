@@ -23,17 +23,24 @@
                 <p id="turn-stat" class="game-status-value">0/500</p>
               </div>
               <div class="game-control">
-                {% if replay_enable == 'always' %}
-                <a id="download-button" href="#" enable_condition="always"><i class="fas fa-download"></i></a>
-                {% elif replay_enable == 'end' %}
-                <a id="download-button" href="#" enable_condition="end"><i class="fas fa-download"></i></a>
-                {% endif %}
-                {% if not replay_mode %}
-                <a id="restart-button" href="#"><i class="fas fa-redo"></i></a>
-                <a id="config-button" href="#" data-toggle="modal" data-target="#config-modal"><i class="fas fa-cog "></i></a>
-                {% endif %}
-                <a id="expand-button" href="#"><i class="fas fa-expand"></i></a>
-                <a id="compress-button" href="#" class="collapse"><i class="fas fa-compress"></i></a>
+                <div class="text-right">
+                  {% if replay_enable == 'always' %}
+                  <a id="download-button" href="#" enable_condition="always"><i class="fas fa-download"></i></a>
+                  {% elif replay_enable == 'end' %}
+                  <a id="download-button" href="#" enable_condition="end"><i class="fas fa-download"></i></a>
+                  {% endif %}
+                  {% if not replay_mode %}
+                  <a id="restart-button" href="#"><i class="fas fa-redo"></i></a>
+                  <a id="config-button" href="#" data-toggle="modal" data-target="#config-modal"><i class="fas fa-cog "></i></a>
+                  {% endif %}
+                  <a id="expand-button" href="#"><i class="fas fa-expand"></i></a>
+                  <a id="compress-button" href="#" class="collapse"><i class="fas fa-compress"></i></a>
+                </div>
+                <div class="text-right">
+                  <a id="resource-render-button" href="#"><i class="fas fa-coins"></i></a>
+                  <a id="building-render-button" href="#"><i class="fas fa-building"></i></a>
+                  <a id="owner-render-button" href="#"><i class="fas fa-square"></i></a>
+                </div>
               </div>
             </div>
           </div>

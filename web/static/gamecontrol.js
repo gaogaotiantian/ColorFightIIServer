@@ -131,4 +131,19 @@ $( function() {
             alert("You can't download replay now!");
         }
     })
+
+    // Render callbacks
+    $( '#resource-render-button' ).click( function() {
+        change_render_options({"gold": "toggle", "energy": "toggle"});
+    })
+
+    $( '#building-render-button' ).click( function() {
+        change_render_options({"building": "toggle"});
+    })
+
+    $( '#owner-render-button' ).click( function() {
+        change_render_options({"owner": "toggle"});
+    })
 } );
+
+

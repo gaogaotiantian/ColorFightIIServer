@@ -76,6 +76,14 @@ let gameDim         = cellSize * GAME_WIDTH;
 const ENERGY_COLOR  = "#65c9cf";
 const GOLD_COLOR    = "#faf334";
 
+let forceRefresh  = false;
+let renderOptions = {
+    "energy"  : true,
+    "gold"    : true,
+    "owner"   : true,
+    "building": true,
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // 0 is an invalid UID so it can be used as a sentinel value. 
@@ -220,7 +228,7 @@ function draw_game(ts) {
         // this is due to the DOM manipulations in the info pane or if it is 
         // us not receiving events. 
 
-        if (gameData["turn"] != lastTurn || countDown != gameData["info"]["start_count_down"]) {
+        if (gameData["turn"] != lastTurn || countDown != gameData["info"]["start_count_down"] || forceRefresh) {
             turnStartTime = ts;
             lastTurn  = gameData["turn"];
             maxTurn   = gameData["info"]["max_turn"];
@@ -234,7 +242,7 @@ function draw_game(ts) {
             // Draw the game board once per turn. 
             for (let y = 0; y < GAME_HEIGHT; y++) {
                 for (let x = 0; x < GAME_WIDTH; x++) {
-                    if (gameMapEmpty || has_changed(gameMap[y][x], prevMap[y][x])) {
+                    if (gameMapEmpty || has_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
                         per_turn_draw_cell(x, y, gameMap[y][x], prevMap[y][x]); 
                     }
                 }
@@ -249,11 +257,13 @@ function draw_game(ts) {
         // Animate the cells per frame. 
         for (let y = 0; y < GAME_HEIGHT; y++) {
             for (let x = 0; x < GAME_WIDTH; x++) {
-                if (owner_changed(gameMap[y][x], prevMap[y][x])) {
+                if (owner_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
                     animate_cell(x, y, gameMap[y][x], prevMap[y][x], turnProgress);
                 }
             }
         }
+
+        forceRefresh = false;
     }
 
     // Always render the game for the animation
@@ -272,6 +282,21 @@ function owner_changed(currCell, prevCell) {
     return (currCell["owner"] != prevCell["owner"]);
 }
 
+function change_render_options(options) {
+    console.log(options)
+    console.log(renderOptions)
+    for (key in options) {
+        if (key in renderOptions) {
+            if (options[key] == "toggle") {
+                renderOptions[key] = !renderOptions[key];
+            } else {
+                renderOptions[key] = options[key];
+            }
+        }
+    }
+    forceRefresh = true;
+}
+
 function per_turn_draw_cell(x, y, currCell, prevCell)
 {
     // Clear the cell container
@@ -280,12 +305,26 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     }
 
     let base = new PIXI.Graphics();
-    // Draw energy border. 
-    draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 1);
-    // Draw gold border. 
-    draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 3);
     // Fill in owner color. Unowned corresponds to black. 
-    draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
+    if (renderOptions["owner"]) {
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 1);
+    } else {
+        draw_cell_rect(base, id_to_color(0), 1.0, x, y, 0);
+    }
+    // Draw energy border. 
+    if (renderOptions["energy"] || currCell['owner'] == 0) {
+        draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 1);
+    }
+    // Draw gold border. 
+    if (renderOptions["gold"] || currCell['owner'] == 0) {
+        draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 3);
+    }
+    // Fill in owner color. Unowned corresponds to black. 
+    if (renderOptions["owner"]) {
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
+    } else {
+        draw_cell_rect(base, id_to_color(0), 1.0, x, y, 5);
+    }
 
     // Add a child to do animations. 
     base.addChild(new PIXI.Graphics()); 
@@ -298,7 +337,7 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     let prevBuilding = prevCell['building']; 
 
     // Setup any needed animated sprites. 
-    if (currBuilding["name"] != "empty") {
+    if (currBuilding["name"] != "empty" && renderOptions["building"]) {
         draw_building(x, y, currBuilding);
         if (currBuilding['name'] != prevBuilding['name']) {
             // Different building. 
@@ -315,7 +354,7 @@ function animate_cell(x, y, currCell, prevCell, progress) {
     let base            = cellContainers[y][x].children[0]; 
     let capture_cell    = base.children[0];
 
-    if (capture_cell) {
+    if (capture_cell && renderOptions["owner"]) {
         const   ownerShrink = 5; 
         let     prevMap     = prevGameData['game_map'];
         // Cell was captured the previous round. 
@@ -459,37 +498,45 @@ function combine_color( src, dst, per ) {
 // Play, get data from websockets
 if (gameRoomMode == 'play') {
     gameSocket.onmessage = function( msg ) {
-        prevGameData = gameData;
-        gameData     = JSON.parse( msg.data );
-    
-        parse_game_data_and_draw();
+        let tempGameData = JSON.parse(msg.data);
+        if (gameData['turn'] != tempGameData['turn']) {
+            prevGameData = gameData
+        }
+        parse_game_data_and_draw(tempGameData);
     }
 }
 
 // Parse gameData and draw the game, replay will use this function to draw
-function parse_game_data_and_draw() {
-    // We need to unpack some of the data
-    let game_map = [];
-    let headers = gameData['game_map']['headers'];
-    for (let y = 0; y < gameData['game_map']['data'].length; y++) {
-        game_map.push([])
-        for (let x = 0; x < gameData['game_map']['data'][y].length; x++) {
-            game_map[y].push([]);
-            let data = gameData['game_map']['data'][y][x];
-            for (let hidx = 0; hidx < headers.length; hidx++) {
-                let header = headers[hidx];
-                if (header == 'building') {
-                    let building = {};
-                    building['name'] = letter_to_name(data[hidx][0]);
-                    building['level'] = data[hidx][1];
-                    game_map[y][x]['building'] = building;
-                } else {
-                    game_map[y][x][header] = data[hidx];
+function parse_game_data_and_draw(newData) {
+    // only update game_map if it's a new turn
+    if (newData['turn'] == gameData['turn']) {
+        newData['game_map'] = gameData['game_map'];
+        gameData = newData;
+    } else {
+        gameData = newData;
+        // We need to unpack some of the data
+        let game_map = [];
+        let headers = gameData['game_map']['headers'];
+        for (let y = 0; y < gameData['game_map']['data'].length; y++) {
+            game_map.push([])
+            for (let x = 0; x < gameData['game_map']['data'][y].length; x++) {
+                game_map[y].push([]);
+                let data = gameData['game_map']['data'][y][x];
+                for (let hidx = 0; hidx < headers.length; hidx++) {
+                    let header = headers[hidx];
+                    if (header == 'building') {
+                        let building = {};
+                        building['name'] = letter_to_name(data[hidx][0]);
+                        building['level'] = data[hidx][1];
+                        game_map[y][x]['building'] = building;
+                    } else {
+                        game_map[y][x][header] = data[hidx];
+                    }
                 }
             }
         }
+        gameData['game_map'] = game_map;
     }
-    gameData['game_map'] = game_map;
 
     if (!prevGameData) {
         prevGameData = gameData;
