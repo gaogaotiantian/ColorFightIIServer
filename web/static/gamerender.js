@@ -637,7 +637,7 @@ function queue_upgrade(x, y) {
 
 function draw_user_list() {
     const listHTML  = document.getElementById('user-list-info');
-    const users     = Object.entries(gameData['users']);
+    const users     = Object.entries(gameData['users']).sort((a, b) => b[1]['gold'] - a[1]['gold']);
 
     // Clear out all the old user rows. 
     clear_div(listHTML); 
