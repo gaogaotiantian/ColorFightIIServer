@@ -25,6 +25,7 @@ class Colorfight:
         self.admin_password = ""
         self.join_key = ""
         self.finish_time = 0
+        self.key_frame = 0
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
@@ -93,6 +94,7 @@ class Colorfight:
         self.errors = {}
         self.last_update = time.time() 
         self.game_map = GameMap(self.height, self.width) 
+        self.key_frame = 0
         self.clear_log()
         self.add_log()
 
@@ -114,6 +116,7 @@ class Colorfight:
         elif do_update:
             self.dirty = True
             self.turn += 1
+            self.key_frame += 1
             self.errors = self.do_all_commands()
             # 1. Update all the cells based on attackers
             #    This will also update the cell dict in users
@@ -270,6 +273,9 @@ class Colorfight:
         if len(username) >= 15:
             return False, "Username can't exceed 15 characters."
 
+        if len(username) == 0:
+            return False, "Username has to be at least 1 characters"
+
         if join_key != self.join_key:
             return False, "You need the correct join key for the room"
 
@@ -280,15 +286,18 @@ class Colorfight:
                     return True, (user.uid,)
                 else:
                     return False, "Username exists"
+
         if self.allow_join_after_start or self.turn == 0:
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
                     user = User(uid, username, password)
                     if self.game_map.born(user):
+                        self.key_frame += 1
                         self.users[uid] = user
                         return True, (uid,)
                     else:
                         return False, "Map is full"
+
             raise Exception("Should never be here")
         else:
             return False, "You are not allowed to join after the game starts"
@@ -405,9 +414,12 @@ class Colorfight:
             self.log.append(self.get_game_info_str())
 
     def clear_log(self):
+        self.log_turn = 0
         self.log = []
+        self.compressed_log = None
 
     def get_log(self):
-        if self.turn == self.max_turn:
-            return gzip.compress(json.dumps(self.log).encode('utf-8'), compresslevel = 5)
-        return gzip.compress(json.dumps(self.log).encode('utf-8'), compresslevel = 5)
+        if self.log_turn != self.turn:
+            self.log_turn = self.turn
+            self.compressed_log = gzip.compress(json.dumps(self.log).encode('utf-8'), compresslevel = 5)
+        return self.compressed_log
