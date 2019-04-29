@@ -144,6 +144,10 @@ $( function() {
     $( '#owner-render-button' ).click( function() {
         change_render_options({"owner": "toggle"});
     })
+
+    $(window).on("focus", function() {
+        full_refresh();
+    })
 } );
 
 

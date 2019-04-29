@@ -154,6 +154,13 @@ class GameMap:
                         print(cell.owner)
                     cell.owner = 0
 
+        # If the user's home is destroyed, clear the buildings
+        for user in users.values():
+            if user.tech_level == 0:
+                for cell in user.cells.values():
+                    if not cell.building.is_home:
+                        cell.building = Empty()
+
         # After updating the owner, we update the force field
         for x in range(self.width):
             for y in range(self.height):

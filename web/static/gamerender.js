@@ -167,7 +167,8 @@ const assets = [
     "/static/assets/fortress2.json",
     "/static/assets/fortress3.json",
     "/static/assets/buildEffect.json",
-    "/static/assets/upgradeEffect.json"
+    "/static/assets/upgradeEffect.json",
+    "/static/assets/destroyEffect.json"
 ]
 
 PIXI.loader
@@ -283,8 +284,6 @@ function owner_changed(currCell, prevCell) {
 }
 
 function change_render_options(options) {
-    console.log(options)
-    console.log(renderOptions)
     for (key in options) {
         if (key in renderOptions) {
             if (options[key] == "toggle") {
@@ -294,6 +293,11 @@ function change_render_options(options) {
             }
         }
     }
+    full_refresh();
+}
+
+function full_refresh()
+{
     forceRefresh = true;
 }
 
@@ -347,6 +351,11 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
             // Building is a higher level. 
             draw_upgrade_effect(x, y); 
         }
+    }
+
+    if (currBuilding["name"] == "empty" && prevBuilding["name"] != "empty" && 
+            renderOptions["building"]) {
+        draw_destroy_effect(x, y);
     }
 }
 
@@ -431,6 +440,10 @@ function draw_upgrade_effect(x, y) {
     draw_cell_building(x, y, 'upgradeEffect', false); 
 }
 
+function draw_destroy_effect(x, y) {
+    draw_cell_building(x, y, 'destroyEffect', false);
+}
+
 function draw_cell_building(x, y, animation_name, loop) {
     if (animations[animation_name]) {
         let build_effect_image = new PIXI.extras.AnimatedSprite(animations[animation_name]);
@@ -501,6 +514,10 @@ if (gameRoomMode == 'play') {
         let tempGameData = JSON.parse(msg.data);
         if (gameData['turn'] != tempGameData['turn']) {
             prevGameData = gameData
+        }
+        
+        if (tempGameData['turn'] < gameData['turn']) {
+            full_refresh();
         }
         parse_game_data_and_draw(tempGameData);
     }
@@ -1079,9 +1096,9 @@ function create_cell_info(x, y) {
                 let selfEnergy  = selfData['energy'];
 
                 // Min attack. Just enough to capture. 
-                let minAttack   = attackCost + forceField;
+                let minAttack   = attackCost;
                 // Max attack. Enough to max out the force field. 
-                let maxAttack   = Math.max(minAttack, GAME_MAX_ATTACK); 
+                let maxAttack   = Math.max(minAttack + 300, GAME_MAX_ATTACK); 
 
                 // Create a min attack button. 
                 buttonDiv.appendChild(create_button('Min Attack: ' + minAttack, 

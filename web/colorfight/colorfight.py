@@ -6,7 +6,7 @@ import gzip
 from .game_map import GameMap
 from .user import User
 from .position import Position
-from .building import get_building_class
+from .building import get_building_class, Home
 
 from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
@@ -237,6 +237,11 @@ class Colorfight:
 
         if self.users[uid].gold < BldClass.cost:
             return False, "Not enough gold"
+
+        if BldClass is Home and self.users[uid].tech_level != 0:
+            return False, "You can only have one home"
+        elif BldClass is not Home and self.users[uid].tech_level == 0:
+            return False, "You need to have a home before build other buildings"
 
         self.game_map[build_pos].building = BldClass()
         self.users[uid].gold -= BldClass.cost
