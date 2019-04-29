@@ -61,6 +61,7 @@ let gameData     = false;
 let prevGameData = false;
 let lastTurn     = -1;
 let maxTurn      = 500;
+let countDown    = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Rendering Variables
@@ -219,11 +220,16 @@ function draw_game(ts) {
         // this is due to the DOM manipulations in the info pane or if it is 
         // us not receiving events. 
 
-        if (gameData["turn"] != lastTurn) {
+        if (gameData["turn"] != lastTurn || countDown != gameData["info"]["start_count_down"]) {
             turnStartTime = ts;
-            lastTurn = gameData["turn"];
-            maxTurn  = gameData["info"]["max_turn"];
+            lastTurn  = gameData["turn"];
+            maxTurn   = gameData["info"]["max_turn"];
+            countDown = gameData["info"]["start_count_down"];
+            
             gameTurn.innerHTML = lastTurn + "/" + maxTurn;
+            if (countDown != 0) {
+                gameTurn.innerHTML += " (" + countDown.toString() + ")";
+            }
 
             // Draw the game board once per turn. 
             for (let y = 0; y < GAME_HEIGHT; y++) {

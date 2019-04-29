@@ -14,11 +14,14 @@ from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 class Colorfight:
     def __init__(self):
         self.turn = 0
+
+        # Setups
         self.max_turn = GAME_MAX_TURN
         self.width = GAME_WIDTH
         self.height = GAME_HEIGHT
         self.round_time = ROUND_TIME
         self.first_round_time = ROUND_TIME
+        self.start_count_down = self.first_round_time
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
         self.replay_enable = "never"
@@ -29,13 +32,19 @@ class Colorfight:
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
+
+        # Possible actions
         self.valid_actions = {
             # Action     # Required Args           # Optional Args # Return val
             "register": [("username", "password"), ("join_key",),  ("uid",)],
             "command":  [("cmd_list",),            (),             ()]
         }
-        self.dirty      = True
+
+        # Game info related
         self._game_info = None
+        self._game_info_key_frame = 0
+
+        # Initialization
         self.restart()
 
     def config(self, data):
@@ -89,12 +98,13 @@ class Colorfight:
 
     def restart(self):
         self.turn = 0
-        self.dirty = True
         self.users = {}
         self.errors = {}
-        self.last_update = time.time() 
-        self.game_map = GameMap(self.height, self.width) 
         self.key_frame = 0
+        self.start_count_down = self.first_round_time
+        self.game_map = GameMap(self.height, self.width) 
+        self.last_update = time.time() 
+        self.key_frame = 1
         self.clear_log()
         self.add_log()
 
@@ -102,8 +112,14 @@ class Colorfight:
         do_update = False
         do_restart = False
         if self.turn == 0:
-            if force or (time.time() - self.last_update > self.first_round_time):
+            count_down = self.first_round_time - (time.time() - self.last_update)
+            if force or count_down < 0:
                 do_update = True
+                self.start_count_down = 0
+            elif int(count_down) != self.start_count_down:
+                self.start_count_down = int(count_down)
+                self.key_frame += 1
+                
         elif self.turn == self.max_turn:
             if self.finish_time != 0 and time.time() - self.last_update > self.finish_time:
                 do_restart = True
@@ -111,10 +127,8 @@ class Colorfight:
             if force or (time.time() - self.last_update > self.round_time):
                 do_update = True
         if do_restart:
-            self.dirty = True
             self.restart()
         elif do_update:
-            self.dirty = True
             self.turn += 1
             self.key_frame += 1
             self.errors = self.do_all_commands()
@@ -352,8 +366,6 @@ class Colorfight:
             if arg in data:
                 arg_list[arg] = data[arg]
 
-        self.dirty = True
-        
         # should be a tuple 
         success, result = getattr(self, action)(uid, **arg_list)
         if not success:
@@ -374,6 +386,7 @@ class Colorfight:
                 "width": GAME_WIDTH, \
                 "height": GAME_HEIGHT, \
                 "round_time": self.round_time, \
+                "start_count_down": self.start_count_down, \
                 "allow_manual_mode": self.allow_manual_mode, \
         }
 
@@ -402,8 +415,8 @@ class Colorfight:
         }
 
     def get_game_info_str(self):
-        if self.dirty or self._game_info == None:
-            self.dirty = False
+        if self._game_info == None or self._game_info_key_frame != self.key_frame:
+            self._game_info_key_frame = self.key_frame
             self._game_info = self.get_game_info()
             self.compress_game_info(self._game_info)
             self._game_info_str = json.dumps(self._game_info,separators=[',',':'])

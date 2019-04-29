@@ -73,7 +73,7 @@ async def game_channel(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    curr_turn = 0 
+    key_frame = 0 
     gameroom_id = request.match_info['gameroom_id']
 
     if gameroom_id in request.app['game']:
@@ -82,8 +82,8 @@ async def game_channel(request):
         try:
             while True:
                 game.update()
-                if curr_turn != game.turn:
-                    curr_turn = game.turn
+                if key_frame != game.key_frame:
+                    key_frame = game.key_frame
                     await ws.send_str(game.get_game_info_str())
                 await asyncio.sleep(0.04)
         finally:
