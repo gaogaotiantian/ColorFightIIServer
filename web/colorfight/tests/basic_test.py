@@ -63,6 +63,7 @@ def test_update():
 def test_attack():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -86,6 +87,7 @@ def test_attack():
 def test_build():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -108,6 +110,7 @@ def test_build():
 def test_upgrade():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
