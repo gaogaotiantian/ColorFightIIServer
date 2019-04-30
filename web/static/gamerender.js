@@ -512,48 +512,25 @@ function combine_color( src, dst, per ) {
 if (gameRoomMode == 'play') {
     gameSocket.onmessage = function( msg ) {
         let tempGameData = JSON.parse(msg.data);
-        if (gameData['turn'] != tempGameData['turn']) {
-            prevGameData = gameData
-        }
-        
-        if (tempGameData['turn'] < gameData['turn']) {
-            full_refresh();
-        }
         parse_game_data_and_draw(tempGameData);
     }
 }
 
 // Parse gameData and draw the game, replay will use this function to draw
 function parse_game_data_and_draw(newData) {
+    newData = unpack_game_data(newData);
+    if (gameData && gameData['turn'] != newData['turn']) {
+        prevGameData = gameData
+    }
+    
+    if (newData['turn'] < gameData['turn']) {
+        full_refresh();
+    }
     // only update game_map if it's a new turn
     if (newData['turn'] == gameData['turn']) {
         newData['game_map'] = gameData['game_map'];
-        gameData = newData;
-    } else {
-        gameData = newData;
-        // We need to unpack some of the data
-        let game_map = [];
-        let headers = gameData['game_map']['headers'];
-        for (let y = 0; y < gameData['game_map']['data'].length; y++) {
-            game_map.push([])
-            for (let x = 0; x < gameData['game_map']['data'][y].length; x++) {
-                game_map[y].push([]);
-                let data = gameData['game_map']['data'][y][x];
-                for (let hidx = 0; hidx < headers.length; hidx++) {
-                    let header = headers[hidx];
-                    if (header == 'building') {
-                        let building = {};
-                        building['name'] = letter_to_name(data[hidx][0]);
-                        building['level'] = data[hidx][1];
-                        game_map[y][x]['building'] = building;
-                    } else {
-                        game_map[y][x][header] = data[hidx];
-                    }
-                }
-            }
-        }
-        gameData['game_map'] = game_map;
     }
+    gameData = newData;
 
     if (!prevGameData) {
         prevGameData = gameData;
@@ -573,6 +550,38 @@ function parse_game_data_and_draw(newData) {
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
     flush_commands(); 
+}
+
+function unpack_game_data(game_data) {
+    let game_map = [];
+    let headers = game_data['game_map']['headers'];
+    for (let y = 0; y < game_data['game_map']['data'].length; y++) {
+        game_map.push([])
+        for (let x = 0; x < game_data['game_map']['data'][y].length; x++) {
+            game_map[y].push([]);
+            let data = game_data['game_map']['data'][y][x];
+            for (let hidx = 0; hidx < headers.length; hidx++) {
+                let header = headers[hidx];
+                if (header == 'building') {
+                    let building = {};
+                    try {
+                        building['name'] = letter_to_name(data[hidx][0]);
+                    } catch(exception) {
+                        console.log(exception)
+                        console.log(y)
+                        console.log(x)   
+                        console.log(data)
+                    }
+                    building['level'] = data[hidx][1];
+                    game_map[y][x]['building'] = building;
+                } else {
+                    game_map[y][x][header] = data[hidx];
+                }
+            }
+        }
+    }
+    game_data['game_map'] = game_map;
+    return game_data;
 }
 
 function letter_to_name(letter) {

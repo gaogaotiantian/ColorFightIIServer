@@ -2,6 +2,7 @@ import json
 import time
 import sys
 import gzip
+import copy
 
 from .game_map import GameMap
 from .user import User
@@ -43,6 +44,7 @@ class Colorfight:
         # Game info related
         self._game_info = None
         self._game_info_key_frame = 0
+        self._prev_game_info = None
 
         # Initialization
         self.restart()
@@ -101,6 +103,8 @@ class Colorfight:
         self.users = {}
         self.errors = {}
         self.key_frame = 0
+        self._prev_game_info = None
+        self._game_info = None
         self.start_count_down = self.first_round_time
         self.game_map = GameMap(self.height, self.width) 
         self.last_update = time.time() 
@@ -422,17 +426,35 @@ class Colorfight:
                 "users": {user.uid: user.info() for user in self.users.values()} \
         }
 
-    def get_game_info_str(self):
+    def get_compressed_game_info(self):
         if self._game_info == None or self._game_info_key_frame != self.key_frame:
             self._game_info_key_frame = self.key_frame
+            self._prev_game_info = self._game_info
             self._game_info = self.get_game_info()
             self.compress_game_info(self._game_info)
-            self._game_info_str = json.dumps(self._game_info,separators=[',',':'])
-        return self._game_info_str
+        return self._game_info
 
     def add_log(self):
+        def same_cell(c1, c2):
+            return all([c1[i] == c2[i] for i in range(len(c1))])
+
         if self.replay_enable:
-            self.log.append(self.get_game_info_str())
+            if not self._prev_game_info:
+                self.log.append(self.get_compressed_game_info())
+            else:
+                currData = self.get_compressed_game_info()
+                newData = {"turn"    : currData["turn"], \
+                           "users"   : currData["users"], \
+                           "game_map":{"data":[[[] for j in range(GAME_WIDTH)] for i in range(GAME_HEIGHT)]}}
+
+                game_map_data = currData['game_map']['data']
+                for y in range(GAME_HEIGHT):
+                    for x in range(GAME_WIDTH):
+                        cell_data = currData['game_map']['data'][y][x]
+                        if not same_cell(cell_data, self._prev_game_info['game_map']['data'][y][x]):
+                            newData["game_map"]["data"][y][x] = cell_data
+                
+                self.log.append(newData)
 
     def clear_log(self):
         self.log_turn = 0
@@ -442,5 +464,5 @@ class Colorfight:
     def get_log(self):
         if self.log_turn != self.turn:
             self.log_turn = self.turn
-            self.compressed_log = gzip.compress(json.dumps(self.log).encode('utf-8'), compresslevel = 5)
+            self.compressed_log = gzip.compress(json.dumps(self.log, separators=[',',':']).encode('utf-8'), compresslevel = 5)
         return self.compressed_log

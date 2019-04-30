@@ -12,13 +12,38 @@ var replaySpeedIdx = 3;
 function load_file() {
     let file = document.getElementById('replay-file-input').files[0];
     fr = new FileReader();
-    console.log(123)
     fr.onloadend = function(e) {
         try {
             let raw = pako.inflate(fr.result, {to:'string'});
             let data = JSON.parse(raw);
+            let info = {};
+            let game_map_data = [];
+            let game_map_headers = [];
             for (var i = 0; i < data.length; i++) {
-                fullGameData[i] = JSON.parse(data[i]);
+                let round_data  = data[i];
+                fullGameData[i] = JSON.parse(JSON.stringify(data[i]));
+                if (i == 0) {
+                    info = round_data['info'];
+                    info["start_count_down"] = 0;
+                    game_map_data    = round_data['game_map']['data'];
+                    game_map_headers = round_data['game_map']['headers'];
+                } else {
+                    fullGameData[i]['info'] = info;
+                    fullGameData[i]['users'] = round_data['users'];
+                    let round_game_map_data = [];
+                    for (let i = 0; i < game_map_data.length; i++) {
+                        for (let j = 0; j < game_map_data[0].length; j++) {
+                            if (round_data['game_map']['data'][i][j].length == 0) {
+                                round_game_map_data.push(game_map_data[i][j]);
+                            } else {
+                                round_game_map_data.push(round_data['game_map']['data'][i][j]);
+                                game_map_data[i][j] = round_data['game_map']['data'][i][j];
+                            }
+                        }
+                    }
+                    fullGameData[i]['game_map']['headers'] = game_map_headers;
+                    fullGameData[i]['game_map']['data'] = JSON.parse(JSON.stringify(game_map_data));
+                }
             }
             replayCurrTurn = 0;
             replayMaxTurn = data.length - 1;
@@ -29,6 +54,7 @@ function load_file() {
             slider.value = 0;
         }
         catch (exception) {
+            console.log(exception)
             alert("Wrong replay file!");
         }
     }
@@ -37,13 +63,12 @@ function load_file() {
 
 function play_loop() {
     if (replayStatus != 'invalid') {
-        prevGameData = gameData;
-        gameData = JSON.parse(JSON.stringify(fullGameData[replayCurrTurn]));
+        data = JSON.parse(JSON.stringify(fullGameData[replayCurrTurn]));
         if (replayStatus == 'play' && replayCurrTurn < replayMaxTurn) {
             replayCurrTurn += 1;
         }
         update_panels();
-        parse_game_data_and_draw();
+        parse_game_data_and_draw(data);
     }
     setTimeout(play_loop, possibleReplaySpeed[replaySpeedIdx] * 1000);
 }

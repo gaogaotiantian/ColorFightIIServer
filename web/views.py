@@ -84,7 +84,7 @@ async def game_channel(request):
                 game.update()
                 if key_frame != game.key_frame:
                     key_frame = game.key_frame
-                    await ws.send_str(game.get_game_info_str())
+                    await ws.send_json(game.get_compressed_game_info())
                 await asyncio.sleep(0.04)
         finally:
             pass
