@@ -9,6 +9,7 @@ class User:
         self.gold_source = 0
         self.tech_level = 1
         self.tax_level = 0
+        self.tax_amount = 0
         self.building_number = {}
         self.dead = False
         self.cells = {}
@@ -20,9 +21,21 @@ class User:
         self.gold_source   += cell.gold
 
     def update(self):
+        def get_tax(num):
+            tax = 0
+            curr_coeff = 0
+            while num >= 100:
+                num -= 100
+                tax += curr_coeff * 100
+                curr_coeff += 1
+            tax += num * curr_coeff
+            return tax
+        cell_count = len(self.cells)
+        building_count = self.building_number.get("energy_well", 0) + self.building_number.get("gold_mine", 0)
         self.tax_level = int(len(self.cells) / 100)
-        self.energy += self.energy_source - 2 * self.tax_level * len(self.cells)
-        self.gold   += self.gold_source - 2 * self.tax_level * len(self.cells)
+        self.tax_amount = get_tax(cell_count) + get_tax(building_count)
+        self.energy += self.energy_source - self.tax_amount
+        self.gold   += self.gold_source   - self.tax_amount
         if len(self.cells) == 0:
             self.dead = True
 
@@ -36,6 +49,6 @@ class User:
                 "gold_source": self.gold_source, \
                 "tech_level": self.tech_level, \
                 "tax_level": self.tax_level, \
-                "tax_amount": 2 *self.tax_level * len(self.cells), \
+                "tax_amount": self.tax_amount, \
                 "building_number": self.building_number, \
                 "cells": [cell.position.info() for cell in self.cells.values()]}
