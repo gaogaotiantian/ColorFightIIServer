@@ -277,14 +277,14 @@ resource buildings a player owns, the larger the ```tax_amount``` will be.
 The equation for ```tax_amount``` generated from number of cells and buildings
 are the same.
 
-number  | tax
-----    | ----
-0-100   | no tax
-100-200 | 1 per cell/building
-200-300 | 2 per cell/building
-300-400 | 3 per cell/building
+number  | tax rate                | total tax
+----    | ----                    | ---
+0-100   | no tax                  | 0
+100-200 | 1 per cell/building     | 1*(num - 100) 
+200-300 | 2 per cell/building     | 100 + 2*(num - 200)
+300-400 | 3 per cell/building     | 300 + 3*(num - 300)
 ...     | ...
-800-900 | 8 per cell/building
+800-900 | 8 per cell/building     | 2800 + 8*(num - 800)
 
 > For example. A player has 337 cells on which 102 ```gold_mines```, 73 
   ```energy_wells``` and 99 ```fortress``` are built. First we need to calculate

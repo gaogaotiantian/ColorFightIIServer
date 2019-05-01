@@ -233,33 +233,40 @@ are the same.</p>
 <thead>
 <tr>
 <th>number</th>
-<th>tax</th>
+<th>tax rate</th>
+<th>total tax</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0-100</td>
 <td>no tax</td>
+<td>0</td>
 </tr>
 <tr>
 <td>100-200</td>
 <td>1 per cell/building</td>
+<td>1*(num - 100)</td>
 </tr>
 <tr>
 <td>200-300</td>
 <td>2 per cell/building</td>
+<td>100 + 2*(num - 200)</td>
 </tr>
 <tr>
 <td>300-400</td>
 <td>3 per cell/building</td>
+<td>300 + 3*(num - 300)</td>
 </tr>
 <tr>
 <td>...</td>
 <td>...</td>
+<td></td>
 </tr>
 <tr>
 <td>800-900</td>
 <td>8 per cell/building</td>
+<td>2800 + 8*(num - 800)</td>
 </tr>
 </tbody>
 </table>
