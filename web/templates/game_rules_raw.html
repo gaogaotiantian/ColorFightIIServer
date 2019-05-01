@@ -229,14 +229,40 @@ needs to upgrade their home to a higher level, therefore achieves a higher
 resource buildings a player owns, the larger the <code>tax_amount</code> will be.</p>
 <p>The equation for <code>tax_amount</code> generated from number of cells and buildings
 are the same.</p>
-<p>number  | tax
-----    | ----
-0-100   | no tax
-100-200 | 1 per cell/building
-200-300 | 2 per cell/building
-300-400 | 3 per cell/building
-...     | ...
-800-900 | 8 per cell/building</p>
+<table>
+<thead>
+<tr>
+<th>number</th>
+<th>tax</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-100</td>
+<td>no tax</td>
+</tr>
+<tr>
+<td>100-200</td>
+<td>1 per cell/building</td>
+</tr>
+<tr>
+<td>200-300</td>
+<td>2 per cell/building</td>
+</tr>
+<tr>
+<td>300-400</td>
+<td>3 per cell/building</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<td>800-900</td>
+<td>8 per cell/building</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>For example. A player has 337 cells on which 102 <code>gold_mines</code>, 73 
   <code>energy_wells</code> and 99 <code>fortress</code> are built. First we need to calculate
