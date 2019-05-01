@@ -1,9 +1,4 @@
 @font-face {
-    font-family: Conthrax;
-    src: url(./fonts/conthrax-sb.ttf);
-}
-
-@font-face {
     font-family: Comfortaa;
     src: url(./fonts/Comfortaa-Regular.ttf);
 }
@@ -37,8 +32,8 @@ body {
 
 .nav-link {
     color: rgb(200, 197, 207);
-    font-family: Conthrax;
-    font-size: 1.1rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
     padding: 0.5rem 0.2rem;
     text-shadow: 0px 0px 1px #473670;
     -webkit-transition: color 0.3s, text-shadow 0.5s;
@@ -97,7 +92,7 @@ body {
 }
 
 .doc-header h1{
-    font-family: Conthrax;
+    font-family: 'Orbitron', sans-serif ;
     font-size: 2rem;
     color: rgb(228, 240, 255);
     text-shadow: 

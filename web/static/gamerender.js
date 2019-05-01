@@ -926,12 +926,12 @@ function create_user_info(uid, user) {
                       goldTotal                     ], 
         [create_p('+'),                  
                       create_p('+')                 ], 
-        [create_p(user['energy_source'], {"color":"#008000"}), 
-                      create_p(user['gold_source'], {"color":"#008000"}) ], 
+        [create_p(user['energy_source'], {"class":"resource-incr-p"}), 
+                      create_p(user['gold_source'], {"class":"resource-incr-p"}) ], 
         [create_p('-'), 
                       create_p('-')                 ], 
-        [create_p(user['tax_amount'], {"color":"#E00000"}), 
-                      create_p(user['tax_amount'], {"color":"#E00000"}) ], 
+        [create_p(user['tax_amount'], {"class":"resource-decr-p"}), 
+                      create_p(user['tax_amount'], {"class":"resource-decr-p"}) ], 
     ]; 
 
     ///////////////////////////////////////////////////////
@@ -1224,6 +1224,9 @@ function create_p(text, args = {}) {
     node.appendChild(document.createTextNode(text));
     if ('img_src' in args) {
         add_img_before(node, args['img_src'])
+    }
+    if ('class' in args) {
+        node.className = args['class'];
     }
     if ('color' in args) {
         node.style.color = args['color'];
