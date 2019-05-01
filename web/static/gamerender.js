@@ -132,7 +132,9 @@ for (var i = 0; i < cellContainers.length; i++) {
 
 function cell_hover_handler(hover) {
     hoverCell = position_to_cell(hover.data.global.x, hover.data.global.y); 
+    update_selected_user();
     draw_selected_cell_info(); 
+    draw_selected_user_info(); 
 }
 
 function cell_click_handler(click) {
@@ -142,8 +144,8 @@ function cell_click_handler(click) {
 
 function position_to_cell(x, y)
 {
-    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH), 
-            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT)]
+    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH - 1), 
+            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT - 1)]
 }
 
 function clamp(val, lower, upper) {
@@ -474,10 +476,15 @@ get_random_color = function() {
 }
 
 // UID 0 corresponds to unowned. It is set to black. 
-var ID_COLORS = [ 0x000000, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
-                  0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
-                  0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
-                  0xDDDDDD, ];
+// This is 20 colors inherited from colorfight, for colorfightII, we only need 
+// 8 colors + black. We added a couple more for extras
+// var ID_COLORS = [ 0x000000, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
+//                   0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
+//                   0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
+//                   0xDDDDDD, ];
+var ID_COLORS = [0x000000, 0xE6194B, 0x3CB44B, 0xffe119, 0x4363D8, 0xF58231,
+                 0x42D4F4, 0xF032E6, 0x9A6324,
+                 0x800000, 0x469990, 0xFABEBE, 0x000075, 0xE6BEFF, 0x911EB4];
 
 // Convert a 6-hex value to a corresponding HTML RGB color code string. 
 function id_to_color(uid) {
@@ -523,11 +530,15 @@ function parse_game_data_and_draw(newData) {
         prevGameData = gameData
     }
     
-    if (newData['turn'] < gameData['turn']) {
+    if (!gameData || 
+            newData['turn'] < gameData['turn'] || 
+            newData['info']['game_id'] != gameData['info']['game_id']) {
         full_refresh();
     }
     // only update game_map if it's a new turn
-    if (newData['turn'] == gameData['turn']) {
+    if (gameData && 
+            gameData['info']['game_id'] == newData['info']['game_id'] && 
+            newData['turn'] == gameData['turn']) {
         newData['game_map'] = gameData['game_map'];
     }
     gameData = newData;
@@ -748,7 +759,15 @@ function draw_user_list() {
 function update_selected_user() {
     // Hover has priority over click. 
     if (hoverUID == SENTINEL_UID) {
-        selectUID = clickUID; 
+        let hoveredCellInfo = false;
+        if (gameData && gameData['game_map']) {
+            hoveredCellInfo = gameData['game_map'][hoverCell[1]][hoverCell[0]];
+        }
+        if (hoveredCellInfo && hoveredCellInfo['owner'] != SENTINEL_UID) {
+            selectUID = hoveredCellInfo['owner'];
+        } else {
+            selectUID = clickUID; 
+        }
     }
     else {
         selectUID = hoverUID;
