@@ -76,6 +76,7 @@ async def game_channel(request):
     key_frame = 0 
     gameroom_id = request.match_info['gameroom_id']
     game_id = None
+    last_send = time.time()
 
     if gameroom_id in request.app['game']:
         game = request.app['game'][gameroom_id]
@@ -83,9 +84,10 @@ async def game_channel(request):
         try:
             while True:
                 game.update()
-                if key_frame != game.key_frame or game_id != game.game_id:
+                if key_frame != game.key_frame or game_id != game.game_id or time.time() - last_send > 30:
                     game_id   = game.game_id
                     key_frame = game.key_frame
+                    last_send = time.time()
                     await ws.send_json(game.get_compressed_game_info())
                 await asyncio.sleep(0.04)
         finally:
