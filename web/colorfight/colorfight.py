@@ -31,6 +31,7 @@ class Colorfight:
         self.finish_time = 0
         self.key_frame = 0
         self.symmetric = True
+        self.game_id   = 0
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
@@ -55,7 +56,6 @@ class Colorfight:
             /param data: dict for all possible parameters
         """
         try:
-            print(data)
             for field in data:
                 val = data[field]
                 if field == "max_turn":
@@ -110,9 +110,14 @@ class Colorfight:
         self.start_count_down = self.first_round_time
         self.game_map = GameMap(self.height, self.width) 
         self.last_update = time.time() 
+        self.game_id = str(int(self.last_update * 1000))
         self.key_frame = 1
         self.clear_log()
         self.add_log()
+
+    def start(self):
+        if self.turn == 0:
+            self.update(force = True)
 
     def update(self, force = False):
         do_update = False
@@ -411,6 +416,7 @@ class Colorfight:
                 "round_time": self.round_time, \
                 "start_count_down": self.start_count_down, \
                 "allow_manual_mode": self.allow_manual_mode, \
+                "game_id": self.game_id, \
         }
 
     def compress_game_info(self, info):

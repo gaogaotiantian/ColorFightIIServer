@@ -523,11 +523,15 @@ function parse_game_data_and_draw(newData) {
         prevGameData = gameData
     }
     
-    if (newData['turn'] < gameData['turn']) {
+    if (!gameData || 
+            newData['turn'] < gameData['turn'] || 
+            newData['info']['game_id'] != gameData['info']['game_id']) {
         full_refresh();
     }
     // only update game_map if it's a new turn
-    if (newData['turn'] == gameData['turn']) {
+    if (gameData && 
+            gameData['info']['game_id'] == newData['info']['game_id'] && 
+            newData['turn'] == gameData['turn']) {
         newData['game_map'] = gameData['game_map'];
     }
     gameData = newData;
