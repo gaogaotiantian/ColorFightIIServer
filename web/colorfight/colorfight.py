@@ -54,6 +54,7 @@ class Colorfight:
             /param data: dict for all possible parameters
         """
         try:
+            print(data)
             for field in data:
                 val = data[field]
                 if field == "max_turn":
@@ -67,7 +68,7 @@ class Colorfight:
                     else:
                         return False, "rount_time value invalid"
                 elif field == "first_round_time":
-                    if 0 <= val <= 60:
+                    if val in ["full", "never"] or 0 <= val <= 60:
                         self.first_round_time = val
                     else:
                         return False, "first_round_time value invalid"
@@ -116,8 +117,17 @@ class Colorfight:
         do_update = False
         do_restart = False
         if self.turn == 0:
-            count_down = self.first_round_time - (time.time() - self.last_update)
-            if force or count_down < 0:
+            if self.first_round_time == "never":
+                count_down = 9999
+            elif self.first_round_time == "full":
+                if len(self.users) == 8:
+                    count_down = 0
+                else:
+                    count_down = 9999
+            else:
+                count_down = self.first_round_time - (time.time() - self.last_update)
+            
+            if force or count_down <= 0:
                 do_update = True
                 self.start_count_down = 0
             elif int(count_down) != self.start_count_down:
