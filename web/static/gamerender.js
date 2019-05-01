@@ -132,7 +132,9 @@ for (var i = 0; i < cellContainers.length; i++) {
 
 function cell_hover_handler(hover) {
     hoverCell = position_to_cell(hover.data.global.x, hover.data.global.y); 
+    update_selected_user();
     draw_selected_cell_info(); 
+    draw_selected_user_info(); 
 }
 
 function cell_click_handler(click) {
@@ -142,8 +144,8 @@ function cell_click_handler(click) {
 
 function position_to_cell(x, y)
 {
-    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH), 
-            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT)]
+    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH - 1), 
+            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT - 1)]
 }
 
 function clamp(val, lower, upper) {
@@ -757,7 +759,15 @@ function draw_user_list() {
 function update_selected_user() {
     // Hover has priority over click. 
     if (hoverUID == SENTINEL_UID) {
-        selectUID = clickUID; 
+        let hoveredCellInfo = false;
+        if (gameData && gameData['game_map']) {
+            hoveredCellInfo = gameData['game_map'][hoverCell[1]][hoverCell[0]];
+        }
+        if (hoveredCellInfo && hoveredCellInfo['owner'] != SENTINEL_UID) {
+            selectUID = hoveredCellInfo['owner'];
+        } else {
+            selectUID = clickUID; 
+        }
     }
     else {
         selectUID = hoverUID;
