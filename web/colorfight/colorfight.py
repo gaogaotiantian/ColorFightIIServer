@@ -30,6 +30,7 @@ class Colorfight:
         self.join_key = ""
         self.finish_time = 0
         self.key_frame = 0
+        self.symmetric = True
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
