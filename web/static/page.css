@@ -212,3 +212,51 @@ code {
     box-shadow: 0px 0px 5px 1px #2600ff2c;
 }
 
+.modal-content {
+    color: rgba(255, 255, 255, 0.8);
+    background: #373A49;
+	background-size     : cover;
+	background-position : center;
+	background-repeat   : repeat;
+    font-family: 'Quantico';
+}
+
+.modal-header, label {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.modal-header .close {
+    color:#fff;
+}
+.modal-header .close:hover {
+    color:#ddd !important;
+}
+
+.modal-foot button {
+    font-family: Comfortaa;
+    font-size: 1vw;
+    min-width: 100%;
+    color: #fff;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px #8fcdff;
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px #249bfc9c,
+        inset 0px 0px 5px 2px #249bfc9c;
+    background-color: #00000000;
+    transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+.modal-foot button:hover {
+    background-color: transparent;
+    box-shadow: 
+        0px 0px 10px 1px rgba(201, 247, 255, 0.856);
+        inset 0px 0px 5px 1px #1f94f3e0,
+}
+
+.modal-foot button:active {
+    background-color: transparent !important;
+    transform: translateY(4px);
+}
