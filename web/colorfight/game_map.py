@@ -84,9 +84,11 @@ class MapCell:
                 "force_field": self.force_field}
 
 class GameMap:
-    def __init__(self, width, height):
+    def __init__(self, width, height, symmetric = True):
         self.width = width
         self.height = height
+        self.symmetric = symmetric
+        self.symmetric_born_position = self._generate_symmetric_born_position()
         self._cells = self._generate_cells(width, height)
     
     def __getitem__(self, location):
@@ -103,6 +105,23 @@ class GameMap:
         else:
             return False
 
+    def _generate_symmetric_born_position(self):
+        x = random.randrange(1, self.width // 2)
+        y = random.randrange(0, x)
+        ret = [
+                Position(x, y),
+                Position(y, x),
+                Position(self.width - 1 - x, y),
+                Position(y, self.width - 1 - x),
+                Position(x, self.height - 1 - y),
+                Position(self.height - 1 - y, x),
+                Position(self.width - 1 - x, self.height - 1 - y),
+                Position(self.height - 1 - y, self.width - 1 - x)
+        ]
+        random.shuffle(ret)
+        return ret
+
+
     def get_cells(self):
         return [self._cells[y][x] for y in range(self.height) for x in range(self.width)]
 
@@ -112,8 +131,18 @@ class GameMap:
             return None
         return random.choice(empty_cells)
 
+    def get_symmetric_born_cell(self):
+        for p in self.symmetric_born_position:
+            if self[p].owner == 0:
+                return self[p]
+        return None
+
+
     def born(self, user):
-        cell = self.get_random_empty_cell()
+        if self.symmetric:
+            cell = self.get_symmetric_born_cell()
+        else:
+            cell = self.get_random_empty_cell()
         if cell == None:
             return False
         cell.building = Home()
@@ -154,6 +183,13 @@ class GameMap:
                         print(cell.owner)
                     cell.owner = 0
 
+        # If the user's home is destroyed, clear the buildings
+        for user in users.values():
+            if user.tech_level == 0:
+                for cell in user.cells.values():
+                    if not cell.building.is_home:
+                        cell.building = Empty()
+
         # After updating the owner, we update the force field
         for x in range(self.width):
             for y in range(self.height):
@@ -191,13 +227,37 @@ class GameMap:
         
         return new_cells
 
+    def _cast_to_original_coord(self, x, y):
+        if x >= self.width / 2:
+            x = self.width - 1 - x
+        if y >= self.height / 2:
+            y = self.height - 1 - y
+        if y > x:
+            x, y = y, x
+        return x, y
+
     def _generate_cells(self, width, height):
         cells = [[None for _ in range(width)] for _ in range(height)]
-        for x in range(width):
-            for y in range(height):
-                cells[y][x] = MapCell(Position(x, y))
-        for i in range(3):
-            cells = self._blur(cells, percent = 0.05)
+        if not self.symmetric:
+            for x in range(width):
+                for y in range(height):
+                    cells[y][x] = MapCell(Position(x, y))
+            for i in range(3):
+                cells = self._blur(cells, percent = 0.05)
+        else:
+            # generate a 1/8 slice first
+            for x in range((width+1) // 2):
+                for y in range(x+1):
+                    cells[y][x] = MapCell(Position(x, y))
+            for x in range(width):
+                for y in range(height):
+                    if cells[y][x] == None:
+                        orig_x, orig_y = self._cast_to_original_coord(x, y)
+                        cells[y][x] = copy.deepcopy(cells[orig_y][orig_x])
+                        cells[y][x].position = Position(x, y)
+            for i in range(3):
+                cells = self._blur(cells, percent = 0.05)
+
         return cells
 
     def _copy_cells(self, cells):

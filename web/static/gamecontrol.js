@@ -8,8 +8,24 @@ function restartGame( data ) {
         success: function(msg) {
             if (!msg['success']) {
                 alert(msg['err_msg']);
-            } else {
-                location.reload();
+            } 
+        }
+    } );
+}
+
+function startGame() {
+    $.ajax( {
+        url: "/start",
+        method: "POST",
+        dataType: "json",
+        contentType: 'application/json;charset=UTF-8',
+        data: JSON.stringify( {
+            "admin_password": $( "#admin-password-input" ).val() ,
+            "gameroom_id"   : window.location.pathname.split('/')[2]
+        } ),
+        success: function(msg) {
+            if (!msg['success']) {
+                alert(msg['err_msg']);
             }
         }
     } );
@@ -36,7 +52,11 @@ function getConfig() {
 
     var first_round_time = $( "#first-round-time-sel option:selected" ).val();
     if( first_round_time != "same" ) {
-        config[ "first_round_time" ] = parseFloat( first_round_time );
+        let data = parseFloat( first_round_time );
+        if (!data) {
+            data = first_round_time;
+        }
+        config[ "first_round_time" ] = data;
     }
 
     var finish_time = $( "#finish-time-sel option:selected" ).val();
@@ -102,6 +122,11 @@ function fullScreenHandler() {
     }
 }  
 $( function() {
+    $( '#go-button' ).click( function() {
+        startGame();
+    })
+
+
     $( '#restart-button' ).click( function() {
         restartGame( getConfig() );
     } );
@@ -131,4 +156,23 @@ $( function() {
             alert("You can't download replay now!");
         }
     })
+
+    // Render callbacks
+    $( '#resource-render-button' ).click( function() {
+        change_render_options({"gold": "toggle", "energy": "toggle"});
+    })
+
+    $( '#building-render-button' ).click( function() {
+        change_render_options({"building": "toggle"});
+    })
+
+    $( '#owner-render-button' ).click( function() {
+        change_render_options({"owner": "toggle"});
+    })
+
+    $(window).on("focus", function() {
+        full_refresh();
+    })
 } );
+
+

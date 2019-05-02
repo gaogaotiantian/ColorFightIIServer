@@ -61,6 +61,7 @@ let gameData     = false;
 let prevGameData = false;
 let lastTurn     = -1;
 let maxTurn      = 500;
+let countDown    = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Rendering Variables
@@ -74,6 +75,14 @@ let gameDim         = cellSize * GAME_WIDTH;
 // Use a common color for ENERGY and GOLD related drawing. 
 const ENERGY_COLOR  = "#65c9cf";
 const GOLD_COLOR    = "#faf334";
+
+let forceRefresh  = false;
+let renderOptions = {
+    "energy"  : true,
+    "gold"    : true,
+    "owner"   : true,
+    "building": true,
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -123,7 +132,9 @@ for (var i = 0; i < cellContainers.length; i++) {
 
 function cell_hover_handler(hover) {
     hoverCell = position_to_cell(hover.data.global.x, hover.data.global.y); 
+    update_selected_user();
     draw_selected_cell_info(); 
+    draw_selected_user_info(); 
 }
 
 function cell_click_handler(click) {
@@ -133,8 +144,8 @@ function cell_click_handler(click) {
 
 function position_to_cell(x, y)
 {
-    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH), 
-            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT)]
+    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH - 1), 
+            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT - 1)]
 }
 
 function clamp(val, lower, upper) {
@@ -158,7 +169,8 @@ const assets = [
     "/static/assets/fortress2.json",
     "/static/assets/fortress3.json",
     "/static/assets/buildEffect.json",
-    "/static/assets/upgradeEffect.json"
+    "/static/assets/upgradeEffect.json",
+    "/static/assets/destroyEffect.json"
 ]
 
 PIXI.loader
@@ -219,16 +231,21 @@ function draw_game(ts) {
         // this is due to the DOM manipulations in the info pane or if it is 
         // us not receiving events. 
 
-        if (gameData["turn"] != lastTurn) {
+        if (gameData["turn"] != lastTurn || countDown != gameData["info"]["start_count_down"] || forceRefresh) {
             turnStartTime = ts;
-            lastTurn = gameData["turn"];
-            maxTurn  = gameData["info"]["max_turn"];
+            lastTurn  = gameData["turn"];
+            maxTurn   = gameData["info"]["max_turn"];
+            countDown = gameData["info"]["start_count_down"];
+            
             gameTurn.innerHTML = lastTurn + "/" + maxTurn;
+            if (countDown != 0) {
+                gameTurn.innerHTML += " (" + countDown.toString() + ")";
+            }
 
             // Draw the game board once per turn. 
             for (let y = 0; y < GAME_HEIGHT; y++) {
                 for (let x = 0; x < GAME_WIDTH; x++) {
-                    if (gameMapEmpty || has_changed(gameMap[y][x], prevMap[y][x])) {
+                    if (gameMapEmpty || has_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
                         per_turn_draw_cell(x, y, gameMap[y][x], prevMap[y][x]); 
                     }
                 }
@@ -243,11 +260,13 @@ function draw_game(ts) {
         // Animate the cells per frame. 
         for (let y = 0; y < GAME_HEIGHT; y++) {
             for (let x = 0; x < GAME_WIDTH; x++) {
-                if (owner_changed(gameMap[y][x], prevMap[y][x])) {
+                if (owner_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
                     animate_cell(x, y, gameMap[y][x], prevMap[y][x], turnProgress);
                 }
             }
         }
+
+        forceRefresh = false;
     }
 
     // Always render the game for the animation
@@ -266,6 +285,24 @@ function owner_changed(currCell, prevCell) {
     return (currCell["owner"] != prevCell["owner"]);
 }
 
+function change_render_options(options) {
+    for (key in options) {
+        if (key in renderOptions) {
+            if (options[key] == "toggle") {
+                renderOptions[key] = !renderOptions[key];
+            } else {
+                renderOptions[key] = options[key];
+            }
+        }
+    }
+    full_refresh();
+}
+
+function full_refresh()
+{
+    forceRefresh = true;
+}
+
 function per_turn_draw_cell(x, y, currCell, prevCell)
 {
     // Clear the cell container
@@ -274,12 +311,26 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     }
 
     let base = new PIXI.Graphics();
-    // Draw energy border. 
-    draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 1);
-    // Draw gold border. 
-    draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 3);
     // Fill in owner color. Unowned corresponds to black. 
-    draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
+    if (renderOptions["owner"]) {
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 1);
+    } else {
+        draw_cell_rect(base, id_to_color(0), 1.0, x, y, 0);
+    }
+    // Draw energy border. 
+    if (renderOptions["energy"] || currCell['owner'] == 0) {
+        draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 1);
+    }
+    // Draw gold border. 
+    if (renderOptions["gold"] || currCell['owner'] == 0) {
+        draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 3);
+    }
+    // Fill in owner color. Unowned corresponds to black. 
+    if (renderOptions["owner"]) {
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
+    } else {
+        draw_cell_rect(base, id_to_color(0), 1.0, x, y, 5);
+    }
 
     // Add a child to do animations. 
     base.addChild(new PIXI.Graphics()); 
@@ -292,7 +343,7 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     let prevBuilding = prevCell['building']; 
 
     // Setup any needed animated sprites. 
-    if (currBuilding["name"] != "empty") {
+    if (currBuilding["name"] != "empty" && renderOptions["building"]) {
         draw_building(x, y, currBuilding);
         if (currBuilding['name'] != prevBuilding['name']) {
             // Different building. 
@@ -303,13 +354,18 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
             draw_upgrade_effect(x, y); 
         }
     }
+
+    if (currBuilding["name"] == "empty" && prevBuilding["name"] != "empty" && 
+            renderOptions["building"]) {
+        draw_destroy_effect(x, y);
+    }
 }
 
 function animate_cell(x, y, currCell, prevCell, progress) {
     let base            = cellContainers[y][x].children[0]; 
     let capture_cell    = base.children[0];
 
-    if (capture_cell) {
+    if (capture_cell && renderOptions["owner"]) {
         const   ownerShrink = 5; 
         let     prevMap     = prevGameData['game_map'];
         // Cell was captured the previous round. 
@@ -386,6 +442,10 @@ function draw_upgrade_effect(x, y) {
     draw_cell_building(x, y, 'upgradeEffect', false); 
 }
 
+function draw_destroy_effect(x, y) {
+    draw_cell_building(x, y, 'destroyEffect', false);
+}
+
 function draw_cell_building(x, y, animation_name, loop) {
     if (animations[animation_name]) {
         let build_effect_image = new PIXI.extras.AnimatedSprite(animations[animation_name]);
@@ -416,10 +476,15 @@ get_random_color = function() {
 }
 
 // UID 0 corresponds to unowned. It is set to black. 
-var ID_COLORS = [ 0x000000, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
-                  0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
-                  0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
-                  0xDDDDDD, ];
+// This is 20 colors inherited from colorfight, for colorfightII, we only need 
+// 8 colors + black. We added a couple more for extras
+// var ID_COLORS = [ 0x000000, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
+//                   0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
+//                   0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
+//                   0xDDDDDD, ];
+var ID_COLORS = [0x000000, 0xE6194B, 0x3CB44B, 0xffe119, 0x4363D8, 0xF58231,
+                 0x42D4F4, 0xF032E6, 0x9A6324,
+                 0x800000, 0x469990, 0xFABEBE, 0x000075, 0xE6BEFF, 0x911EB4];
 
 // Convert a 6-hex value to a corresponding HTML RGB color code string. 
 function id_to_color(uid) {
@@ -453,37 +518,30 @@ function combine_color( src, dst, per ) {
 // Play, get data from websockets
 if (gameRoomMode == 'play') {
     gameSocket.onmessage = function( msg ) {
-        prevGameData = gameData;
-        gameData     = JSON.parse( msg.data );
-    
-        parse_game_data_and_draw();
+        let tempGameData = JSON.parse(msg.data);
+        parse_game_data_and_draw(tempGameData);
     }
 }
 
 // Parse gameData and draw the game, replay will use this function to draw
-function parse_game_data_and_draw() {
-    // We need to unpack some of the data
-    let game_map = [];
-    let headers = gameData['game_map']['headers'];
-    for (let y = 0; y < gameData['game_map']['data'].length; y++) {
-        game_map.push([])
-        for (let x = 0; x < gameData['game_map']['data'][y].length; x++) {
-            game_map[y].push([]);
-            let data = gameData['game_map']['data'][y][x];
-            for (let hidx = 0; hidx < headers.length; hidx++) {
-                let header = headers[hidx];
-                if (header == 'building') {
-                    let building = {};
-                    building['name'] = letter_to_name(data[hidx][0]);
-                    building['level'] = data[hidx][1];
-                    game_map[y][x]['building'] = building;
-                } else {
-                    game_map[y][x][header] = data[hidx];
-                }
-            }
-        }
+function parse_game_data_and_draw(newData) {
+    newData = unpack_game_data(newData);
+    if (gameData && gameData['turn'] != newData['turn']) {
+        prevGameData = gameData
     }
-    gameData['game_map'] = game_map;
+    
+    if (!gameData || 
+            newData['turn'] < gameData['turn'] || 
+            newData['info']['game_id'] != gameData['info']['game_id']) {
+        full_refresh();
+    }
+    // only update game_map if it's a new turn
+    if (gameData && 
+            gameData['info']['game_id'] == newData['info']['game_id'] && 
+            newData['turn'] == gameData['turn']) {
+        newData['game_map'] = gameData['game_map'];
+    }
+    gameData = newData;
 
     if (!prevGameData) {
         prevGameData = gameData;
@@ -503,6 +561,38 @@ function parse_game_data_and_draw() {
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
     flush_commands(); 
+}
+
+function unpack_game_data(game_data) {
+    let game_map = [];
+    let headers = game_data['game_map']['headers'];
+    for (let y = 0; y < game_data['game_map']['data'].length; y++) {
+        game_map.push([])
+        for (let x = 0; x < game_data['game_map']['data'][y].length; x++) {
+            game_map[y].push([]);
+            let data = game_data['game_map']['data'][y][x];
+            for (let hidx = 0; hidx < headers.length; hidx++) {
+                let header = headers[hidx];
+                if (header == 'building') {
+                    let building = {};
+                    try {
+                        building['name'] = letter_to_name(data[hidx][0]);
+                    } catch(exception) {
+                        console.log(exception)
+                        console.log(y)
+                        console.log(x)   
+                        console.log(data)
+                    }
+                    building['level'] = data[hidx][1];
+                    game_map[y][x]['building'] = building;
+                } else {
+                    game_map[y][x][header] = data[hidx];
+                }
+            }
+        }
+    }
+    game_data['game_map'] = game_map;
+    return game_data;
 }
 
 function letter_to_name(letter) {
@@ -631,7 +721,7 @@ function queue_upgrade(x, y) {
 
 function draw_user_list() {
     const listHTML  = document.getElementById('user-list-info');
-    const users     = Object.entries(gameData['users']);
+    const users     = Object.entries(gameData['users']).sort((a, b) => b[1]['gold'] - a[1]['gold']);
 
     // Clear out all the old user rows. 
     clear_div(listHTML); 
@@ -669,7 +759,15 @@ function draw_user_list() {
 function update_selected_user() {
     // Hover has priority over click. 
     if (hoverUID == SENTINEL_UID) {
-        selectUID = clickUID; 
+        let hoveredCellInfo = false;
+        if (gameData && gameData['game_map']) {
+            hoveredCellInfo = gameData['game_map'][hoverCell[1]][hoverCell[0]];
+        }
+        if (hoveredCellInfo && hoveredCellInfo['owner'] != SENTINEL_UID) {
+            selectUID = hoveredCellInfo['owner'];
+        } else {
+            selectUID = clickUID; 
+        }
     }
     else {
         selectUID = hoverUID;
@@ -828,12 +926,12 @@ function create_user_info(uid, user) {
                       goldTotal                     ], 
         [create_p('+'),                  
                       create_p('+')                 ], 
-        [create_p(user['energy_source'], {"color":"#008000"}), 
-                      create_p(user['gold_source'], {"color":"#008000"}) ], 
+        [create_p(user['energy_source'], {"class":"resource-incr-p"}), 
+                      create_p(user['gold_source'], {"class":"resource-incr-p"}) ], 
         [create_p('-'), 
                       create_p('-')                 ], 
-        [create_p(user['tax_amount'], {"color":"#E00000"}), 
-                      create_p(user['tax_amount'], {"color":"#E00000"}) ], 
+        [create_p(user['tax_amount'], {"class":"resource-decr-p"}), 
+                      create_p(user['tax_amount'], {"class":"resource-decr-p"}) ], 
     ]; 
 
     ///////////////////////////////////////////////////////
@@ -1026,9 +1124,9 @@ function create_cell_info(x, y) {
                 let selfEnergy  = selfData['energy'];
 
                 // Min attack. Just enough to capture. 
-                let minAttack   = attackCost + forceField;
+                let minAttack   = attackCost;
                 // Max attack. Enough to max out the force field. 
-                let maxAttack   = Math.max(minAttack, GAME_MAX_ATTACK); 
+                let maxAttack   = Math.max(minAttack + 300, GAME_MAX_ATTACK); 
 
                 // Create a min attack button. 
                 buttonDiv.appendChild(create_button('Min Attack: ' + minAttack, 
@@ -1126,6 +1224,9 @@ function create_p(text, args = {}) {
     node.appendChild(document.createTextNode(text));
     if ('img_src' in args) {
         add_img_before(node, args['img_src'])
+    }
+    if ('class' in args) {
+        node.className = args['class'];
     }
     if ('color' in args) {
         node.style.color = args['color'];

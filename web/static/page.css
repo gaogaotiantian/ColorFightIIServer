@@ -1,9 +1,4 @@
 @font-face {
-    font-family: Conthrax;
-    src: url(./fonts/conthrax-sb.ttf);
-}
-
-@font-face {
     font-family: Comfortaa;
     src: url(./fonts/Comfortaa-Regular.ttf);
 }
@@ -37,8 +32,8 @@ body {
 
 .nav-link {
     color: rgb(200, 197, 207);
-    font-family: Conthrax;
-    font-size: 1.1rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
     padding: 0.5rem 0.2rem;
     text-shadow: 0px 0px 1px #473670;
     -webkit-transition: color 0.3s, text-shadow 0.5s;
@@ -66,15 +61,21 @@ body {
 }
 
 .section-overview h1 {
-    text-shadow: 0 1px 5px #A5E8B7;
+    margin-top: 1.2rem;
+    font-family: 'Orbitron';
+    text-shadow: 
+        0px 0px 3px #60b7ff,
+        0px 0px 10px #005aad;
 }
 
 .section-overview p {
-    letter-spacing: 0.1rem;
+    font-family: 'Quantico';
+    letter-spacing: 0.05rem;
 }
 
 .section-overview a {
     font-size: 1.4rem;
+    font-family: 'Quantico';
     background-image: linear-gradient(-180deg, #fad961, #f76b1c);
     font-weight: 600;
     color: #fff;
@@ -97,7 +98,7 @@ body {
 }
 
 .doc-header h1{
-    font-family: Conthrax;
+    font-family: 'Orbitron', sans-serif ;
     font-size: 2rem;
     color: rgb(228, 240, 255);
     text-shadow: 
@@ -121,10 +122,30 @@ body {
         inset 0px 0px 5000px #6092ff1c;
 }
 
-.doc-section p {
+.doc-section p, .doc-section tbody {
     color: #cacaca;
     text-shadow: 0px 0px 4px #0084ff;
     margin-bottom: 0.5rem;
+}
+
+.doc-section a{
+    color: #91c2ff;
+}
+
+.doc-section button {
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.4rem;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+}
+
+.doc-section button:hover {
+    box-shadow: 
+        0px 0px 2px 1px #84bdff,
+        0px 0px 10px 2px #497297;
 }
 
 .doc-section a{
@@ -182,6 +203,24 @@ body {
 
 .doc-section h1,h2,h3,h4 {
     font-weight: 600;
+}
+
+.doc-section table {
+    margin-bottom: 1vh;
+    border: solid 2px rgba(201, 247, 255, 0.5);
+    text-shadow: 
+        0px 0px 2px #005ca7;
+    box-shadow: 
+        0px 0px 15px 2px #249bfc9c,
+        inset 0px 0px 5000px #6092ff1c;
+}
+
+.doc-section th, .doc-section td{
+    padding: 0.2vh 0.5vw;
+}
+
+.doc-section tr:nth-child(even) {
+    background-color: #474A59;
 }
 
 code {

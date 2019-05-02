@@ -23,7 +23,7 @@ def convert_md_to_html():
         with open(game_rules_fp) as f:
             md = f.read()
             md = md[:md.find('## Communication')]
-            html = markdown.markdown(md, extensions = ['toc'])
+            html = markdown.markdown(md, extensions = ['toc', 'tables'])
             game_rules_html_fp = os.path.join(FILE_PATH, 'web', 'templates', 'game_rules_raw.html')
             with open(game_rules_html_fp, 'w') as fw:
                 fw.write(html)
@@ -35,7 +35,7 @@ def convert_md_to_html():
     # API UPDATE
     try:
         data = urllib.request.urlopen('https://raw.githubusercontent.com/gaogaotiantian/ColorfightIIBot/master/README.md').read().decode('ascii')
-        html = markdown.markdown(data, extensions = ['toc'])
+        html = markdown.markdown(data, extensions = ['toc', 'tables'])
         api_html_fp = os.path.join(FILE_PATH, 'web', 'templates', 'api_raw.html')
         with open(api_html_fp, 'w') as fw:
             fw.write(html)

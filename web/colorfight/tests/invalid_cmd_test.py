@@ -15,6 +15,7 @@ def test_invalid_position():
     try:
         game = Colorfight()
         uid = join(game, 'a', 'a')
+        game.update(True)
         result = attack(game, uid, -1, -1, 100)
         game.update(True)
         info = game.get_game_info()

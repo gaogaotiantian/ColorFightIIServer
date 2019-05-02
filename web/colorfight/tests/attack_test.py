@@ -7,6 +7,7 @@ import pytest
 def test_attack_cell_with_less_attack_cost():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -26,6 +27,7 @@ def test_attack_cell_with_less_attack_cost():
 def test_attack_without_enough_energy():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 100
@@ -46,6 +48,7 @@ def test_attack_without_enough_energy():
 def test_update_attack_cost():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -69,6 +72,7 @@ def test_update_attack_cost():
 def test_force_field_max():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000

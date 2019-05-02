@@ -7,6 +7,7 @@ import pytest
 def test_build_on_base():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -22,6 +23,7 @@ def test_build_on_base():
 def test_build_without_enough_resource():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -42,6 +44,7 @@ def test_build_without_enough_resource():
 def test_invalid_building_type():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -65,6 +68,7 @@ def test_invalid_building_type():
 def test_build_on_invalid_cell():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000

@@ -73,8 +73,10 @@ async def game_channel(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    curr_turn = 0 
+    key_frame = 0 
     gameroom_id = request.match_info['gameroom_id']
+    game_id = None
+    last_send = time.time()
 
     if gameroom_id in request.app['game']:
         game = request.app['game'][gameroom_id]
@@ -82,9 +84,11 @@ async def game_channel(request):
         try:
             while True:
                 game.update()
-                if curr_turn != game.turn:
-                    curr_turn = game.turn
-                    await ws.send_str(game.get_game_info_str())
+                if key_frame != game.key_frame or game_id != game.game_id or time.time() - last_send > 30:
+                    game_id   = game.game_id
+                    key_frame = game.key_frame
+                    last_send = time.time()
+                    await ws.send_json(game.get_compressed_game_info())
                 await asyncio.sleep(0.04)
         finally:
             pass
@@ -117,8 +121,14 @@ async def action_channel(request):
 
 async def restart(request):
     data = await request.json()
-    gameroom_id = data['gameroom_id']
-    config = data['config']
+    if 'gameroom_id' in data:
+        gameroom_id = data['gameroom_id']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify room id"})
+    if 'config' in data:
+        config = data['config']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify config"})
 
     admin_password = ""
     if 'admin_password' in data:
@@ -138,6 +148,29 @@ async def restart(request):
             return web.json_response({"success": False, "err_msg": err_msg})
     else:
         return web.json_response({"success": False, "err_msg": "You are not allowed to do this"})
+
+async def start_game(request):
+    data = await request.json()
+    if 'gameroom_id' in data:
+        gameroom_id = data['gameroom_id']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify room id"})
+
+    admin_password = ""
+    if 'admin_password' in data:
+        admin_password = data['admin_password']
+
+    if gameroom_id not in request.app['game']:
+        return web.json_response({"success": False, "err_msg": "No such room"})
+
+    game = request.app['game'][gameroom_id]
+
+    if admin_password == game.admin_password or admin_password == request.app['admin_password']:
+        game.start()
+    else:
+        return web.json_response({"success": False, "err_msg": "You are not allowed to do this"})
+
+    return web.json_response({"success": True})
 
 async def create_gameroom(request):
     data = await request.json()
