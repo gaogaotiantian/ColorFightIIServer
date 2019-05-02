@@ -131,6 +131,11 @@ $( function() {
         restartGame( getConfig() );
     } );
 
+    $( '#modal-refresh-button' ).click( function() {
+        restartGame( getConfig() );
+        $('.modal').modal('toggle');
+    } );
+
     document.addEventListener('fullscreenchange', fullScreenHandler);
     document.addEventListener('webkitfullscreenchange', fullScreenHandler);
     document.addEventListener('mozfullscreenchange', fullScreenHandler);

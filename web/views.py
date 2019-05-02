@@ -1,10 +1,17 @@
+import time
+import re
+
 import aiohttp
 from aiohttp import web
 import asyncio
 import aiohttp_jinja2
+
 from colorfight import Colorfight
-import time
-import re
+from colorfight.config import get_config
+
+# =============================================================================
+#    Utility
+# =============================================================================
 
 def url_safe(s):
     if re.search('[^0-9a-zA-Z-_.]', s):
@@ -21,6 +28,9 @@ def clean_gameroom(request):
         if name in request.app['game']:
             request.app['game'].pop(name)
 
+# =============================================================================
+#    Web pages
+# =============================================================================
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
@@ -68,6 +78,10 @@ async def api_documentation(request):
 @aiohttp_jinja2.template('contact.html')
 async def contact(request):
     return {}
+
+# =============================================================================
+#    Websockets
+# =============================================================================
 
 async def game_channel(request):
     ws = web.WebSocketResponse()
@@ -118,6 +132,10 @@ async def action_channel(request):
         finally:
             pass
     return ws
+
+# =============================================================================
+#    RPC to server
+# =============================================================================
 
 async def restart(request):
     data = await request.json()
@@ -185,7 +203,17 @@ async def create_gameroom(request):
         if len(request.app['game']) >= 10:
             return web.json_response({"success": False, "err_msg": "Max room number reached"})
 
+        if 'config' in data:
+            # If it's an official game, we require a password
+            if data['config'] == 'official':
+                if 'admin_password' not in data:
+                    return web.json_response({"success": False, "err_msg": "You need to set a password for official game!"})
+            config = get_config(data['config'])
+        else:
+            config = get_config('default')
+
         request.app['game'][gameroom_id] = Colorfight()
+        request.app['game'][gameroom_id].config(config)
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
