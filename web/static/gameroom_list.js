@@ -52,6 +52,11 @@ function getConfig() {
         data['join_key'] = join_key;
     }
 
+    var config = $( '#config-input option:selected' ).val();
+    if (config) {
+        data['config'] = config;
+    }
+
     return data;
 }
 
