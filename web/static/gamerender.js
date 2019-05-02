@@ -459,7 +459,7 @@ function draw_cell_building(x, y, animation_name, loop) {
 }
 
 function draw_cell_rect(base, color, color_strength, x, y, shrink) {
-    base.beginFill(combine_color("#000000", color, color_strength));
+    base.beginFill(combine_color("#11162B", color, color_strength));
     base.drawRect(x * cellSize + shrink, y * cellSize + shrink, 
         cellSize - (shrink * 2), cellSize - (shrink * 2));
     base.endFill();
@@ -482,8 +482,8 @@ get_random_color = function() {
 //                   0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
 //                   0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
 //                   0xDDDDDD, ];
-var ID_COLORS = [0x000000, 0xE6194B, 0x3CB44B, 0xffe119, 0x4363D8, 0xF58231,
-                 0x42D4F4, 0xF032E6, 0x9A6324,
+var ID_COLORS = [0x2A3252, 0xFF325B, 0x79CD84, 0xF7EB97, 0x4363D8, 0xD7894E,
+                 0x68D5F0, 0xF579EC, 0x9F1E85,
                  0x800000, 0x469990, 0xFABEBE, 0x000075, 0xE6BEFF, 0x911EB4];
 
 // Convert a 6-hex value to a corresponding HTML RGB color code string. 
