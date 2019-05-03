@@ -52,6 +52,10 @@ class Colorfight:
         if config:
             self.config(config)
 
+        # Replay related
+        self.save_replay = None
+        self.replay_saved = False
+
         # Initialization
         self.restart()
 
@@ -116,6 +120,7 @@ class Colorfight:
         self.last_update = time.time() 
         self.game_id = str(int(self.last_update * 1000))
         self.key_frame = 1
+        self.replay_saved = False
         self.clear_log()
         self.add_log()
 
@@ -143,13 +148,17 @@ class Colorfight:
             elif int(count_down) != self.start_count_down:
                 self.start_count_down = int(count_down)
                 self.key_frame += 1
-                
         elif self.turn == self.max_turn:
             if self.finish_time != 0 and time.time() - self.last_update > self.finish_time:
                 do_restart = True
+            if self.replay_enable == "end" and self.save_replay and not self.replay_saved:
+                self.save_replay(self.get_log(), self.get_game_info())
+                self.replay_saved = True
         else:
             if force or (time.time() - self.last_update > self.round_time):
                 do_update = True
+
+
         if do_restart:
             self.restart()
         elif do_update:
@@ -459,7 +468,7 @@ class Colorfight:
         def same_cell(c1, c2):
             return all([c1[i] == c2[i] for i in range(len(c1))])
 
-        if self.replay_enable:
+        if self.replay_enable != "never":
             if not self._prev_game_info:
                 self.log.append(self.get_compressed_game_info())
             else:
@@ -485,5 +494,5 @@ class Colorfight:
     def get_log(self):
         if self.log_turn != self.turn:
             self.log_turn = self.turn
-            self.compressed_log = gzip.compress(json.dumps(self.log, separators=[',',':']).encode('utf-8'), compresslevel = 5)
+            self.compressed_log = gzip.compress(json.dumps(self.log, separators=[',',':']).encode('utf-8'), compresslevel = 4)
         return self.compressed_log

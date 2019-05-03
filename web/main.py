@@ -6,7 +6,9 @@ import aiohttp_jinja2
 import jinja2
 
 from routes import setup_routes, setup_static_routes
+
 from colorfight import Colorfight
+from firebase import Firebase
 
 PROJECT_ROOT = pathlib.Path(__file__).parent
 
@@ -19,6 +21,7 @@ async def init_app():
     app['game']['public'] = Colorfight()
     app['game_sockets'] = []
     app['admin_password'] = os.getenv('ADMIN_PASSWORD', "")
+    app['firebase'] = Firebase()
     setup_routes(app)
     setup_static_routes(app)
     
