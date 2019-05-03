@@ -248,7 +248,6 @@ async def delete_gameroom(request):
 
 async def download_replay(request):
     gameroom_id = request.match_info['gameroom_id']
-    print(gameroom_id)
     if gameroom_id not in request.app['game']:
         print(request.app['game'].keys())
         return web.Response(status = 400)
