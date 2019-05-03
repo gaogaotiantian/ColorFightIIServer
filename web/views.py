@@ -212,8 +212,8 @@ async def create_gameroom(request):
         else:
             config = get_config('default')
 
-        request.app['game'][gameroom_id] = Colorfight()
-        request.app['game'][gameroom_id].config(config)
+        request.app['game'][gameroom_id] = Colorfight(config = config)
+        request.app['game'][gameroom_id].save_replay = lambda replay, data: request.app['firebase'].upload_replay(replay, data)
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
@@ -248,7 +248,9 @@ async def delete_gameroom(request):
 
 async def download_replay(request):
     gameroom_id = request.match_info['gameroom_id']
+    print(gameroom_id)
     if gameroom_id not in request.app['game']:
+        print(request.app['game'].keys())
         return web.Response(status = 400)
     else:
         game = request.app['game'][gameroom_id]
