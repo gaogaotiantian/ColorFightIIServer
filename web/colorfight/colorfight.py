@@ -47,6 +47,10 @@ class Colorfight:
         self._game_info = None
         self._game_info_key_frame = 0
         self._prev_game_info = None
+        
+        # Do configuration
+        if config:
+            self.config(config)
 
         # Replay related
         self.save_replay = None
