@@ -13,7 +13,7 @@ from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
-    def __init__(self):
+    def __init__(self, config = None):
         self.turn = 0
 
         # Setups
@@ -47,6 +47,10 @@ class Colorfight:
         self._game_info = None
         self._game_info_key_frame = 0
         self._prev_game_info = None
+        
+        # Do configuration
+        if config:
+            self.config(config)
 
         # Initialization
         self.restart()

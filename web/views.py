@@ -212,8 +212,7 @@ async def create_gameroom(request):
         else:
             config = get_config('default')
 
-        request.app['game'][gameroom_id] = Colorfight()
-        request.app['game'][gameroom_id].config(config)
+        request.app['game'][gameroom_id] = Colorfight(config)
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
