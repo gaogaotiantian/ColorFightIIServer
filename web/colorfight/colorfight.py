@@ -56,10 +56,6 @@ class Colorfight:
         self.save_replay = None
         self.replay_saved = False
 
-        # Do configuration
-        if not config:
-            self.config(config)
-
         # Initialization
         self.restart()
 

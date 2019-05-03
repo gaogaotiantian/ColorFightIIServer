@@ -25,18 +25,15 @@ class Firebase:
         self.firestore = firestore.client()
 
     def _upload_replay_data(self, data, game_id):
-        print("data start")
+        print("data", time.time())
         blob = self.bucket.blob('replays/{}.cfr'.format(game_id))
-        start = time.time()
         blob.upload_from_string(data, content_type="application/octet-stream")
-        end = time.time()
-        print(start, end)
+        print("data finish", time.time())
 
     def _upload_replay_info(self, game_info):
-        print("info start")
         game_id = game_info['info']['game_id']
         users   = game_info['users']
-        start = time.time()
+        print("info", time.time())
         ref = self.firestore.collection('replays').document(str(game_id))
         ref.set({
             'game_id': game_id,
@@ -49,8 +46,7 @@ class Firebase:
                 } for uid in users
             }
         })
-        end = time.time()
-        print(start, end)
+        print("info finish", time.time())
 
     def upload_replay(self, replay, game_info):
         game_id = game_info['info']['game_id']
