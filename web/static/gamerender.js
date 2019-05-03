@@ -76,6 +76,9 @@ let gameDim         = cellSize * GAME_WIDTH;
 const ENERGY_COLOR  = "#65c9cf";
 const GOLD_COLOR    = "#faf334";
 
+const GREY_BACKGROUND   = '#222222';
+const HIGHLIGHT_COLOR   = '#ffffff';
+
 let forceRefresh  = false;
 let renderOptions = {
     "energy"  : true,
@@ -105,7 +108,8 @@ let selfUsername    = null;
 let selfUID         = SENTINEL_UID; 
 
 // Selected cell position. Default to (0, 0). 
-let clickCell       = [0, 0]; 
+let highlightCell   = false;
+let clickCell       = [0, 0];
 let hoverCell       = [0, 0]; 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,6 +123,7 @@ gameRenderer.plugins.interaction.on('mousemove', cell_hover_handler);
 
 // An array to store the cell containers
 let cellContainers = new Array(GAME_HEIGHT);
+let gameMapEmpty   = true;
 for (var i = 0; i < cellContainers.length; i++) {
     cellContainers[i] = new Array(GAME_WIDTH);
     for (var j = 0; j < cellContainers[i].length; j++) {
@@ -147,12 +152,18 @@ function cell_hover_handler(hover) {
 }
 
 function cell_click_handler(click) {
-    set_cell_bg(clickCell[0], clickCell[1], '#222222');
-
-    clickCell = position_to_cell(click.data.global.x, click.data.global.y); 
-    set_cell_bg(clickCell[0], clickCell[1], '#ffffff');
-
+    if (highlightCell != false) {
+        set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+    }
+    clickCell       = position_to_cell(click.data.global.x, click.data.global.y); 
+    highlightCell   = true;
+    set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
     draw_selected_cell_info(); 
+}
+
+function cell_click_clear_handler(click) {
+    highlightCell = false;
+    set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
 }
 
 function position_to_cell(x, y)
@@ -258,9 +269,12 @@ function draw_game(ts) {
             // Draw the game board once per turn. 
             for (let y = 0; y < GAME_HEIGHT; y++) {
                 for (let x = 0; x < GAME_WIDTH; x++) {
-                    per_turn_draw_cell(x, y, gameMap[y][x], prevMap[y][x]); 
+                    if (gameMapEmpty || has_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
+                        per_turn_draw_cell(x, y, gameMap[y][x], prevMap[y][x]); 
+                    }
                 }
             }
+            gameMapEmpty = false;
         }
 
         // Get progress % in the current turn. 
@@ -288,7 +302,7 @@ function draw_game(ts) {
 function has_changed(currCell, prevCell) {
     return (currCell["building"]["name"]  != prevCell["building"]["name"]) 
         || (currCell["building"]["level"] != prevCell["building"]["level"]) 
-        || (currCell["owner"]             != prevCell["owner"]);
+        || owner_changed(currCell, prevCell); 
 }
 
 function owner_changed(currCell, prevCell) {
@@ -329,11 +343,11 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     // Draw a the background. This will show up even when all the render 
     // options are off. By default do a grey grid, but draw it white if 
     // the cell is clicked as a basic highlight. 
-    if ((x == clickCell[0]) && (y == clickCell[1])) {
-        set_cell_bg(x, y, '#ffffff');
+    if ((highlightCell != false) && (x == clickCell[0]) && (y == clickCell[1])) {
+        set_cell_bg(x, y, HIGHLIGHT_COLOR);
     }
     else {
-        set_cell_bg(x, y, '#222222');
+        set_cell_bg(x, y, GREY_BACKGROUND);
     }
     borderCount += 1; 
 
@@ -1007,7 +1021,7 @@ function draw_selected_cell_info()
         if (gameRenderer.plugins.interaction.mouseOverRenderer) {
             cellHTML.appendChild(create_cell_info(hoverCell[0], hoverCell[1]));
         }
-        else {
+        else if (clickCell != false) {
             cellHTML.appendChild(create_cell_info(clickCell[0], clickCell[1])); 
         }
     }
@@ -1109,6 +1123,8 @@ function create_cell_info(x, y) {
     ////////////////////////////////////////////////////////////////////////////
 
     let buttonDiv = document.createElement('div'); 
+
+    buttonDiv.appendChild(create_button('Clear Selection', cell_click_clear_handler)); 
 
     // TODO: Investigate why button clicks are inconsistent. 
 
