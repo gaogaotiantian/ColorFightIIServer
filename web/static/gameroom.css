@@ -14,10 +14,19 @@ html, body {
 }
 
 #game-div {
-	background: black;
+	background: transparent;
 	margin  : 0px;
-	padding : 10px;
-	border-radius: 7px;
+    padding : 10px;
+    border: solid  1.5px rgba(162, 201, 209, 0.774);
+    border-radius: 0.3rem;
+    box-shadow: 
+        0px 0px 15px 2px #1b5e949c,
+        -5px 0px 15px 1px #1b5d946e,
+        5px 0px 15px 1px #1b5d946e,
+        -15px 0px 15px 1px #0d7eb341,
+        15px 0px 15px 1px #0d7eb341,
+        inset 0px 0px 10px 1px #1b5e949c,
+        inset 0px 0px 5000px 1px #6092ff1c;
 }
 
 .game-status-header{
