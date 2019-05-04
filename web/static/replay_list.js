@@ -10,7 +10,7 @@ var storage = firebase.storage();
 var page = 1;
 var REPLAYS_PER_PAGE = 20;
 
-function load_file(file = false) {
+function load_file(file = false, game_id = "upload") {
     if (!file) {
         file = document.getElementById('replay-file-input').files[0];
     }
@@ -19,7 +19,7 @@ function load_file(file = false) {
         try {
             let raw = pako.inflate(fr.result, {to:'string'});
             sessionStorage.setItem("rawGameData", raw);
-            window.location.href = '/replay?loaded=true'
+            window.location.href = '/replay/' + game_id + '?loaded=true'
         }
         catch (exception) {
             console.log(exception)
@@ -57,7 +57,7 @@ function play_replay(game_id) {
         xhr.onload = function(event) {
             var blob = xhr.response;
             try {
-                load_file(blob);
+                load_file(blob, game_id);
             }
             catch (exception) {
                 console.log(exception)
