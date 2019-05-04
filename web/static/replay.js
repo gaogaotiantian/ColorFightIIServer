@@ -136,9 +136,7 @@ $(function() {
     var queryDict = {}
     location.search.substr(1).split("&").forEach(function(item) {queryDict[item.split("=")[0]] = item.split("=")[1]});
     if ('loaded' in queryDict) {
-        console.log(123)
         if (queryDict['loaded'] == "true") {
-            console.log(234)
             let raw_data = sessionStorage.getItem('rawGameData');
             load_data(JSON.parse(raw_data));
         } 
