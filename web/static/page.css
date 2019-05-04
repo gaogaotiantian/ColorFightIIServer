@@ -71,10 +71,37 @@ body {
 .section-overview a {
     font-size: 1.4rem;
     font-family: 'Quantico';
-    background-image: linear-gradient(-180deg, #fad961, #f76b1c);
+    /* background-image: linear-gradient(-180deg, #fad961, #f76b1c); */
     font-weight: 600;
     color: #fff;
     border: 0;
+}
+
+.section-overview .start-button {
+    font-size: 1.4rem;
+    font-family: 'Quantico';
+    font-weight: 600;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.856);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px #249bfc9c,
+        inset 0px 0px 5px 2px #249bfc9c;
+    background-color: #2b5e7552;
+    transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+.section-overview .start-button:hover {
+    background-color: #b5d1ffe1;
+    box-shadow: 
+        0px 0px 20px 2px #249bfc9c,
+        inset 0px 0px 15px 2px #249bfc9c;
 }
 
 .btn-start {
@@ -127,6 +154,33 @@ body {
     color: #91c2ff;
 }
 
+.section-overview .start-button {
+    font-size: 1.4rem;
+    font-family: 'Quantico';
+    font-weight: 600;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.856);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px #249bfc9c,
+        inset 0px 0px 5px 2px #249bfc9c;
+    background-color: #2b5e7552;
+    transition: background-color 0.1s, box-shadow 0.1s;
+  }
+
+  .section-overview .start-button:hover {
+    background-color: #b5d1ffe1;
+    box-shadow: 
+        0px 0px 20px 2px #249bfc9c,
+        inset 0px 0px 15px 2px #249bfc9c;
+  }
+
 .doc-section button {
     font-size: 1rem;
     border: none;
@@ -135,12 +189,23 @@ body {
     background-color: rgb(63, 98, 128);
     padding: 0.3rem 1.5rem 0.3rem 1.5rem;
     margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.856);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px #249bfc9c,
+        inset 0px 0px 5px 2px #249bfc9c;
+    background-color: #2b5e7552;
+    transition: background-color 0.1s, box-shadow 0.1s;
 }
 
 .doc-section button:hover {
+    background-color: #b5d1ffe1;
     box-shadow: 
-        0px 0px 2px 1px #84bdff,
-        0px 0px 10px 2px #497297;
+        0px 0px 20px 2px #249bfc9c,
+        inset 0px 0px 15px 2px #249bfc9c;
 }
 
 .doc-section h1 {
