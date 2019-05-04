@@ -14,8 +14,8 @@ html, body {
 }
 
 #game-div {
-	background: transparent;
-	margin  : 0px;
+    background: transparent;
+    margin  : 0px;
     padding : 10px;
     border: solid  1.5px rgba(162, 201, 209, 0.774);
     border-radius: 0.3rem;
