@@ -88,3 +88,7 @@
 .gameroom-name-div>a {
     color: rgb(150, 200, 209);
 }
+
+#replay-content-container a {
+    color: rgb(150, 200, 209);
+}

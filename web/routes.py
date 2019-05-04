@@ -27,6 +27,7 @@ def setup_routes(app):
     app.router.add_get('/gameroom/{gameroom_id}/game_channel', game_channel)
     app.router.add_get('/gameroom/{gameroom_id}/action_channel', action_channel)
 
+    app.router.add_get('/replay_list', replay_list)
     app.router.add_get('/replay', game_room)
 
     cors = aiohttp_cors.setup(app, defaults = {

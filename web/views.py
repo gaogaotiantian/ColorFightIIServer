@@ -63,6 +63,10 @@ async def gameroom_list(request):
         gamerooms.append(gameroom)
     return {'gamerooms': gamerooms, 'headers': headers}
 
+@aiohttp_jinja2.template('replay_list.html')
+async def replay_list(request):
+    return {}
+
 @aiohttp_jinja2.template('get_started.html')
 async def get_started(request):
     return {}
