@@ -247,8 +247,8 @@ code {
 .modal-foot button:hover {
     background-color: transparent;
     box-shadow: 
-        0px 0px 10px 1px rgba(201, 247, 255, 0.856);
-        inset 0px 0px 5px 1px #1f94f3e0,
+        0px 0px 10px 1px rgba(201, 247, 255, 0.856),
+        inset 0px 0px 5px 1px #1f94f3e0;
 }
 
 .modal-foot button:active {
