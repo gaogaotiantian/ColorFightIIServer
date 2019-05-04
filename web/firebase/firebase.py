@@ -10,30 +10,32 @@ import time
 from firebase_admin import storage, firestore
 
 
-cred_json = json.loads(os.getenv('FIREBASE_CREDENTIALS', None))
 class Firebase:
     def __init__(self):
-        credential = credentials.Certificate(cred_json)
-        app = firebase_admin.initialize_app(credential, {
-            'projectId'    : 'colorfightai-firebase',
-            'storageBucket': 'colorfightai-firebase.appspot.com'
-        })
+        try:
+            cred_json = json.loads(os.getenv('FIREBASE_CREDENTIALS', None))
+            credential = credentials.Certificate(cred_json)
+            app = firebase_admin.initialize_app(credential, {
+                'projectId'    : 'colorfightai-firebase',
+                'storageBucket': 'colorfightai-firebase.appspot.com'
+            })
 
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers = 5)
+            self.executor = concurrent.futures.ThreadPoolExecutor(max_workers = 5)
 
-        self.bucket = storage.bucket()
-        self.firestore = firestore.client()
+            self.bucket = storage.bucket()
+            self.firestore = firestore.client()
+            self.valid = True
+        except Exception as e:
+            self.valid = False
+            print("Could not connect to firebase, other stuff should work fine")
 
     def _upload_replay_data(self, data, game_id):
-        print("data", time.time())
         blob = self.bucket.blob('replays/{}.cfr'.format(game_id))
         blob.upload_from_string(data, content_type="application/octet-stream")
-        print("data finish", time.time())
 
     def _upload_replay_info(self, game_info):
         game_id = game_info['info']['game_id']
         users   = game_info['users']
-        print("info", time.time())
         ref = self.firestore.collection('replays').document(str(game_id))
         ref.set({
             'game_id': game_id,
@@ -46,13 +48,13 @@ class Firebase:
                 } for uid in users
             }
         })
-        print("info finish", time.time())
 
     def upload_replay(self, replay, game_info):
-        game_id = game_info['info']['game_id']
-        loop = asyncio.get_event_loop()
-        asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_data, replay, game_id))
-        asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_info, game_info))
+        if self.valid:
+            game_id = game_info['info']['game_id']
+            loop = asyncio.get_event_loop()
+            asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_data, replay, game_id))
+            asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_info, game_info))
 
     
 if __name__ == '__main__':
