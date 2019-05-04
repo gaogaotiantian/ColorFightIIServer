@@ -88,20 +88,20 @@ body {
     text-shadow:         
         0px 0px 3px #66b5ff,
         0px 0px 5px #0059a1;
-    border: solid  1.5px rgba(201, 247, 255, 0.856);
+    border: solid  1.5px rgba(201, 247, 255, 0.85);
     border-radius: 0.5vw;
     box-shadow: 
-        0px 0px 10px 2px #249bfc9c,
-        inset 0px 0px 5px 2px #249bfc9c;
-    background-color: #2b5e7552;
+        0px 0px 10px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.6);
+    background-color: rgba(43,94,117,0.32);
     transition: background-color 0.1s, box-shadow 0.1s;
 }
 
 .section-overview .start-button:hover {
-    background-color: #b5d1ffe1;
+    background-color: rgba(181,209,255,0.89);
     box-shadow: 
-        0px 0px 20px 2px #249bfc9c,
-        inset 0px 0px 15px 2px #249bfc9c;
+        0px 0px 20px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.6);
 }
 
 .btn-start {
@@ -168,17 +168,17 @@ body {
     border: solid  1.5px rgba(201, 247, 255, 0.856);
     border-radius: 0.5vw;
     box-shadow: 
-        0px 0px 10px 2px #249bfc9c,
-        inset 0px 0px 5px 2px #249bfc9c;
-    background-color: #2b5e7552;
+        0px 0px 10px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.6);
+    background-color: rgba(43,94,117,0.32);
     transition: background-color 0.1s, box-shadow 0.1s;
 }
 
 .doc-section button:hover {
-    background-color: #b5d1ffe1;
+    background-color: rgba(181,209,255,0.89);
     box-shadow: 
-        0px 0px 20px 2px #249bfc9c,
-        inset 0px 0px 15px 2px #249bfc9c;
+        0px 0px 20px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.6);
 }
 
 .doc-section h1 {
@@ -300,7 +300,7 @@ code {
     background-color: transparent;
     box-shadow: 
         0px 0px 10px 1px rgba(201, 247, 255, 0.856),
-        inset 0px 0px 5px 1px #1f94f3e0;
+        inset 0px 0px 5px 1px rgba(31,148,243,0.88);
 }
 
 .modal-foot button:active {
