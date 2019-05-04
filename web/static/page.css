@@ -71,10 +71,37 @@ body {
 .section-overview a {
     font-size: 1.4rem;
     font-family: 'Quantico';
-    background-image: linear-gradient(-180deg, #fad961, #f76b1c);
+    /* background-image: linear-gradient(-180deg, #fad961, #f76b1c); */
     font-weight: 600;
     color: #fff;
     border: 0;
+}
+
+.section-overview .start-button {
+    font-size: 1.4rem;
+    font-family: 'Quantico';
+    font-weight: 600;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.85);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.6);
+    background-color: rgba(43,94,117,0.32);
+    transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+.section-overview .start-button:hover {
+    background-color: rgba(181,209,255,0.89);
+    box-shadow: 
+        0px 0px 20px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.6);
 }
 
 .btn-start {
@@ -135,12 +162,23 @@ body {
     background-color: rgb(63, 98, 128);
     padding: 0.3rem 1.5rem 0.3rem 1.5rem;
     margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.856);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.6);
+    background-color: rgba(43,94,117,0.32);
+    transition: background-color 0.1s, box-shadow 0.1s;
 }
 
 .doc-section button:hover {
+    background-color: rgba(181,209,255,0.89);
     box-shadow: 
-        0px 0px 2px 1px #84bdff,
-        0px 0px 10px 2px #497297;
+        0px 0px 20px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.6);
 }
 
 .doc-section h1 {
@@ -261,8 +299,8 @@ code {
 .modal-foot button:hover {
     background-color: transparent;
     box-shadow: 
-        0px 0px 10px 1px rgba(201, 247, 255, 0.856);
-        inset 0px 0px 5px 1px rgba(31,148,243,0.878),
+        0px 0px 10px 1px rgba(201, 247, 255, 0.856),
+        inset 0px 0px 5px 1px rgba(31,148,243,0.88);
 }
 
 .modal-foot button:active {
