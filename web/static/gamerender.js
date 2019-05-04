@@ -179,7 +179,11 @@ function position_to_cell(x, y)
 }
 
 function clamp(val, lower, upper) {
-    return Math.min(Math.max(val, lower), upper); 
+    if (val) {
+        return Math.min(Math.max(val, lower), upper); 
+    } else {
+        return lower;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -578,6 +582,10 @@ function parse_game_data_and_draw(newData) {
     newData = unpack_game_data(newData);
     if (gameData && gameData['turn'] != newData['turn']) {
         prevGameData = gameData
+    }
+
+    if (gameData && newData['info']['game_id'] != gameData['info']['game_id']) {
+        prevGameData = false;
     }
     
     if (!gameData || 
