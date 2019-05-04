@@ -139,9 +139,9 @@ body {
     text-shadow: 
         0px 0px 2px #005ca7;
     box-shadow: 
-        0px 0px 15px 2px #249bfc9c,
-        inset 0px 0px 10px 2px #249bfc9c,
-        inset 0px 0px 5000px #6092ff1c;
+        0px 0px 15px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 10px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 5000px rgba(96,146,255,0.109);
 }
 
 .doc-section p, .doc-section tbody {
@@ -219,17 +219,21 @@ body {
 }
 
 .doc-section table {
-    margin-bottom: 1vh;
+    width: 100%;
+    margin-bottom: 1.5vh;
     border: solid 2px rgba(201, 247, 255, 0.5);
     text-shadow: 
         0px 0px 2px #005ca7;
     box-shadow: 
-        0px 0px 15px 2px #249bfc9c,
-        inset 0px 0px 5000px #6092ff1c;
+        0px 0px 15px 2px rgba(36,155,252,0.611);
 }
 
 .doc-section th, .doc-section td{
     padding: 0.2vh 0.5vw;
+}
+
+.doc-section thead {
+    background: rgba(36,155,252,0.15);
 }
 
 .doc-section tr:nth-child(even) {
@@ -239,10 +243,16 @@ body {
 code {
     background-color: rgb(81, 78, 92);
     color: #f3cae3;
-    text-shadow: 0px 0px 4px #ff18b280;
+    text-shadow: 0px 0px 4px rgba(255,24,178,0.501);
     border-radius: 5px;
     padding: 2px 10px;
-    box-shadow: 0px 0px 5px 1px #2600ff2c;
+    box-shadow: 0px 0px 5px 1px rgba(38,0,255,0.172);
+}
+
+.doc-section blockquote {
+    padding: 0.3vw 1vw; 
+    margin: 1vh 1vw;
+    font-size: 1.1rem;
 }
 
 .modal-content {
@@ -265,6 +275,10 @@ code {
     color:#ddd !important;
 }
 
+.modal-content input, .modal-content select {
+    background-color: #eee;
+}
+
 .modal-foot button {
     font-family: 'Comfortaa';
     font-size: 1vw;
@@ -276,17 +290,22 @@ code {
     border: solid  1.5px #8fcdff;
     border-radius: 0.5vw;
     box-shadow: 
-        0px 0px 10px 2px #249bfc9c,
-        inset 0px 0px 5px 2px #249bfc9c;
-    background-color: #00000000;
+        0px 0px 10px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.611);
+    background-color: rgba(0,0,0,0);
     transition: background-color 0.1s, box-shadow 0.1s;
 }
 
 .modal-foot button:hover {
     background-color: transparent;
     box-shadow: 
+<<<<<<< HEAD
         0px 0px 10px 1px rgba(201, 247, 255, 0.856),
         inset 0px 0px 5px 1px #1f94f3e0;
+=======
+        0px 0px 10px 1px rgba(201, 247, 255, 0.856);
+        inset 0px 0px 5px 1px rgba(31,148,243,0.878),
+>>>>>>> 1c34c0bc12f638651c19455020a202a4a94daf78
 }
 
 .modal-foot button:active {

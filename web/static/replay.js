@@ -16,42 +16,7 @@ function load_file() {
         try {
             let raw = pako.inflate(fr.result, {to:'string'});
             let data = JSON.parse(raw);
-            let info = {};
-            let game_map_data = [];
-            let game_map_headers = [];
-            for (var i = 0; i < data.length; i++) {
-                let round_data  = data[i];
-                fullGameData[i] = JSON.parse(JSON.stringify(data[i]));
-                if (i == 0) {
-                    info = round_data['info'];
-                    info["start_count_down"] = 0;
-                    game_map_data    = round_data['game_map']['data'];
-                    game_map_headers = round_data['game_map']['headers'];
-                } else {
-                    fullGameData[i]['info'] = info;
-                    fullGameData[i]['users'] = round_data['users'];
-                    let round_game_map_data = [];
-                    for (let i = 0; i < game_map_data.length; i++) {
-                        for (let j = 0; j < game_map_data[0].length; j++) {
-                            if (round_data['game_map']['data'][i][j].length == 0) {
-                                round_game_map_data.push(game_map_data[i][j]);
-                            } else {
-                                round_game_map_data.push(round_data['game_map']['data'][i][j]);
-                                game_map_data[i][j] = round_data['game_map']['data'][i][j];
-                            }
-                        }
-                    }
-                    fullGameData[i]['game_map']['headers'] = game_map_headers;
-                    fullGameData[i]['game_map']['data'] = JSON.parse(JSON.stringify(game_map_data));
-                }
-            }
-            replayCurrTurn = 0;
-            replayMaxTurn = data.length - 1;
-            replayStatus = 'play';
-            changeFrame = true;
-            var slider = document.getElementById('replay-slider');
-            slider.max = replayMaxTurn;
-            slider.value = 0;
+            load_data(data);
         }
         catch (exception) {
             console.log(exception)
@@ -59,6 +24,45 @@ function load_file() {
         }
     }
     fr.readAsArrayBuffer(file);
+}
+
+function load_data(data) {
+    let info = {};
+    let game_map_data = [];
+    let game_map_headers = [];
+    for (var i = 0; i < data.length; i++) {
+        let round_data  = data[i];
+        fullGameData[i] = JSON.parse(JSON.stringify(data[i]));
+        if (i == 0) {
+            info = round_data['info'];
+            info["start_count_down"] = 0;
+            game_map_data    = round_data['game_map']['data'];
+            game_map_headers = round_data['game_map']['headers'];
+        } else {
+            fullGameData[i]['info'] = info;
+            fullGameData[i]['users'] = round_data['users'];
+            let round_game_map_data = [];
+            for (let i = 0; i < game_map_data.length; i++) {
+                for (let j = 0; j < game_map_data[0].length; j++) {
+                    if (round_data['game_map']['data'][i][j].length == 0) {
+                        round_game_map_data.push(game_map_data[i][j]);
+                    } else {
+                        round_game_map_data.push(round_data['game_map']['data'][i][j]);
+                        game_map_data[i][j] = round_data['game_map']['data'][i][j];
+                    }
+                }
+            }
+            fullGameData[i]['game_map']['headers'] = game_map_headers;
+            fullGameData[i]['game_map']['data'] = JSON.parse(JSON.stringify(game_map_data));
+        }
+    }
+    replayCurrTurn = 0;
+    replayMaxTurn = data.length - 1;
+    replayStatus = 'play';
+    changeFrame = true;
+    var slider = document.getElementById('replay-slider');
+    slider.max = replayMaxTurn;
+    slider.value = 0;
 }
 
 function play_loop() {
@@ -128,6 +132,14 @@ $(function() {
         var slider = document.getElementById('replay-slider');
         replayCurrTurn = parseInt(slider.value);
         replayStatus = 'pause';
+    }
+    var queryDict = {}
+    location.search.substr(1).split("&").forEach(function(item) {queryDict[item.split("=")[0]] = item.split("=")[1]});
+    if ('loaded' in queryDict) {
+        if (queryDict['loaded'] == "true") {
+            let raw_data = sessionStorage.getItem('rawGameData');
+            load_data(JSON.parse(raw_data));
+        } 
     }
 
     play_loop();

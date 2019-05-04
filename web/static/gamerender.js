@@ -152,18 +152,24 @@ function cell_hover_handler(hover) {
 }
 
 function cell_click_handler(click) {
-    if (highlightCell != false) {
-        set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+    // Check whether we clicked the same cell. If so, dehighlight it
+    let currClickCell = position_to_cell(click.data.global.x, click.data.global.y); 
+    if (highlightCell) {
+        if (currClickCell[0] == clickCell[0] && currClickCell[1] == clickCell[1]) {
+            highlightCell = false;
+            set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+        } else {
+            set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+            clickCell     = currClickCell;
+            highlightCell = true;
+            set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
+        }
+    } else {
+        clickCell     = currClickCell;
+        highlightCell = true;
+        set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
     }
-    clickCell       = position_to_cell(click.data.global.x, click.data.global.y); 
-    highlightCell   = true;
-    set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
     draw_selected_cell_info(); 
-}
-
-function cell_click_clear_handler(click) {
-    highlightCell = false;
-    set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
 }
 
 function position_to_cell(x, y)
@@ -227,7 +233,7 @@ function main() {
 function draw_game(ts) {
     // For any reasonable screens, we should expect the height be the limit
     // Limit the dimension by height and screen width. 
-    gameDim = Math.min(window.innerWidth * 0.6, window.innerHeight - gameRow.offsetTop); 
+    gameDim = Math.min(window.innerWidth * 0.6, window.innerHeight - gameRow.offsetTop - 10); 
 
     if (gameDiv.clientWidth != gameDim) {
         gameDiv.setAttribute("style", "width:" + gameDim + "px; height:" + gameDim + "px");
@@ -1124,8 +1130,6 @@ function create_cell_info(x, y) {
     ////////////////////////////////////////////////////////////////////////////
 
     let buttonDiv = document.createElement('div'); 
-
-    buttonDiv.appendChild(create_button('Clear Selection', cell_click_clear_handler)); 
 
     // TODO: Investigate why button clicks are inconsistent. 
 
