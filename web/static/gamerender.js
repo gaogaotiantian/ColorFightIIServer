@@ -76,6 +76,9 @@ let gameDim         = cellSize * GAME_WIDTH;
 const ENERGY_COLOR  = "#65c9cf";
 const GOLD_COLOR    = "#faf334";
 
+const GREY_BACKGROUND   = '#222222';
+const HIGHLIGHT_COLOR   = '#ffffff';
+
 let forceRefresh  = false;
 let renderOptions = {
     "energy"  : true,
@@ -105,7 +108,8 @@ let selfUsername    = null;
 let selfUID         = SENTINEL_UID; 
 
 // Selected cell position. Default to (0, 0). 
-let clickCell       = [0, 0]; 
+let highlightCell   = false;
+let clickCell       = [0, 0];
 let hoverCell       = [0, 0]; 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,12 +122,22 @@ gameRenderer.plugins.interaction.on('mousedown', cell_click_handler);
 gameRenderer.plugins.interaction.on('mousemove', cell_hover_handler); 
 
 // An array to store the cell containers
-let cellContainers  = new Array(GAME_HEIGHT);
-let gameMapEmpty    = true;
+let cellContainers = new Array(GAME_HEIGHT);
+let gameMapEmpty   = true;
 for (var i = 0; i < cellContainers.length; i++) {
     cellContainers[i] = new Array(GAME_WIDTH);
     for (var j = 0; j < cellContainers[i].length; j++) {
-        cellContainers[i][j] = new PIXI.Container();
+        let cell = new PIXI.Container(); 
+        // Background. 
+        cell.addChild(new PIXI.Graphics());
+        // Base color. 
+        cell.addChild(new PIXI.Graphics());
+        // Base animations. 
+        cell.addChild(new PIXI.Graphics());
+        // Container for drawing buildings and their animations. 
+        cell.addChild(new PIXI.Container());
+
+        cellContainers[i][j] = cell; 
         gameStage.addChild(cellContainers[i][j]);
     }
 }
@@ -138,8 +152,18 @@ function cell_hover_handler(hover) {
 }
 
 function cell_click_handler(click) {
-    clickCell = position_to_cell(click.data.global.x, click.data.global.y); 
+    if (highlightCell != false) {
+        set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+    }
+    clickCell       = position_to_cell(click.data.global.x, click.data.global.y); 
+    highlightCell   = true;
+    set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
     draw_selected_cell_info(); 
+}
+
+function cell_click_clear_handler(click) {
+    highlightCell = false;
+    set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
 }
 
 function position_to_cell(x, y)
@@ -278,7 +302,7 @@ function draw_game(ts) {
 function has_changed(currCell, prevCell) {
     return (currCell["building"]["name"]  != prevCell["building"]["name"]) 
         || (currCell["building"]["level"] != prevCell["building"]["level"]) 
-        || (currCell["owner"]             != prevCell["owner"]);
+        || owner_changed(currCell, prevCell); 
 }
 
 function owner_changed(currCell, prevCell) {
@@ -305,72 +329,90 @@ function full_refresh()
 
 function per_turn_draw_cell(x, y, currCell, prevCell)
 {
-    // Clear the cell container
-    while (cellContainers[y][x].children[0]) {
-        cellContainers[y][x].removeChild(cellContainers[y][x].children[0]); 
-    }
+    let borderCount = 0;
+    let base    = cellContainers[y][x].children[1];
+    let animate = cellContainers[y][x].children[2];
+    let build   = cellContainers[y][x].children[3];
 
-    let base = new PIXI.Graphics();
-    // Fill in owner color. Unowned corresponds to black. 
-    if (renderOptions["owner"]) {
-        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 1);
-    } else {
-        draw_cell_rect(base, id_to_color(0), 1.0, x, y, 0);
+    base.clear();
+    animate.clear();
+
+    // Clear the building animations. 
+    build.removeChildren();
+
+    // Draw a the background. This will show up even when all the render 
+    // options are off. By default do a grey grid, but draw it white if 
+    // the cell is clicked as a basic highlight. 
+    if ((highlightCell != false) && (x == clickCell[0]) && (y == clickCell[1])) {
+        set_cell_bg(x, y, HIGHLIGHT_COLOR);
     }
+    else {
+        set_cell_bg(x, y, GREY_BACKGROUND);
+    }
+    borderCount += 1; 
+
     // Draw energy border. 
     if (renderOptions["energy"] || currCell['owner'] == 0) {
-        draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, 1);
+        draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, borderCount * 2);
+        borderCount += 1;
     }
     // Draw gold border. 
     if (renderOptions["gold"] || currCell['owner'] == 0) {
-        draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, 3);
+        draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, borderCount * 2);
+        borderCount += 1;
     }
     // Fill in owner color. Unowned corresponds to black. 
     if (renderOptions["owner"]) {
-        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, borderCount * 2);
     } else {
-        draw_cell_rect(base, id_to_color(0), 1.0, x, y, 5);
+        draw_cell_rect(base, id_to_color(0), 1.0, x, y, borderCount * 2);
     }
 
-    // Add a child to do animations. 
-    base.addChild(new PIXI.Graphics()); 
+    if (renderOptions['building']) {
+        // Draw building. 
+        let currBuilding = currCell['building']; 
+        let prevBuilding = prevCell['building']; 
 
-    // Draw the background colors onto the cell. 
-    cellContainers[y][x].addChild(base); 
-
-    // Draw building. 
-    let currBuilding = currCell['building']; 
-    let prevBuilding = prevCell['building']; 
-
-    // Setup any needed animated sprites. 
-    if (currBuilding["name"] != "empty" && renderOptions["building"]) {
-        draw_building(x, y, currBuilding);
-        if (currBuilding['name'] != prevBuilding['name']) {
-            // Different building. 
-            draw_building_effect(x, y); 
+        // Setup any needed animated sprites. 
+        if (currBuilding["name"] != "empty") {
+            draw_building(x, y, currBuilding);
+            if (currBuilding['name'] != prevBuilding['name']) {
+                // Different building. 
+                draw_building_effect(x, y); 
+            }
+            else if (currBuilding['level'] != prevBuilding['level']) {
+                // Building is a higher level. 
+                draw_upgrade_effect(x, y); 
+            }
         }
-        else if (currBuilding['level'] != prevBuilding['level']) {
-            // Building is a higher level. 
-            draw_upgrade_effect(x, y); 
-        }
-    }
 
-    if (currBuilding["name"] == "empty" && prevBuilding["name"] != "empty" && 
-            renderOptions["building"]) {
-        draw_destroy_effect(x, y);
+        if (currBuilding["name"] == "empty" && prevBuilding["name"] != "empty") {
+            draw_destroy_effect(x, y);
+        }
     }
 }
 
-function animate_cell(x, y, currCell, prevCell, progress) {
-    let base            = cellContainers[y][x].children[0]; 
-    let capture_cell    = base.children[0];
+function set_cell_bg(x, y, color) {
+    cellBG = cellContainers[y][x].children[0];
+    cellBG.clear();
+    draw_cell_rect(cellBG, color, 1.0, x, y, 0); 
+}
 
-    if (capture_cell && renderOptions["owner"]) {
-        const   ownerShrink = 5; 
-        let     prevMap     = prevGameData['game_map'];
+function animate_cell(x, y, currCell, prevCell, progress) {
+    if (renderOptions["owner"]) {
+        let capture_cell    = cellContainers[y][x].children[2]; 
+        let ownerShrink     = 0; 
+        let prevMap         = prevGameData['game_map'];
         // Cell was captured the previous round. 
 
-        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, 5);
+        let borderCount = 1;
+        if (renderOptions['energy'] || currCell['owner'] == 0) {
+            borderCount += 1;
+        } 
+        if (renderOptions['gold'] || currCell['owner'] == 0) {
+            borderCount += 1;
+        }
+        ownerShrink = borderCount * 2
 
         // Draw a shrinking rectangle of the old color.
 
@@ -420,12 +462,13 @@ function animate_cell(x, y, currCell, prevCell, progress) {
         // No adjacent blocks is possible if we are just joining the game or 
         // the game refreshed. In both cases, do no animation. 
         if ((xScale != 0) || (yScale != 0)) {
-            base.beginFill(combine_color(id_to_color(prevCell['owner']), id_to_color(currCell['owner']), progress)); 
-            base.drawRect((cellSize * x) + ownerShrink + (drawSize * xLeft), 
+            capture_cell.clear();
+            capture_cell.beginFill(combine_color(id_to_color(prevCell['owner']), id_to_color(currCell['owner']), progress)); 
+            capture_cell.drawRect((cellSize * x) + ownerShrink + (drawSize * xLeft), 
                           (cellSize * y) + ownerShrink + (drawSize * yTop), 
                           drawSize * (1 - (xLeft + xRight)), 
                           drawSize * (1 - (yTop + yBot))); 
-            base.endFill(); 
+            capture_cell.endFill(); 
         }
     }
 }
@@ -453,8 +496,9 @@ function draw_cell_building(x, y, animation_name, loop) {
         build_effect_image.y = y * cellSize;
         build_effect_image.animationSpeed = animations[animation_name].length / 60;
         build_effect_image.loop = loop;
-        build_effect_image.play()
-        cellContainers[y][x].addChild(build_effect_image);
+        build_effect_image.play(); 
+        // We inserted a building placeholder at index 3. 
+        cellContainers[y][x].children[3].addChild(build_effect_image);
     }
 }
 
@@ -847,7 +891,7 @@ function draw_self_user_info() {
     // Reset {selfUID} in case we are not in the game. 
     selfUID = SENTINEL_UID;
 
-    // The last time we tried to join, we use {selfUsername}. 
+    // The last time we tried to join, we used {selfUsername}. 
     // Check if it is located in the {gameData} we have received. 
     // This may clash with anybody else who has the same username or if a new 
     // game started and somebody stole our username, but these cases should be 
@@ -866,7 +910,12 @@ function draw_self_user_info() {
     else {
         // Hide the join game form. 
         joinHTML.style.display = 'none';
+
         // Insert the desired user info. 
+        selfHeader = create_p('USER INFO');
+        selfHeader.className = 'game-status-header';
+        selfHTML.appendChild(selfHeader);
+
         selfHTML.appendChild(create_user_info(selfUID, get_user_info(selfUID))); 
     }
 }
@@ -875,6 +924,11 @@ function draw_self_user_info() {
 function draw_selected_user_info() {
     const userHTML = document.getElementById('selected-user-info');
     clear_div(userHTML); 
+
+    userHeader = create_p('SELECTED USER INFO')
+    userHeader.className = 'game-status-header'
+    userHTML.appendChild(userHeader)
+
     userHTML.appendChild(create_user_info(selectUID, get_user_info(selectUID))); 
 }
 
@@ -960,10 +1014,14 @@ function draw_selected_cell_info()
 
     if (gameData) {
         // Do not draw until we have game information. 
+        cellHeader = create_p('SELECTED CELL INFO')
+        cellHeader.className = 'game-status-header'
+        cellHTML.appendChild(cellHeader)
+
         if (gameRenderer.plugins.interaction.mouseOverRenderer) {
             cellHTML.appendChild(create_cell_info(hoverCell[0], hoverCell[1]));
         }
-        else {
+        else if (clickCell != false) {
             cellHTML.appendChild(create_cell_info(clickCell[0], clickCell[1])); 
         }
     }
@@ -1065,6 +1123,8 @@ function create_cell_info(x, y) {
     ////////////////////////////////////////////////////////////////////////////
 
     let buttonDiv = document.createElement('div'); 
+
+    buttonDiv.appendChild(create_button('Clear Selection', cell_click_clear_handler)); 
 
     // TODO: Investigate why button clicks are inconsistent. 
 
