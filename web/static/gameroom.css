@@ -45,9 +45,9 @@ html, body {
     border: solid  1.5px rgba(201, 247, 255, 0.856);
     border-radius: 0.3rem;
     box-shadow: 
-        0px 0px 15px 2px #249bfc9c,
-        inset 0px 0px 10px 2px #249bfc9c,
-        inset 0px 0px 5000px #6092ff1c;
+        0px 0px 15px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 10px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 5000px rgba(96,146,255,0.109);
 }
 
 .game-status-section p{
@@ -71,17 +71,17 @@ html, body {
     border: solid  1.5px rgba(201, 247, 255, 0.856);
     border-radius: 0.5vw;
     box-shadow: 
-        0px 0px 10px 2px #249bfc9c,
-        inset 0px 0px 5px 2px #249bfc9c;
-    background-color: #00000000;
+        0px 0px 10px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.611);
+    background-color: rgba(0,0,0,0);
     transition: background-color 0.1s, box-shadow 0.1s;
 }
 
 .game-status-section button:active {
     background-color: #b5d1ffe1;
     box-shadow: 
-        0px 0px 20px 2px #249bfc9c,
-        inset 0px 0px 15px 2px #249bfc9c;
+        0px 0px 20px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.611);
 }
 
 .user-gold-p {
@@ -110,7 +110,7 @@ html, body {
 }
 
 #join-game-form input {
-    background: #00000000;
+    background: rgba(0,0,0,0);
     font-family: Quantico;
     color: #fff;
     border-radius: 2vw;
@@ -121,9 +121,9 @@ html, body {
         0px 0px 3px #66b5ff,
         0px 0px 5px #0059a1;
     box-shadow: 
-        0px 0px 4px 1px #249bfc9c,
-        inset 0px 0px 2px 1px #249bfc9c,
-        inset 0px 0px 5000px #767ea152;
+        0px 0px 4px 1px rgba(36,155,252,0.611),
+        inset 0px 0px 2px 1px rgba(36,155,252,0.611),
+        inset 0px 0px 5000px rgba(118,126,161,0.321);
     transition: box-shadow 0.5s, background 0.5s;
 }
 
@@ -135,8 +135,8 @@ html, body {
 #join-game-form input:hover {
     box-shadow: 
         0px 0px 10px 1px #8fcdff,
-        inset 0px 0px 5px 1px #1f94f3e0,
-        inset 0px 0px 5000px #767ea152;
+        inset 0px 0px 5px 1px rgba(31,148,243,0.878),
+        inset 0px 0px 5000px rgba(118,126,161,0.321);
 }
 
 #join-game-form input:active {
@@ -162,8 +162,8 @@ html, body {
     border-radius: 0.4vw;
     border: solid 2px #80939c;
     box-shadow: 
-        0px 0px 4px 1px #5a90d69c,
-        inset 0px 0px 2px 1px #249bfc9c;
+        0px 0px 4px 1px rgba(31,148,243,0.878),
+        inset 0px 0px 2px 1px rgba(36,155,252,0.611);
 }
 
 .resource-incr-p {
@@ -205,7 +205,7 @@ input.row-input {
 }
 
 #replay-file-load-button {
-    background: #00000000;
+    background: rgba(0,0,0,0);
     font-family: Quantico;
     color: #fff;
     border-radius: 0.5vw;
@@ -216,17 +216,17 @@ input.row-input {
         0px 0px 3px #66b5ff,
         0px 0px 5px #0059a1;
     box-shadow: 
-        0px 0px 4px 1px #249bfc9c,
-        inset 0px 0px 2px 1px #249bfc9c,
-        inset 0px 0px 5000px #767ea152;
+        0px 0px 4px 1px rgba(36,155,252,0.611),
+        inset 0px 0px 2px 1px rgba(36,155,252,0.611),
+        inset 0px 0px 5000px rgba(118,126,161,0.321);
     transition: box-shadow 0.5s;
 }
 
 #replay-file-load-button:hover {
     box-shadow: 
         0px 0px 10px 1px #8fcdff,
-        inset 0px 0px 5px 1px #1f94f3e0,
-        inset 0px 0px 5000px #767ea152 !important;
+        inset 0px 0px 5px 1px rgba(31,148,243,0.878),
+        inset 0px 0px 5000px rgba(118,126,161,0.321) !important;
 }
 
 #replay-file-load-button:active {

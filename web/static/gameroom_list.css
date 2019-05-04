@@ -28,8 +28,8 @@
     margin-bottom: 1.5rem;
     box-shadow: 
         -2px 0px 5px 2px #a6dbff,
-        -10px 0px 10px 4px #249bfc9c,
-        10px 0px 10px 4px #249bfc9c;
+        -10px 0px 10px 4px rgba(36,155,252,0.611),
+        10px 0px 10px 4px rgba(36,155,252,0.611);
 }
 
 .table-head h1 {
