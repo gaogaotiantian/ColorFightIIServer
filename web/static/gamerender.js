@@ -613,9 +613,18 @@ function parse_game_data_and_draw(newData) {
     draw_selected_cell_info(); 
     draw_selected_user_info(); 
 
-    // Draw our own info or the join game info.
-    if (document.getElementById('user-info')) {
+    // Draw our own info or the join game info if manual mode is allowed.
+    if (gameData['info']['allow_manual_mode']) {
+        var userDiv = document.getElementById('user-info');
+        if (userDiv.classList.contains("d-none")) {
+            userDiv.classList.remove("d-none");
+        }
         draw_self_user_info(); 
+    } else {
+        var userDiv = document.getElementById('user-info');
+        if (!userDiv.classList.contains("d-none")) {
+            userDiv.classList.add("d-none");
+        }
     }
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
