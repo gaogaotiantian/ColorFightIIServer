@@ -142,12 +142,16 @@ cell provides. </p>
   <code>level</code> of the building and the <code>energy</code> the user owns. <code>Home</code>
   also provides fixed amount of <code>energy</code> and <code>gold</code>. As <code>home</code> 
   stores the gold of the user, <code>1/3</code> of the total <code>gold</code> the user owns
-  will be stolen if <code>Home</code> is destroyed.<ul>
-<li><code>attack_cost</code> = <code>(1000 + user.energy + force_field) * level</code></li>
+  will be stolen if <code>Home</code> is destroyed. All the buildings of the player 
+  will be destroyed too if <code>Home</code> is destroyed. A play can only have one
+  <code>Home</code> at a time.<ul>
+<li><code>cost</code> = <code>1000 gold</code></li>
 <li><code>upgrade_cost</code> = <code>[(1000, 1000), (2000, 2000)]</code></li>
+<li><code>attack_cost</code> = <code>(1000 + user.energy + force_field) * level</code></li>
 <li><code>energy</code> = <code>10 * level</code></li>
 <li><code>gold</code> = <code>10 * level</code></li>
-<li>Destroy effect: <code>1/3</code> of <code>gold</code> will be stolen by attacker</li>
+<li>Destroy effect: <code>1/3</code> of <code>gold</code> will be stolen by attacker, all
+  the buildings of the player will be destroyed.</li>
 </ul>
 </li>
 <li><code>EnergyWell</code> is the building to increase the energy production. When 
@@ -171,11 +175,13 @@ cell provides. </p>
 </ul>
 </li>
 <li><code>Fortress</code> is the building to improve the defense of the territory. A 
-  <code>Fortress</code> will increase the amount of <code>force_field</code> of both the cell
+  <code>Fortress</code> can increase the <code>attack_cost</code> of the cell. It will also 
+  increase the amount of <code>force_field</code> of both the cell
   it's on and all the adjacent owned cells. It will also decrease the amount of
   <code>force_field</code> of all the adjacent enemy cells.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
 <li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0)]</code></li>
+<li><code>attack_cost</code> = <code>(natural_cost + force_field) * (1 + level)</code></li>
 <li><code>adjacent_forcefield_incr</code> = <code>2 + level</code></li>
 <li><code>self_forcefield_incr</code> = <code>5 * level</code></li>
 <li><code>adjacent_forcefield_decr</code> = <code>10 * (1 + level)</code></li>

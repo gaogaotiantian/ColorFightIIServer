@@ -178,12 +178,16 @@ cell provides.
   ```level``` of the building and the ```energy``` the user owns. ```Home```
   also provides fixed amount of ```energy``` and ```gold```. As ```home``` 
   stores the gold of the user, ```1/3``` of the total ```gold``` the user owns
-  will be stolen if ```Home``` is destroyed.
-    * ```attack_cost``` = ```(1000 + user.energy + force_field) * level```
+  will be stolen if ```Home``` is destroyed. All the buildings of the player 
+  will be destroyed too if ```Home``` is destroyed. A play can only have one
+  ```Home``` at a time.
+    * ```cost``` = ```1000 gold```
     * ```upgrade_cost``` = ```[(1000, 1000), (2000, 2000)]```
+    * ```attack_cost``` = ```(1000 + user.energy + force_field) * level```
     * ```energy``` = ```10 * level```
     * ```gold``` = ```10 * level```
-    * Destroy effect: ```1/3``` of ```gold``` will be stolen by attacker
+    * Destroy effect: ```1/3``` of ```gold``` will be stolen by attacker, all
+      the buildings of the player will be destroyed.
 * ```EnergyWell``` is the building to increase the energy production. When 
   ```EnergyWell``` is destroyed, the energy it is producing will become the 
   ```force_field``` of the cell after it's taken.
@@ -201,11 +205,13 @@ cell provides.
     * Destroy effect: ```(50, 150, 350)[level-1]``` ```gold``` will be added to
       the attacker
 * ```Fortress``` is the building to improve the defense of the territory. A 
-  ```Fortress``` will increase the amount of ```force_field``` of both the cell
+  ```Fortress``` can increase the ```attack_cost``` of the cell. It will also 
+  increase the amount of ```force_field``` of both the cell
   it's on and all the adjacent owned cells. It will also decrease the amount of
   ```force_field``` of all the adjacent enemy cells.
     * ```cost``` = ```100 gold```
     * ```upgrade_cost``` =  ```[(200, 0), (400, 0)]```
+    * ```attack_cost``` = ```(natural_cost + force_field) * (1 + level)```
     * ```adjacent_forcefield_incr``` = ```2 + level```
     * ```self_forcefield_incr``` = ```5 * level```
     * ```adjacent_forcefield_decr``` = ```10 * (1 + level)```
