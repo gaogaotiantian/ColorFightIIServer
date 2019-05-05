@@ -513,7 +513,7 @@ function draw_cell_building(x, y, animation_name, loop) {
 }
 
 function draw_cell_rect(base, color, color_strength, x, y, shrink) {
-    base.beginFill(combine_color("#11162B", color, color_strength));
+    base.beginFill(combine_color("#2B2E37", color, color_strength));
     base.drawRect(x * cellSize + shrink, y * cellSize + shrink, 
         cellSize - (shrink * 2), cellSize - (shrink * 2));
     base.endFill();
@@ -537,7 +537,7 @@ get_random_color = function() {
 //                   0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
 //                   0xDDDDDD, ];
 
-var ID_COLORS = [0x2A3252, 0xE6194B, 0x3CB44B, 0xffe119, 0x4363D8, 0xF58231,
+var ID_COLORS = [0x151517, 0xE6194B, 0x3CB44B, 0xffe119, 0x4363D8, 0xF58231,
                  0x42D4F4, 0xF032E6, 0x9A6324,
                  0x800000, 0x469990, 0xFABEBE, 0x000075, 0xE6BEFF, 0x911EB4];
 
