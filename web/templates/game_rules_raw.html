@@ -90,11 +90,12 @@ commands will be parsed in order.</p>
 <li>Parse all the commands<ol>
 <li>building will be built</li>
 <li>upgrade will finish</li>
+<li>resource will be spent</li>
 </ol>
 </li>
 <li>Update cells<ol>
 <li>parse all the attack commands, calculate the owner of the cell for next
-   round.</li>
+   round. if buildings are destroyed, compute effects</li>
 <li><code>gold</code> and <code>energy</code> income will be calculated based on the new
    possessions.</li>
 <li><code>tech_level</code> will be determined.</li>
@@ -126,8 +127,6 @@ other aspects. </p>
 can produce per round.</p>
 <p>However, the actual energy and gold a player gets may be taxed if the player
 owns too many cells.</p>
-<p>For every 100 cells the player owns, 2 gold and 2 energy will be taxed for each
-cell the player has.</p>
 <h4 id="building">Building</h4>
 <p>Players can build on a <code>MapCell</code> that's owned by them. Only one building
 is allowed on one <code>MapCell</code></p>
@@ -138,23 +137,48 @@ home is not restricted by this rule).</p>
 <p>A building on a <code>MapCell</code> will change the amount of energy and gold the 
 cell provides. </p>
 <ul>
-<li><code>Home</code> is automatically built on the cell that the player spawns. <ul>
-<li><code>attack_cost</code> 1000</li>
+<li><code>Home</code> is automatically built on the cell that the player spawns. 
+  <code>Home</code> has a very high <code>attack_cost</code> which is determined by the 
+  <code>level</code> of the building and the <code>energy</code> the user owns. <code>Home</code>
+  also provides fixed amount of <code>energy</code> and <code>gold</code>. As <code>home</code> 
+  stores the gold of the user, <code>1/3</code> of the total <code>gold</code> the user owns
+  will be stolen if <code>Home</code> is destroyed.<ul>
+<li><code>attack_cost</code> = <code>(1000 + user.energy + force_field) * level</code></li>
 <li><code>upgrade_cost</code> = <code>[(1000, 1000), (2000, 2000)]</code></li>
 <li><code>energy</code> = <code>10 * level</code></li>
 <li><code>gold</code> = <code>10 * level</code></li>
+<li>Destroy effect: <code>1/3</code> of <code>gold</code> will be stolen by attacker</li>
 </ul>
 </li>
-<li><code>EnergyWell</code> is the building to increase the energy production.<ul>
+<li><code>EnergyWell</code> is the building to increase the energy production. When 
+  <code>EnergyWell</code> is destroyed, the energy it is producing will become the 
+  <code>force_field</code> of the cell after it's taken.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
 <li><code>upgrade_cost</code> = <code>[(200, 0), (400, 0)]</code></li>
 <li><code>energy</code> = <code>natural_energy * (1 + level)</code></li>
+<li>Destroy effect: <code>(50, 150, 350)[level - 1]</code> <code>force_field</code> will be
+  added to the cell</li>
 </ul>
 </li>
-<li><code>GoldMine</code> is the building to increase the gold production.<ul>
+<li><code>GoldMine</code> is the building to increase the gold production. When 
+  <code>GoldMine</code> is destoyed, the gold left in there will become the trophy of 
+  the attacker.<ul>
 <li><code>cost</code> = <code>100 gold</code></li>
 <li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0)]</code></li>
 <li><code>gold</code> = <code>natural_gold * (1 + level)</code> </li>
+<li>Destroy effect: <code>(50, 150, 350)[level-1]</code> <code>gold</code> will be added to
+  the attacker</li>
+</ul>
+</li>
+<li><code>Fortress</code> is the building to improve the defense of the territory. A 
+  <code>Fortress</code> will increase the amount of <code>force_field</code> of both the cell
+  it's on and all the adjacent owned cells. It will also decrease the amount of
+  <code>force_field</code> of all the adjacent enemy cells.<ul>
+<li><code>cost</code> = <code>100 gold</code></li>
+<li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0)]</code></li>
+<li><code>adjacent_forcefield_incr</code> = <code>2 + level</code></li>
+<li><code>self_forcefield_incr</code> = <code>5 * level</code></li>
+<li><code>adjacent_forcefield_decr</code> = <code>10 * (1 + level)</code></li>
 </ul>
 </li>
 </ul>
@@ -169,14 +193,19 @@ and the total energy all players put to attack this cell in that round. </p>
 <p><code>force_field = int(min(1000, 2*(energy*2 - total_energy - attack_cost)))</code></p>
 <p><code>force_field</code> will be added to <code>attack_cost</code></p>
 <p>After each round, <code>force_field</code> will be updated based on surrounding cells.
-For each enemy surrounding cell, <code>force_field</code> will reduce <code>30</code>. For
-each self cell, <code>force_field</code> will increase <code>5</code>.</p>
+For each enemy surrounding cell, <code>force_field</code> will reduce <code>10</code>. For
+each self cell, <code>force_field</code> will increase <code>2</code>.</p>
 <blockquote>
 <p>For example. Player A owns cell (2, 2) and currently the cell has 100 
   <code>force_field</code>. Player A owns (2, 1) and (1, 2), too. (2, 3) is empty and
   Player B owns (3, 2). Therefore the cell (2, 2) has 2 self cells and 1 emeny
-  cell around, so for each round, the <code>force_field</code> will reduce 30 - 2 * 5
-  = 20.</p>
+  cell around, so for each round, the <code>force_field</code> will reduce 10 - 2 * 2
+  = 6.</p>
+<p><code>Fortress</code> will affect the change of <code>force_field</code>. If Player A owns
+  cell (2, 2) and has a level 1 <code>Fortress</code> on it. Player A owns (2, 1) with
+  a level 2 <code>Fortress</code> and (1, 2) with nothing. Player B owns (2, 3) with
+  a level 1 <code>Fortress</code> and (3, 2) with nothing. The cell (2, 2) will have 
+  a <code>force_field</code> change for <code>5 + 4 + 2 - 20 - 10</code> = <code>-19</code></p>
 </blockquote>
 <h3 id="gamemap">GameMap</h3>
 <p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
@@ -194,9 +223,60 @@ treated as the same user. Duplicate usernames are not allowed.</p>
 player has. <code>tech_level</code> limits the level of all other buildings. The player
 needs to upgrade their home to a higher level, therefore achieves a higher
 <code>tech_level</code>, before they upgrade other buildings.</p>
-<h4 id="tax-level">Tax Level</h4>
-<p><code>tax_level</code> is determined by the cell number the player owns. For every
-100 cells, 2 gold and 2 energy will be taxed for each cell the player owns. </p>
-<p>For example, if the player has 298 cells, the <code>tax_level</code> will be 2 and for
-each round, 298*2 = 596 energy and gold will be subtracted from player's gold
-and energy.</p>
+<h4 id="tax-amount">Tax Amount</h4>
+<p><code>tax_amount</code> is determined by the number of cells and resource buildings 
+(<code>energy_well</code> and <code>gold_mine</code>) a player owns. The more cells and 
+resource buildings a player owns, the larger the <code>tax_amount</code> will be.</p>
+<p>The equation for <code>tax_amount</code> generated from number of cells and buildings
+are the same.</p>
+<table>
+<thead>
+<tr>
+<th>number</th>
+<th>tax rate</th>
+<th>total tax</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0-100</td>
+<td>no tax</td>
+<td>0</td>
+</tr>
+<tr>
+<td>100-200</td>
+<td>1 per cell/building</td>
+<td>1*(num - 100)</td>
+</tr>
+<tr>
+<td>200-300</td>
+<td>2 per cell/building</td>
+<td>100 + 2*(num - 200)</td>
+</tr>
+<tr>
+<td>300-400</td>
+<td>3 per cell/building</td>
+<td>300 + 3*(num - 300)</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td></td>
+</tr>
+<tr>
+<td>800-900</td>
+<td>8 per cell/building</td>
+<td>2800 + 8*(num - 800)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>For example. A player has 337 cells on which 102 <code>gold_mines</code>, 73 
+  <code>energy_wells</code> and 99 <code>fortress</code> are built. First we need to calculate
+  the tax generated by number of cells. The tax for cells would 
+  be <code>0 + 100*1 + 100*2 + 37*3 = 411</code>. Then we know the number of resource 
+  buildings is 102 + 73 = 175, so the tax generated by buildings would be
+  <code>0 + 75*1 = 75</code> The total tax would be <code>411 + 75 = 486</code></p>
+<p>As a result, 486 gold and 486 energy will be reduced from the player each
+  round.</p>
+</blockquote>

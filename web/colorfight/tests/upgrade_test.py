@@ -7,6 +7,7 @@ import pytest
 def test_upgrade_without_enough_resource():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 0
@@ -36,6 +37,7 @@ def test_upgrade_without_enough_resource():
 def test_invalid_upgrade():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
 
     #Upgrade cell on invalid position
@@ -71,6 +73,7 @@ def test_invalid_upgrade():
 def test_upgrade_building_with_lower_home_level():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000
@@ -98,6 +101,7 @@ def test_upgrade_building_with_lower_home_level():
 def test_build_over_maximum_tech_level():
     game = Colorfight()
     uid = join(game, 'a', 'a')
+    game.update(True)
     info = game.get_game_info()
     x, y = info['users'][uid]['cells'][0]
     game.users[uid].energy = 10000

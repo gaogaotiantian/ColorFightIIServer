@@ -1,36 +1,63 @@
 import json
 import time
+import sys
+import gzip
+import copy
 
 from .game_map import GameMap
 from .user import User
 from .position import Position
-from .building import get_building_class
+from .building import get_building_class, Home
 
 from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
-    def __init__(self):
+    def __init__(self, config = None):
         self.turn = 0
+
+        # Setups
         self.max_turn = GAME_MAX_TURN
         self.width = GAME_WIDTH
         self.height = GAME_HEIGHT
         self.round_time = ROUND_TIME
         self.first_round_time = ROUND_TIME
+        self.start_count_down = self.first_round_time
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
+        self.replay_enable = "never"
         self.admin_password = ""
+        self.join_key = ""
         self.finish_time = 0
+        self.key_frame = 0
+        self.symmetric = True
+        self.game_id   = 0
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
-        self.game_map = GameMap(self.width, self.height)
+
+        # Possible actions
         self.valid_actions = {
-            "register": [("username", "password"), ("uid",)],
-            "command": [("cmd_list",), ()]
+            # Action     # Required Args           # Optional Args # Return val
+            "register": [("username", "password"), ("join_key",),  ("uid",)],
+            "command":  [("cmd_list",),            (),             ()]
         }
-        self.dirty      = True
+
+        # Game info related
         self._game_info = None
+        self._game_info_key_frame = 0
+        self._prev_game_info = None
+        
+        # Do configuration
+        if config:
+            self.config(config)
+
+        # Replay related
+        self.save_replay = None
+        self.replay_saved = False
+
+        # Initialization
+        self.restart()
 
     def config(self, data):
         """
@@ -50,7 +77,7 @@ class Colorfight:
                     else:
                         return False, "rount_time value invalid"
                 elif field == "first_round_time":
-                    if 0 <= val <= 60:
+                    if val in ["full", "never"] or 0 <= val <= 60:
                         self.first_round_time = val
                     else:
                         return False, "first_round_time value invalid"
@@ -69,6 +96,11 @@ class Colorfight:
                         self.allow_manual_mode = val
                     else:
                         return False, "allow_manual_mode value invalid"
+                elif field == "replay_enable":
+                    if val in ["always", "never", "end"]:
+                        self.replay_enable = val
+                    else:
+                        return False, "replay_enable value invalid"
                 else:
                     return False, "Invalid field {}".format(field)
         except Exception as e:
@@ -78,30 +110,60 @@ class Colorfight:
 
     def restart(self):
         self.turn = 0
-        self.dirty = True
         self.users = {}
         self.errors = {}
-        self.last_update = time.time() 
+        self.key_frame = 0
+        self._prev_game_info = None
+        self._game_info = None
+        self.start_count_down = self.first_round_time
         self.game_map = GameMap(self.height, self.width) 
+        self.last_update = time.time() 
+        self.game_id = str(int(self.last_update * 1000))
+        self.key_frame = 1
+        self.replay_saved = False
+        self.clear_log()
+        self.add_log()
+
+    def start(self):
+        if self.turn == 0:
+            self.update(force = True)
 
     def update(self, force = False):
         do_update = False
         do_restart = False
         if self.turn == 0:
-            if force or (time.time() - self.last_update > self.first_round_time):
+            if self.first_round_time == "never":
+                count_down = 9999
+            elif self.first_round_time == "full":
+                if len(self.users) == 8:
+                    count_down = 0
+                else:
+                    count_down = 9999
+            else:
+                count_down = self.first_round_time - (time.time() - self.last_update)
+            
+            if force or count_down <= 0:
                 do_update = True
+                self.start_count_down = 0
+            elif int(count_down) != self.start_count_down:
+                self.start_count_down = int(count_down)
+                self.key_frame += 1
         elif self.turn == self.max_turn:
             if self.finish_time != 0 and time.time() - self.last_update > self.finish_time:
                 do_restart = True
+            if self.replay_enable == "end" and self.save_replay and not self.replay_saved:
+                self.save_replay(self.get_log(), self.get_game_info())
+                self.replay_saved = True
         else:
             if force or (time.time() - self.last_update > self.round_time):
                 do_update = True
+
+
         if do_restart:
-            self.dirty = True
             self.restart()
         elif do_update:
-            self.dirty = True
             self.turn += 1
+            self.key_frame += 1
             self.errors = self.do_all_commands()
             # 1. Update all the cells based on attackers
             #    This will also update the cell dict in users
@@ -109,6 +171,8 @@ class Colorfight:
             self.update_cells()
             # 2. Update all the users for gold and energy
             self.update_users()
+            start = time.time()
+            self.add_log()
             self.last_update = time.time() 
 
     def update_cells(self):
@@ -207,6 +271,11 @@ class Colorfight:
         if self.users[uid].gold < BldClass.cost:
             return False, "Not enough gold"
 
+        if BldClass is Home and self.users[uid].tech_level != 0:
+            return False, "You can only have one home"
+        elif BldClass is not Home and self.users[uid].tech_level == 0:
+            return False, "You need to have a home before build other buildings"
+
         self.game_map[build_pos].building = BldClass()
         self.users[uid].gold -= BldClass.cost
 
@@ -252,9 +321,16 @@ class Colorfight:
         register
         command
     '''
-    def register(self, uid, username, password):
+    def register(self, uid, username, password, join_key = ""):
         if len(username) >= 15:
             return False, "Username can't exceed 15 characters."
+
+        if len(username) == 0:
+            return False, "Username has to be at least 1 characters"
+
+        if join_key != self.join_key:
+            return False, "You need the correct join key for the room"
+
         # Check whether user exists first
         for user in self.users.values():
             if user.username == username:
@@ -262,20 +338,25 @@ class Colorfight:
                     return True, (user.uid,)
                 else:
                     return False, "Username exists"
+
         if self.allow_join_after_start or self.turn == 0:
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
                     user = User(uid, username, password)
                     if self.game_map.born(user):
+                        self.key_frame += 1
                         self.users[uid] = user
                         return True, (uid,)
                     else:
                         return False, "Map is full"
+
             raise Exception("Should never be here")
         else:
             return False, "You are not allowed to join after the game starts"
 
     def command(self, uid, cmd_list):
+        if self.turn == 0 or self.turn == self.max_turn:
+            return False, "The game has not started or it ended already."
         if type(cmd_list) != list:
             return False, "Wrong type"
         if uid not in self.users:
@@ -296,6 +377,7 @@ class Colorfight:
         return a json object
         
         '''
+
         try:
             data = json.loads(msg)
         except:
@@ -313,17 +395,20 @@ class Colorfight:
             return {"success": False, "err_msg":"You need to join the game first"}
 
         required_args = self.valid_actions[action][0]
-        expected_results = self.valid_actions[action][1]
-        arg_list = []
+        optional_args = self.valid_actions[action][1]
+        expected_results = self.valid_actions[action][2]
+        arg_list = {}
         for arg in required_args:
             if arg not in data:
                 return {"success": False, "err_msg": "{} is missing".format(arg)}
-            arg_list.append(data[arg])
-
-        self.dirty = True
+            arg_list[arg] = data[arg]
         
+        for arg in optional_args:
+            if arg in data:
+                arg_list[arg] = data[arg]
+
         # should be a tuple 
-        success, result = getattr(self, action)(uid, *arg_list)
+        success, result = getattr(self, action)(uid, **arg_list)
         if not success:
             return {"success": False, "err_msg": result}
         if len(result) != len(expected_results):
@@ -342,19 +427,72 @@ class Colorfight:
                 "width": GAME_WIDTH, \
                 "height": GAME_HEIGHT, \
                 "round_time": self.round_time, \
+                "start_count_down": self.start_count_down, \
                 "allow_manual_mode": self.allow_manual_mode, \
+                "game_id": self.game_id, \
         }
 
-    def get_game_info(self):
-        if self.dirty or self._game_info == None:
-            self.dirty = False
-            self._game_info = {\
-                    "turn": self.turn, \
-                    "info": self.info(), \
-                    "error": self.errors, \
-                    "game_map":self.game_map.info(), \
-                    "users": {user.uid: user.info() for user in self.users.values()} \
-            }
+    def compress_game_info(self, info):
+        def name_to_letter(name):
+            if name == "empty":
+                return " "
+            return name[0]
+        game_map = {"data":[[None for _ in range(self.width)] for _ in range(self.height)]}
+        game_map['headers'] = [key for key in info['game_map'][0][0]]
+        for x in range(self.game_map.width):
+            for y in range(self.game_map.height):
+                temp_info = info["game_map"][y][x]
+                temp_info["building"] = [name_to_letter(temp_info["building"]["name"]), 
+                        temp_info["building"]["level"]]
+                game_map["data"][y][x] = [temp_info[key] for key in game_map['headers']]
+        info['game_map'] = game_map
 
+    def get_game_info(self):
+        return {\
+                "turn": self.turn, \
+                "info": self.info(), \
+                "error": self.errors, \
+                "game_map":self.game_map.info(), \
+                "users": {user.uid: user.info() for user in self.users.values()} \
+        }
+
+    def get_compressed_game_info(self):
+        if self._game_info == None or self._game_info_key_frame != self.key_frame:
+            self._game_info_key_frame = self.key_frame
+            self._prev_game_info = self._game_info
+            self._game_info = self.get_game_info()
+            self.compress_game_info(self._game_info)
         return self._game_info
 
+    def add_log(self):
+        def same_cell(c1, c2):
+            return all([c1[i] == c2[i] for i in range(len(c1))])
+
+        if self.replay_enable != "never":
+            if not self._prev_game_info:
+                self.log.append(self.get_compressed_game_info())
+            else:
+                currData = self.get_compressed_game_info()
+                newData = {"turn"    : currData["turn"], \
+                           "users"   : currData["users"], \
+                           "game_map":{"data":[[[] for j in range(GAME_WIDTH)] for i in range(GAME_HEIGHT)]}}
+
+                game_map_data = currData['game_map']['data']
+                for y in range(GAME_HEIGHT):
+                    for x in range(GAME_WIDTH):
+                        cell_data = currData['game_map']['data'][y][x]
+                        if not same_cell(cell_data, self._prev_game_info['game_map']['data'][y][x]):
+                            newData["game_map"]["data"][y][x] = cell_data
+                
+                self.log.append(newData)
+
+    def clear_log(self):
+        self.log_turn = 0
+        self.log = []
+        self.compressed_log = None
+
+    def get_log(self):
+        if self.log_turn != self.turn:
+            self.log_turn = self.turn
+            self.compressed_log = gzip.compress(json.dumps(self.log, separators=[',',':']).encode('utf-8'), compresslevel = 4)
+        return self.compressed_log

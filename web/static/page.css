@@ -1,7 +1,8 @@
 html, body {
     height : 100%;
     width  : 100%;
-	background          : url( "background.jpg" );
+    /* background          : url( "background.jpg" ); */
+    background: #373A49;
 	background-size     : cover;
 	background-position : center;
 	background-repeat   : repeat;
@@ -12,6 +13,7 @@ body {
     font-family: "Nunito Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
     font-size: 1.2rem;
 }
+
 
 .navbar {
     background: rgba(13, 16, 7, 0.5);
@@ -24,14 +26,19 @@ body {
 }
 
 .nav-link {
-    color: #B7AEC9;
+    color: rgb(200, 197, 207);
+    font-family: 'Orbitron', sans-serif;
     font-size: 1.2rem;
     padding: 0.5rem 0.2rem;
+    text-shadow: 0px 0px 1px #473670;
+    -webkit-transition: color 0.3s, text-shadow 0.5s;
+    transition: color 0.3s, text-shadow 0.5s;
 }
 
 .nav-link:hover {
-    color: #C7BED9;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3));
+    color: rgb(255, 255, 255);
+    /* background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3)); */
+    text-shadow: 0px 0px 5px #5c26d8;
 }
 
 .nav ul li {
@@ -49,19 +56,52 @@ body {
 }
 
 .section-overview h1 {
-    text-shadow: 0 1px 5px #A5E8B7;
+    margin-top: 1.2rem;
+    font-family: 'Orbitron';
+    text-shadow: 
+        0px 0px 3px #60b7ff,
+        0px 0px 10px #005aad;
 }
 
 .section-overview p {
-    letter-spacing: 0.1rem;
+    font-family: 'Quantico';
+    letter-spacing: 0.05rem;
 }
 
 .section-overview a {
     font-size: 1.4rem;
-    background-image: linear-gradient(-180deg, #fad961, #f76b1c);
+    font-family: 'Quantico';
+    /* background-image: linear-gradient(-180deg, #fad961, #f76b1c); */
     font-weight: 600;
     color: #fff;
     border: 0;
+}
+
+.section-overview .start-button {
+    font-size: 1.4rem;
+    font-family: 'Quantico';
+    font-weight: 600;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.85);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.6);
+    background-color: rgba(43,94,117,0.32);
+    transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+.section-overview .start-button:hover {
+    background-color: rgba(181,209,255,0.89);
+    box-shadow: 
+        0px 0px 20px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.6);
 }
 
 .btn-start {
@@ -76,48 +116,194 @@ body {
 
 .doc-header {
     color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 1px 3px #A5E8B7;
     padding: 10px 0;
 }
 
+.doc-header h1{
+    font-family: 'Orbitron', sans-serif ;
+    font-size: 2rem;
+    color: rgb(228, 240, 255);
+    text-shadow: 
+        0px 0px 10px #66b5ff,
+        0px 0px 20px #0084ff;
+}
+
 .doc-section {
-    background-color: #fff;
+    /* background-color: rgb(105, 106, 126); */
+    font-family: 'Comfortaa';
+    color: rgb(228, 247, 255);
     border-radius: 8px;
     padding: 20px 35px 40px;
     margin-bottom: 20px;
+    border: solid 2px rgba(201, 247, 255, 0.705);
+    text-shadow: 
+        0px 0px 2px #005ca7;
+    box-shadow: 
+        0px 0px 15px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 10px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 5000px rgba(96,146,255,0.109);
 }
 
-.doc-section p {
+.doc-section p, .doc-section tbody {
+    color: #cacaca;
+    text-shadow: 0px 0px 4px #0084ff;
     margin-bottom: 0.5rem;
+}
+
+.doc-section a{
+    color: #91c2ff;
+}
+
+.doc-section button {
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.4rem;
+    color: #ffffff;
+    background-color: rgb(63, 98, 128);
+    padding: 0.3rem 1.5rem 0.3rem 1.5rem;
+    margin-right: 2rem;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px rgba(201, 247, 255, 0.856);
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.6);
+    background-color: rgba(43,94,117,0.32);
+    transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+.doc-section button:hover {
+    background-color: rgba(181,209,255,0.89);
+    box-shadow: 
+        0px 0px 20px 2px rgba(36,155,252,0.6),
+        inset 0px 0px 15px 2px rgba(36,155,252,0.6);
 }
 
 .doc-section h1 {
     margin-top: 1.5rem;
     border-bottom: 2px solid #e0e2e4;
     padding-bottom: 0.3rem;
+    text-shadow: 
+        0px 0px 3px #ffc46c,
+        0px 0px 10px #af3891;
 }
 
 .doc-section h2 {
     margin-top: 1.4rem;
     border-bottom: 2px solid #eaecef;
     padding-bottom: 0.3rem;
+    text-shadow: 
+        0px 0px 3px #608aff,
+        0px 0px 10px #6200ff;
 }
 
 .doc-section h3 {
     margin-top: 1.3rem;
+    color: rgb(228, 247, 255);
+    font-family: 'Comfortaa';
+    text-shadow: 
+        0px 0px 10px #0084ff;
 }
 
 .doc-section h4 {
     margin-top: 1.2rem;
+    text-shadow: 
+    0px 0px 3px #60b7ff,
+    0px 0px 10px #005aad;
 }
 
 .doc-section h1,h2,h3,h4 {
     font-weight: 600;
 }
 
-code {
-    background-color: #f9f2f4;
-    border-radius: 4px;
-    padding: 2px 4px;
+.doc-section table {
+    width: 100%;
+    margin-bottom: 1.5vh;
+    border: solid 2px rgba(201, 247, 255, 0.5);
+    text-shadow: 
+        0px 0px 2px #005ca7;
+    box-shadow: 
+        0px 0px 15px 2px rgba(36,155,252,0.611);
 }
 
+.doc-section th, .doc-section td{
+    padding: 0.2vh 0.5vw;
+}
+
+.doc-section thead {
+    background: rgba(36,155,252,0.15);
+}
+
+.doc-section tr:nth-child(even) {
+    background-color: #474A59;
+}
+
+code {
+    background-color: rgb(81, 78, 92);
+    color: #f3cae3;
+    text-shadow: 0px 0px 4px rgba(255,24,178,0.501);
+    border-radius: 5px;
+    padding: 2px 10px;
+    box-shadow: 0px 0px 5px 1px rgba(38,0,255,0.172);
+}
+
+.doc-section blockquote {
+    padding: 0.3vw 1vw; 
+    margin: 1vh 1vw;
+    font-size: 1.1rem;
+}
+
+.modal-content {
+    color: rgba(255, 255, 255, 0.8);
+    background: #373A49;
+	background-size     : cover;
+	background-position : center;
+	background-repeat   : repeat;
+    font-family: 'Quantico';
+}
+
+.modal-header, label {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.modal-header .close {
+    color:#fff;
+}
+.modal-header .close:hover {
+    color:#ddd !important;
+}
+
+.modal-content input, .modal-content select {
+    background-color: #eee;
+}
+
+.modal-foot button {
+    font-family: 'Comfortaa';
+    font-size: 1vw;
+    min-width: 100%;
+    color: #fff;
+    text-shadow:         
+        0px 0px 3px #66b5ff,
+        0px 0px 5px #0059a1;
+    border: solid  1.5px #8fcdff;
+    border-radius: 0.5vw;
+    box-shadow: 
+        0px 0px 10px 2px rgba(36,155,252,0.611),
+        inset 0px 0px 5px 2px rgba(36,155,252,0.611);
+    background-color: rgba(0,0,0,0);
+    transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+.modal-foot button:hover {
+    background-color: transparent;
+    box-shadow: 
+        0px 0px 10px 1px rgba(201, 247, 255, 0.856),
+        inset 0px 0px 5px 1px rgba(31,148,243,0.88);
+}
+
+.modal-foot button:active {
+    background-color: transparent !important;
+    transform: translateY(4px);
+}

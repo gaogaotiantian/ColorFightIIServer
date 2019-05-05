@@ -8,8 +8,24 @@ function restartGame( data ) {
         success: function(msg) {
             if (!msg['success']) {
                 alert(msg['err_msg']);
-            } else {
-                location.reload();
+            } 
+        }
+    } );
+}
+
+function startGame() {
+    $.ajax( {
+        url: "/start",
+        method: "POST",
+        dataType: "json",
+        contentType: 'application/json;charset=UTF-8',
+        data: JSON.stringify( {
+            "admin_password": $( "#admin-password-input" ).val() ,
+            "gameroom_id"   : window.location.pathname.split('/')[2]
+        } ),
+        success: function(msg) {
+            if (!msg['success']) {
+                alert(msg['err_msg']);
             }
         }
     } );
@@ -36,7 +52,11 @@ function getConfig() {
 
     var first_round_time = $( "#first-round-time-sel option:selected" ).val();
     if( first_round_time != "same" ) {
-        config[ "first_round_time" ] = parseFloat( first_round_time );
+        let data = parseFloat( first_round_time );
+        if (!data) {
+            data = first_round_time;
+        }
+        config[ "first_round_time" ] = data;
     }
 
     var finish_time = $( "#finish-time-sel option:selected" ).val();
@@ -54,8 +74,13 @@ function getConfig() {
         config[ "allow_manual_mode" ] = (allow_manual_mode == "true");
     }
 
+    var replay_enable = $( "#replay-enable-sel option:selected" ).val();
+    if( replay_enable != "same" ) {
+        config[ "replay_enable" ] = replay_enable;
+    }
+
     data['config'] = config;
-    data['gameroom_id'] = window.location.pathname.substr(window.location.pathname.lastIndexOf('/')+1);
+    data['gameroom_id'] = window.location.pathname.split('/')[2];
 
     return data;
 }
@@ -97,8 +122,18 @@ function fullScreenHandler() {
     }
 }  
 $( function() {
+    $( '#go-button' ).click( function() {
+        startGame();
+    })
+
+
     $( '#restart-button' ).click( function() {
         restartGame( getConfig() );
+    } );
+
+    $( '#modal-refresh-button' ).click( function() {
+        restartGame( getConfig() );
+        $('.modal').modal('toggle');
     } );
 
     document.addEventListener('fullscreenchange', fullScreenHandler);
@@ -113,4 +148,36 @@ $( function() {
     $( '#compress-button ').click( function() {
         closeFullscreen();
     } );
+
+    $( '#download-button' ).click( function() {
+        console.log($(this).attr('enable_condition'))
+        if ($(this).attr('enable_condition') == 'always' || 
+                ($(this).attr('enable_condition') == 'end' && lastTurn == maxTurn)) {
+            let a = document.createElement('a');
+            a.href = './replay';
+            a.download = 'replay.cfr';
+            a.click();
+        } else {
+            alert("You can't download replay now!");
+        }
+    })
+
+    // Render callbacks
+    $( '#resource-render-button' ).click( function() {
+        change_render_options({"gold": "toggle", "energy": "toggle"});
+    })
+
+    $( '#building-render-button' ).click( function() {
+        change_render_options({"building": "toggle"});
+    })
+
+    $( '#owner-render-button' ).click( function() {
+        change_render_options({"owner": "toggle"});
+    })
+
+    $(window).on("focus", function() {
+        full_refresh();
+    })
 } );
+
+

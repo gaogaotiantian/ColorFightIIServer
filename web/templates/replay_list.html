@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'header.html' %}
+    <script src="https://www.gstatic.com/firebasejs/5.11.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.11.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.11.1/firebase-storage.js"></script>
+    <link rel="stylesheet" href='/static/gameroom_list.css'>
+    <link rel="stylesheet" href='/static/gameroom.css'>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="container">
+      <div class="main-content">
+        <div class="row justify-content-md-center">
+          <div class="col-md-10">
+
+            <div class="doc-header">
+              <h1>Replay List</h1>
+            </div>
+
+            <div id="replay-info">
+              <form>
+                <input type="file" id="replay-file-input" class="form-control d-none">
+                <button id="replay-file-load-button" class="btn btn-success btn form-control" type="button">LOAD REPLAY</button>
+              </form>
+            </div>
+
+            <div class="table-div">
+              <div id="replay-container" class="table-container">
+                <div class="table-head">
+                  <div class="table-row table-row-head row">
+                    <div class="table-column col-3"><h1>Game ID</h1></div>
+                    <div class="table-column col-3"><h1>Winner</h1></div>
+                    <div class="table-column col-4"><h1>Time</h1></div>
+                  </div>
+                  <span class="table-divider"></span>
+                </div>
+                  
+                  <div id="replay-content-container">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/1.0.10/pako_inflate.js"></script>
+    <script src="/static/replay_list.js"></script>
+  </body>
+</html>

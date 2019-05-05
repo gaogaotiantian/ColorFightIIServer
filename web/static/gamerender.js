@@ -1,8 +1,17 @@
+// Master switch for replay mode, now is kind of stupid
+var gameRoomMode = 'play';
+if (window.location.pathname.indexOf('replay') > 0) {
+    gameRoomMode = 'replay';
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // WebSocket Variables
+const gameProtocol = window.location.protocol=='https:'&&'wss://'||'ws://';
+var gameSocket;
 
-const gameProtocol  = window.location.protocol=='https:'&&'wss://'||'ws://';
-const gameSocket    = new WebSocket( gameProtocol + window.location.host + window.location.pathname + "/game_channel" );
+if (gameRoomMode == 'play') {
+    gameSocket   = new WebSocket( gameProtocol + window.location.host + window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/')) + "/game_channel" );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // DOM Variables
@@ -52,12 +61,13 @@ let gameData     = false;
 let prevGameData = false;
 let lastTurn     = -1;
 let maxTurn      = 500;
+let countDown    = 0;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Rendering Variables
 
 const cellSize      = 32;
-const cellRadius    = 7;
+const cellRadius    = 8;
 
 // Draw the game as a square, so we only need one dimension. 
 let gameDim         = cellSize * GAME_WIDTH;
@@ -65,6 +75,17 @@ let gameDim         = cellSize * GAME_WIDTH;
 // Use a common color for ENERGY and GOLD related drawing. 
 const ENERGY_COLOR  = "#65c9cf";
 const GOLD_COLOR    = "#faf334";
+
+const GREY_BACKGROUND   = '#222222';
+const HIGHLIGHT_COLOR   = '#ffffff';
+
+let forceRefresh  = false;
+let renderOptions = {
+    "energy"  : true,
+    "gold"    : true,
+    "owner"   : true,
+    "building": true,
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -87,7 +108,8 @@ let selfUsername    = null;
 let selfUID         = SENTINEL_UID; 
 
 // Selected cell position. Default to (0, 0). 
-let clickCell       = [0, 0]; 
+let highlightCell   = false;
+let clickCell       = [0, 0];
 let hoverCell       = [0, 0]; 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,11 +123,21 @@ gameRenderer.plugins.interaction.on('mousemove', cell_hover_handler);
 
 // An array to store the cell containers
 let cellContainers = new Array(GAME_HEIGHT);
-let cellContainersEmpty = true;
+let gameMapEmpty   = true;
 for (var i = 0; i < cellContainers.length; i++) {
     cellContainers[i] = new Array(GAME_WIDTH);
     for (var j = 0; j < cellContainers[i].length; j++) {
-        cellContainers[i][j] = new PIXI.Container();
+        let cell = new PIXI.Container(); 
+        // Background. 
+        cell.addChild(new PIXI.Graphics());
+        // Base color. 
+        cell.addChild(new PIXI.Graphics());
+        // Base animations. 
+        cell.addChild(new PIXI.Graphics());
+        // Container for drawing buildings and their animations. 
+        cell.addChild(new PIXI.Container());
+
+        cellContainers[i][j] = cell; 
         gameStage.addChild(cellContainers[i][j]);
     }
 }
@@ -114,22 +146,44 @@ for (var i = 0; i < cellContainers.length; i++) {
 
 function cell_hover_handler(hover) {
     hoverCell = position_to_cell(hover.data.global.x, hover.data.global.y); 
+    update_selected_user();
     draw_selected_cell_info(); 
+    draw_selected_user_info(); 
 }
 
 function cell_click_handler(click) {
-    clickCell = position_to_cell(click.data.global.x, click.data.global.y); 
+    // Check whether we clicked the same cell. If so, dehighlight it
+    let currClickCell = position_to_cell(click.data.global.x, click.data.global.y); 
+    if (highlightCell) {
+        if (currClickCell[0] == clickCell[0] && currClickCell[1] == clickCell[1]) {
+            highlightCell = false;
+            set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+        } else {
+            set_cell_bg(clickCell[0], clickCell[1], GREY_BACKGROUND);
+            clickCell     = currClickCell;
+            highlightCell = true;
+            set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
+        }
+    } else {
+        clickCell     = currClickCell;
+        highlightCell = true;
+        set_cell_bg(clickCell[0], clickCell[1], HIGHLIGHT_COLOR);
+    }
     draw_selected_cell_info(); 
 }
 
 function position_to_cell(x, y)
 {
-    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH), 
-            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT)]
+    return [clamp(Math.floor(x / cellSize), 0, GAME_WIDTH - 1), 
+            clamp(Math.floor(y / cellSize), 0, GAME_HEIGHT - 1)]
 }
 
 function clamp(val, lower, upper) {
-    return Math.min(Math.max(val, lower), upper); 
+    if (val) {
+        return Math.min(Math.max(val, lower), upper); 
+    } else {
+        return lower;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +203,8 @@ const assets = [
     "/static/assets/fortress2.json",
     "/static/assets/fortress3.json",
     "/static/assets/buildEffect.json",
-    "/static/assets/upgradeEffect.json"
+    "/static/assets/upgradeEffect.json",
+    "/static/assets/destroyEffect.json"
 ]
 
 PIXI.loader
@@ -170,8 +225,7 @@ function setup() {
     main();
 }
 
-let animationStartTime  = false;
-let currentTurnStartTime = false;
+let turnStartTime = false;
 
 /* Appending the PIXI renderer to the DOM */
 function main() {
@@ -181,13 +235,9 @@ function main() {
 
 /* Animation Loop */
 function draw_game(ts) {
-    if (!animationStartTime) { animationStartTime = ts; }
-
-    let animationProgress = animationStartTime - ts;
-
     // For any reasonable screens, we should expect the height be the limit
     // Limit the dimension by height and screen width. 
-    gameDim = Math.min(window.innerWidth * 0.6, window.innerHeight - gameRow.offsetTop); 
+    gameDim = Math.min(window.innerWidth * 0.6, window.innerHeight - gameRow.offsetTop - 10); 
 
     if (gameDiv.clientWidth != gameDim) {
         gameDiv.setAttribute("style", "width:" + gameDim + "px; height:" + gameDim + "px");
@@ -204,22 +254,53 @@ function draw_game(ts) {
     // work with it.
     //
     // TODO: we probably have a race condition here for checking diff
-    if (gameData && gameData["turn"] != lastTurn ) {
-        currentTurnStartTime = ts;
-        lastTurn = gameData["turn"];
-        maxTurn  = gameData["info"]["max_turn"];
-        gameTurn.innerHTML = lastTurn + "/" + maxTurn;
+    if (gameData) {
+        let gameMap = gameData['game_map'];
+        let prevMap = prevGameData['game_map'];
 
-        // Draw the game board. 
-        for (let y = 0; y < 30; y++) {
-            for (let x = 0; x < 30; x++) {
-                if (cellContainersEmpty || 
-                        has_changed(gameData["game_map"][y][x], prevGameData["game_map"][y][x])) {
-                    draw_cell(x, y, gameData["game_map"][y][x], prevGameData["game_map"][y][x]);
+        // NOTE: has_changed() checks are needed to make the info panes respond 
+        // reasonably. However, it does not appear to have a major impact on 
+        // the compute costs, so it seems like this might be an artifact of 
+        // some other unknown resource consumption. We should investigate if 
+        // this is due to the DOM manipulations in the info pane or if it is 
+        // us not receiving events. 
+
+        if (gameData["turn"] != lastTurn || countDown != gameData["info"]["start_count_down"] || forceRefresh) {
+            turnStartTime = ts;
+            lastTurn  = gameData["turn"];
+            maxTurn   = gameData["info"]["max_turn"];
+            countDown = gameData["info"]["start_count_down"];
+            
+            gameTurn.innerHTML = lastTurn + "/" + maxTurn;
+            if (countDown != 0) {
+                gameTurn.innerHTML += " (" + countDown.toString() + ")";
+            }
+
+            // Draw the game board once per turn. 
+            for (let y = 0; y < GAME_HEIGHT; y++) {
+                for (let x = 0; x < GAME_WIDTH; x++) {
+                    if (gameMapEmpty || has_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
+                        per_turn_draw_cell(x, y, gameMap[y][x], prevMap[y][x]); 
+                    }
+                }
+            }
+            gameMapEmpty = false;
+        }
+
+        // Get progress % in the current turn. 
+        // {ts} is in units of ms. A turn is 1 second. 
+        let turnProgress = clamp(ts - turnStartTime, 0, 1000) / 1000; 
+
+        // Animate the cells per frame. 
+        for (let y = 0; y < GAME_HEIGHT; y++) {
+            for (let x = 0; x < GAME_WIDTH; x++) {
+                if (owner_changed(gameMap[y][x], prevMap[y][x]) || forceRefresh) {
+                    animate_cell(x, y, gameMap[y][x], prevMap[y][x], turnProgress);
                 }
             }
         }
-        cellContainersEmpty = false;
+
+        forceRefresh = false;
     }
 
     // Always render the game for the animation
@@ -228,89 +309,214 @@ function draw_game(ts) {
     requestAnimationFrame(draw_game);
 }
 
-function has_changed(currentCell, prevCell) {
-    if (currentCell["building"]["name"] != prevCell["building"]["name"] || 
-            currentCell["building"]["level"] != prevCell["building"]["level"] ||
-            currentCell["owner"] != prevCell["owner"]) {
-        return true;
-    }
-    return false;
+function has_changed(currCell, prevCell) {
+    return (currCell["building"]["name"]  != prevCell["building"]["name"]) 
+        || (currCell["building"]["level"] != prevCell["building"]["level"]) 
+        || owner_changed(currCell, prevCell); 
 }
 
-/* Draw Cell */
-function draw_cell(x, y, currentCell, prevCell) {
-    // Clear the cell container
-    while (cellContainers[y][x].children[0]) {
-        cellContainers[y][x].removeChild(cellContainers[y][x].children[0]);
-    }
+function owner_changed(currCell, prevCell) {
+    return (currCell["owner"] != prevCell["owner"]);
+}
 
-    let base = new PIXI.Graphics();
+function change_render_options(options) {
+    for (key in options) {
+        if (key in renderOptions) {
+            if (options[key] == "toggle") {
+                renderOptions[key] = !renderOptions[key];
+            } else {
+                renderOptions[key] = options[key];
+            }
+        }
+    }
+    full_refresh();
+}
+
+function full_refresh()
+{
+    forceRefresh = true;
+}
+
+function per_turn_draw_cell(x, y, currCell, prevCell)
+{
+    let borderCount = 0;
+    let base    = cellContainers[y][x].children[1];
+    let animate = cellContainers[y][x].children[2];
+    let build   = cellContainers[y][x].children[3];
+
+    base.clear();
+    animate.clear();
+
+    // Clear the building animations. 
+    build.removeChildren();
+
+    // Draw a the background. This will show up even when all the render 
+    // options are off. By default do a grey grid, but draw it white if 
+    // the cell is clicked as a basic highlight. 
+    if ((highlightCell != false) && (x == clickCell[0]) && (y == clickCell[1])) {
+        set_cell_bg(x, y, HIGHLIGHT_COLOR);
+    }
+    else {
+        set_cell_bg(x, y, GREY_BACKGROUND);
+    }
+    borderCount += 1; 
 
     // Draw energy border. 
-    base.beginFill(combine_color("#000000", "#65c9cf", currentCell["natural_energy"] / 10));
-    base.drawRoundedRect(x * cellSize, y * cellSize, cellSize - 2, cellSize - 2, cellRadius);
-    base.endFill();
-
+    if (renderOptions["energy"] || currCell['owner'] == 0) {
+        draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, borderCount * 2);
+        borderCount += 1;
+    }
     // Draw gold border. 
-    base.beginFill(combine_color("#000000", "#faf334", currentCell["natural_gold"] / 10));
-    base.drawRoundedRect(x * cellSize + 2, y * cellSize + 2, cellSize - 6, cellSize - 6, cellRadius - 2);
-    base.endFill();
-
+    if (renderOptions["gold"] || currCell['owner'] == 0) {
+        draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, borderCount * 2);
+        borderCount += 1;
+    }
     // Fill in owner color. Unowned corresponds to black. 
-    base.beginFill(id_to_color(currentCell["owner"]));
-    base.drawRoundedRect(x * cellSize + 4, y * cellSize + 4, cellSize - 10, cellSize - 10, cellRadius - 4);
-    base.endFill();
+    if (renderOptions["owner"]) {
+        draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, borderCount * 2);
+    } else {
+        draw_cell_rect(base, id_to_color(0), 1.0, x, y, borderCount * 2);
+    }
 
-    // TODO: Highlight clicked cell. 
+    if (renderOptions['building']) {
+        // Draw building. 
+        let currBuilding = currCell['building']; 
+        let prevBuilding = prevCell['building']; 
 
-    cellContainers[y][x].addChild( base );
+        // Setup any needed animated sprites. 
+        if (currBuilding["name"] != "empty") {
+            draw_building(x, y, currBuilding);
+            if (currBuilding['name'] != prevBuilding['name']) {
+                // Different building. 
+                draw_building_effect(x, y); 
+            }
+            else if (currBuilding['level'] != prevBuilding['level']) {
+                // Building is a higher level. 
+                draw_upgrade_effect(x, y); 
+            }
+        }
 
-    // Draw building
-    if (currentCell[ "building" ][ "name" ] != "empty") {
-        draw_building(x, y, currentCell["building"]["name"], currentCell["building"]["level"]);
-        if (prevCell["building"]["name"] == "empty") {
-            draw_building_effect(x, y);
-        } else if (prevCell["building"]["name"] == currentCell["building"]["name"] &&
-                prevCell["building"]["level"] != currentCell["building"]["level"]) {
-            draw_upgrade_effect(x, y)
+        if (currBuilding["name"] == "empty" && prevBuilding["name"] != "empty") {
+            draw_destroy_effect(x, y);
         }
     }
 }
 
-function draw_building(x, y, building_name, building_level) {
-    let file_name = building_name + building_level.toString();
-    if (animations[file_name]) {
-        let building_image = new PIXI.extras.AnimatedSprite(animations[file_name]);
-        building_image.x = x * cellSize;
-        building_image.y = y * cellSize;
-        building_image.animationSpeed = (animations[file_name].length) / 60;
-        building_image.play();
-        cellContainers[y][x].addChild(building_image);
+function set_cell_bg(x, y, color) {
+    cellBG = cellContainers[y][x].children[0];
+    cellBG.clear();
+    draw_cell_rect(cellBG, color, 1.0, x, y, 0); 
+}
+
+function animate_cell(x, y, currCell, prevCell, progress) {
+    if (renderOptions["owner"]) {
+        let capture_cell    = cellContainers[y][x].children[2]; 
+        let ownerShrink     = 0; 
+        let prevMap         = prevGameData['game_map'];
+        // Cell was captured the previous round. 
+
+        let borderCount = 1;
+        if (renderOptions['energy'] || currCell['owner'] == 0) {
+            borderCount += 1;
+        } 
+        if (renderOptions['gold'] || currCell['owner'] == 0) {
+            borderCount += 1;
+        }
+        ownerShrink = borderCount * 2
+
+        // Draw a shrinking rectangle of the old color.
+
+        // Shrinking direction depends on adjacency. 
+        // Start with all directions being 0. 
+        // We deliberately use integers intead of booleans since we will 
+        // abuse this fact when we calculate how to draw the animation. 
+        let shrinkDir   = Array(4).fill(0);
+        let adjPos      = get_adjacent_cells(x, y);
+        for (let pos of adjPos) {
+            if (prevMap[pos[1]][pos[0]]['owner'] == currCell['owner']) {
+                // The new owner of {currCell} owned this adjacent cell 
+                // during the previous frame. Identify adjacency. 
+                // Up, Down
+                if (pos[0] == x) { if (pos[1] > y) { shrinkDir[0] = 1; }
+                                   else            { shrinkDir[1] = 1; }
+                }
+                // Right, Left
+                else {             if (pos[0] > x) { shrinkDir[2] = 1; }
+                                   else            { shrinkDir[3] = 1; }
+                }
+            }
+        }
+        // We now know how to draw the capture. 
+        let drawSize = (cellSize - ownerShrink * 2); 
+
+        // TODO: There is probably a better way to do this calculation. 
+
+        // Compute the horizontal changes. 
+        let xScale  = shrinkDir[2] + shrinkDir[3];
+        let xLeft   = 0;
+        let xRight  = 0;
+        if (xScale != 0) {
+            xLeft   = progress * (shrinkDir[3] / xScale);
+            xRight  = progress * (shrinkDir[2] / xScale); 
+        }
+
+        // Compute the vertical changes. 
+        let yScale  = shrinkDir[0] + shrinkDir[1]; 
+        let yTop    = 0; 
+        let yBot    = 0; 
+        if (yScale != 0) {
+            yTop = progress * (shrinkDir[1] / yScale);
+            yBot = progress * (shrinkDir[0] / yScale); 
+        }
+
+        // No adjacent blocks is possible if we are just joining the game or 
+        // the game refreshed. In both cases, do no animation. 
+        if ((xScale != 0) || (yScale != 0)) {
+            capture_cell.clear();
+            capture_cell.beginFill(combine_color(id_to_color(prevCell['owner']), id_to_color(currCell['owner']), progress)); 
+            capture_cell.drawRect((cellSize * x) + ownerShrink + (drawSize * xLeft), 
+                          (cellSize * y) + ownerShrink + (drawSize * yTop), 
+                          drawSize * (1 - (xLeft + xRight)), 
+                          drawSize * (1 - (yTop + yBot))); 
+            capture_cell.endFill(); 
+        }
     }
+}
+
+function draw_building(x, y, building) {
+    draw_cell_building(x, y, building['name'] + building['level'].toString(), true);
 }
 
 function draw_building_effect(x, y) {
-    if (animations["buildEffect"]) {
-        let build_effect_image = new PIXI.extras.AnimatedSprite(animations["buildEffect"]);
-        build_effect_image.x = x * cellSize;
-        build_effect_image.y = y * cellSize;
-        build_effect_image.animationSpeed = animations["buildEffect"].length / 60;
-        build_effect_image.loop = false;
-        build_effect_image.play()
-        cellContainers[y][x].addChild(build_effect_image);
-    }
+    draw_cell_building(x, y, 'buildEffect', false);
 }
 
 function draw_upgrade_effect(x, y) {
-    if (animations["upgradeEffect"]) {
-        let upgrade_effect_image = new PIXI.extras.AnimatedSprite(animations["upgradeEffect"]);
-        upgrade_effect_image.x = x * cellSize;
-        upgrade_effect_image.y = y * cellSize;
-        upgrade_effect_image.animationSpeed = animations["upgradeEffect"].length / 60;
-        upgrade_effect_image.loop = false;
-        upgrade_effect_image.play()
-        cellContainers[y][x].addChild(upgrade_effect_image);
+    draw_cell_building(x, y, 'upgradeEffect', false); 
+}
+
+function draw_destroy_effect(x, y) {
+    draw_cell_building(x, y, 'destroyEffect', false);
+}
+
+function draw_cell_building(x, y, animation_name, loop) {
+    if (animations[animation_name]) {
+        let build_effect_image = new PIXI.extras.AnimatedSprite(animations[animation_name]);
+        build_effect_image.x = x * cellSize;
+        build_effect_image.y = y * cellSize;
+        build_effect_image.animationSpeed = animations[animation_name].length / 60;
+        build_effect_image.loop = loop;
+        build_effect_image.play(); 
+        // We inserted a building placeholder at index 3. 
+        cellContainers[y][x].children[3].addChild(build_effect_image);
     }
+}
+
+function draw_cell_rect(base, color, color_strength, x, y, shrink) {
+    base.beginFill(combine_color("#11162B", color, color_strength));
+    base.drawRect(x * cellSize + shrink, y * cellSize + shrink, 
+        cellSize - (shrink * 2), cellSize - (shrink * 2));
+    base.endFill();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -324,16 +530,27 @@ get_random_color = function() {
 }
 
 // UID 0 corresponds to unowned. It is set to black. 
-var ID_COLORS = [ 0x000000, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
-                  0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
-                  0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
-                  0xDDDDDD, ];
+// This is 20 colors inherited from colorfight, for colorfightII, we only need 
+// 8 colors + black. We added a couple more for extras
+// var ID_COLORS = [ 0x2A3252, 0xE6194B, 0x3Cb44B, 0xFFE119, 0x0082C8, 0xF58231,
+//                   0x911EB4, 0x46F0F0, 0xF032E6, 0xD2F53C, 0x008080, 0xAA6E28,
+//                   0x800000, 0xAAFFC3, 0x808000, 0x000080, 0xFABEBE, 0xE6BEFF, 
+//                   0xDDDDDD, ];
 
+var ID_COLORS = [0x2A3252, 0xE6194B, 0x3CB44B, 0xffe119, 0x4363D8, 0xF58231,
+                 0x42D4F4, 0xF032E6, 0x9A6324,
+                 0x800000, 0x469990, 0xFABEBE, 0x000075, 0xE6BEFF, 0x911EB4];
+
+// Convert a 6-hex value to a corresponding HTML RGB color code string. 
 function id_to_color(uid) {
     while (ID_COLORS.length <= uid) {
         ID_COLORS.push(get_random_color()); 
     }
-    return ID_COLORS[uid]; 
+    colorString = ID_COLORS[uid].toString(16); 
+
+    // HTML expects a '#' + hex. 
+    // Pad string to 6 hex values since javascript will remove leading zeroes. 
+    return '#' + '0'.repeat(6 - colorString.length) + colorString; 
 }
 
 function hex_combine( src, dst, per ) {
@@ -351,10 +568,40 @@ function combine_color( src, dst, per ) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Get data and start draw loop
 
-gameSocket.onmessage = function( msg ) {
-    prevGameData = gameData;
-    gameData     = JSON.parse( msg.data );
+// Play, get data from websockets
+if (gameRoomMode == 'play') {
+    gameSocket.onmessage = function( msg ) {
+        let tempGameData = JSON.parse(msg.data);
+        parse_game_data_and_draw(tempGameData);
+    }
+}
+
+// Parse gameData and draw the game, replay will use this function to draw
+function parse_game_data_and_draw(newData) {
+    newData = unpack_game_data(newData);
+    if (gameData && gameData['turn'] != newData['turn']) {
+        prevGameData = gameData
+    }
+
+    if (gameData && newData['info']['game_id'] != gameData['info']['game_id']) {
+        prevGameData = false;
+    }
+    
+    if (!gameData || 
+            newData['turn'] < gameData['turn'] || 
+            newData['info']['game_id'] != gameData['info']['game_id']) {
+        full_refresh();
+    }
+    // only update game_map if it's a new turn
+    if (gameData && 
+            gameData['info']['game_id'] == newData['info']['game_id'] && 
+            newData['turn'] == gameData['turn']) {
+        newData['game_map'] = gameData['game_map'];
+    }
+    gameData = newData;
+
     if (!prevGameData) {
         prevGameData = gameData;
     }
@@ -367,10 +614,61 @@ gameSocket.onmessage = function( msg ) {
     draw_selected_user_info(); 
 
     // Draw our own info or the join game info.
-    draw_self_user_info(); 
+    if (document.getElementById('user-info')) {
+        draw_self_user_info(); 
+    }
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
     flush_commands(); 
+}
+
+function unpack_game_data(game_data) {
+    let game_map = [];
+    let headers = game_data['game_map']['headers'];
+    for (let y = 0; y < game_data['game_map']['data'].length; y++) {
+        game_map.push([])
+        for (let x = 0; x < game_data['game_map']['data'][y].length; x++) {
+            game_map[y].push([]);
+            let data = game_data['game_map']['data'][y][x];
+            for (let hidx = 0; hidx < headers.length; hidx++) {
+                let header = headers[hidx];
+                if (header == 'building') {
+                    let building = {};
+                    try {
+                        building['name'] = letter_to_name(data[hidx][0]);
+                    } catch(exception) {
+                        console.log(exception)
+                        console.log(y)
+                        console.log(x)   
+                        console.log(data)
+                    }
+                    building['level'] = data[hidx][1];
+                    game_map[y][x]['building'] = building;
+                } else {
+                    game_map[y][x][header] = data[hidx];
+                }
+            }
+        }
+    }
+    game_data['game_map'] = game_map;
+    return game_data;
+}
+
+function letter_to_name(letter) {
+    switch(letter) {
+        case ' ':
+            return 'empty';
+        case 'g':
+            return 'gold_mine';
+        case 'h':
+            return 'home';
+        case 'e':
+            return 'energy_well';
+        case 'f':
+            return 'fortress';
+        default:
+            console.log(letter);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -397,7 +695,7 @@ function join_game_button() {
 
     if (actionChannel == null) {
         // Open a socket to the action channel. 
-        actionChannel = new WebSocket(gameProtocol + window.location.host + window.location.pathname + "/action_channel");
+        actionChannel = new WebSocket(gameProtocol + window.location.host + window.location.pathname.substr(0, window.location.pathname.lastIndexOf('/')) + "/action_channel");
         // Register ourselves when the socket finishes initializing. 
         actionChannel.onopen = function() {
             send_join_command(username, password); 
@@ -482,7 +780,7 @@ function queue_upgrade(x, y) {
 
 function draw_user_list() {
     const listHTML  = document.getElementById('user-list-info');
-    const users     = Object.entries(gameData['users']);
+    const users     = Object.entries(gameData['users']).sort((a, b) => b[1]['gold'] - a[1]['gold']);
 
     // Clear out all the old user rows. 
     clear_div(listHTML); 
@@ -498,10 +796,10 @@ function draw_user_list() {
         userDiv.onmouseover = user_hover_handler; 
         userDiv.onmouseout  = user_out_handler; 
 
-        userGold = create_p(user['gold'], {'color':'#555500'});
+        userGold = create_p(user['gold']);
         // Align the gold value to the right of the entry. 
         userGold.style.marginLeft = 'auto';
-        userGold.className += ' pl-1';
+        userGold.className += ' pl-1 user-gold-p';
         userDiv.appendChild(userGold);
 
         // Append the row to the list. 
@@ -511,7 +809,7 @@ function draw_user_list() {
         if (uid != users[users.length - 1][0]) {
             // Draw a bottom border. 
             userDiv.style.borderStyle = "solid";
-            userDiv.style.borderColor = "#000000";
+            userDiv.style.borderColor = "#C5D3D4";
             userDiv.style.borderWidth = "0px 0px 1px 0px";
         }
     }
@@ -520,7 +818,15 @@ function draw_user_list() {
 function update_selected_user() {
     // Hover has priority over click. 
     if (hoverUID == SENTINEL_UID) {
-        selectUID = clickUID; 
+        let hoveredCellInfo = false;
+        if (gameData && gameData['game_map']) {
+            hoveredCellInfo = gameData['game_map'][hoverCell[1]][hoverCell[0]];
+        }
+        if (hoveredCellInfo && hoveredCellInfo['owner'] != SENTINEL_UID) {
+            selectUID = hoveredCellInfo['owner'];
+        } else {
+            selectUID = clickUID; 
+        }
     }
     else {
         selectUID = hoverUID;
@@ -557,7 +863,7 @@ function create_user_box(uid, username) {
     // Create a box for the user color. 
     const userColorBox      = document.createElement('div');
     userColorBox.className  = 'user-color-box';
-    userColorBox.style.backgroundColor  = HTML_id_to_color(uid);
+    userColorBox.style.backgroundColor  = id_to_color(uid);
 
     // Construct the row. 
     userBoxDiv.appendChild(userColorBox);
@@ -600,7 +906,7 @@ function draw_self_user_info() {
     // Reset {selfUID} in case we are not in the game. 
     selfUID = SENTINEL_UID;
 
-    // The last time we tried to join, we use {selfUsername}. 
+    // The last time we tried to join, we used {selfUsername}. 
     // Check if it is located in the {gameData} we have received. 
     // This may clash with anybody else who has the same username or if a new 
     // game started and somebody stole our username, but these cases should be 
@@ -619,7 +925,12 @@ function draw_self_user_info() {
     else {
         // Hide the join game form. 
         joinHTML.style.display = 'none';
+
         // Insert the desired user info. 
+        selfHeader = create_p('USER INFO');
+        selfHeader.className = 'game-status-header';
+        selfHTML.appendChild(selfHeader);
+
         selfHTML.appendChild(create_user_info(selfUID, get_user_info(selfUID))); 
     }
 }
@@ -628,6 +939,11 @@ function draw_self_user_info() {
 function draw_selected_user_info() {
     const userHTML = document.getElementById('selected-user-info');
     clear_div(userHTML); 
+
+    userHeader = create_p('SELECTED USER INFO')
+    userHeader.className = 'game-status-header'
+    userHTML.appendChild(userHeader)
+
     userHTML.appendChild(create_user_info(selectUID, get_user_info(selectUID))); 
 }
 
@@ -679,12 +995,12 @@ function create_user_info(uid, user) {
                       goldTotal                     ], 
         [create_p('+'),                  
                       create_p('+')                 ], 
-        [create_p(user['energy_source'], {"color":"#008000"}), 
-                      create_p(user['gold_source'], {"color":"#008000"}) ], 
+        [create_p(user['energy_source'], {"class":"resource-incr-p"}), 
+                      create_p(user['gold_source'], {"class":"resource-incr-p"}) ], 
         [create_p('-'), 
                       create_p('-')                 ], 
-        [create_p(user['tax_amount'], {"color":"#E00000"}), 
-                      create_p(user['tax_amount'], {"color":"#E00000"}) ], 
+        [create_p(user['tax_amount'], {"class":"resource-decr-p"}), 
+                      create_p(user['tax_amount'], {"class":"resource-decr-p"}) ], 
     ]; 
 
     ///////////////////////////////////////////////////////
@@ -713,10 +1029,14 @@ function draw_selected_cell_info()
 
     if (gameData) {
         // Do not draw until we have game information. 
+        cellHeader = create_p('SELECTED CELL INFO')
+        cellHeader.className = 'game-status-header'
+        cellHTML.appendChild(cellHeader)
+
         if (gameRenderer.plugins.interaction.mouseOverRenderer) {
             cellHTML.appendChild(create_cell_info(hoverCell[0], hoverCell[1]));
         }
-        else {
+        else if (clickCell != false) {
             cellHTML.appendChild(create_cell_info(clickCell[0], clickCell[1])); 
         }
     }
@@ -819,6 +1139,8 @@ function create_cell_info(x, y) {
 
     let buttonDiv = document.createElement('div'); 
 
+    // TODO: Investigate why button clicks are inconsistent. 
+
     if (selfUID != SENTINEL_UID) {
         // We are in the game. Draw possible action buttons. 
         let selfData = gameData['users'][selfUID];
@@ -827,11 +1149,11 @@ function create_cell_info(x, y) {
             // We are the owner. We can either build or upgrade. 
             if (building['name'] == 'empty') {
                 // There is no building. Draw building choices. 
-                buttonDiv.appendChild(create_cost_button('Build Well', 
+                buttonDiv.appendChild(create_cell_button('Build Well', 
                     BASE_BUILD_COST, function(){queue_well(x, y);})); 
-                buttonDiv.appendChild(create_cost_button('Build Mine', 
+                buttonDiv.appendChild(create_cell_button('Build Mine', 
                     BASE_BUILD_COST, function(){queue_mine(x, y);})); 
-                buttonDiv.appendChild(create_cost_button('Build Fort', 
+                buttonDiv.appendChild(create_cell_button('Build Fort', 
                     BASE_BUILD_COST, function(){queue_fortress(x, y);})); 
             }
             else {
@@ -840,26 +1162,19 @@ function create_cell_info(x, y) {
                 if (upgradeLevel < GAME_MAX_LEVEL) {
                     // Can upgrade further. 
                     let canUpgrade  = true; 
-                    let upgradeCost = 0; 
                     if (building['name'] == 'home') {
                         // Home has a base cost of 1000. 
                         // Cost doubles per level. 
-                        upgradeCost = 1000 * Math.pow(2, upgradeLevel - 1); 
+                        let cost = 1000 * Math.pow(2, upgradeLevel - 1); 
+                        buttonDiv.appendChild(create_button(
+                            'Upgrade: (' + cost + ', ' + cost + ')', 
+                            function(){queue_upgrade(x, y);}));
                     }
-                    else {
-                        // We are not upgrading a home. 
-                        if (upgradeLevel >= selfData['tech_level']) {
-                            // Home not high enough level. 
-                            canUpgrade = false; 
-                        }
+                    else if (upgradeLevel < selfData['tech_level']) {
                         // Cost doubles per level. 
-                        upgradeCost = BASE_BUILD_COST * Math.pow(2, upgradeLevel);
-                    }
-
-                    if (canUpgrade) {
-                        // Enough resources. 
-                        buttonDiv.appendChild(create_cost_button('Upgrade', 
-                            upgradeCost, function(){queue_upgrade(x, y);})); 
+                        let cost = BASE_BUILD_COST * Math.pow(2, upgradeLevel);
+                        buttonDiv.appendChild(create_cell_button('Upgrade', 
+                            cost, function(){queue_upgrade(x, y);})); 
                     }
                 }
             }
@@ -882,9 +1197,9 @@ function create_cell_info(x, y) {
                 let selfEnergy  = selfData['energy'];
 
                 // Min attack. Just enough to capture. 
-                let minAttack   = attackCost + forceField;
+                let minAttack   = attackCost;
                 // Max attack. Enough to max out the force field. 
-                let maxAttack   = Math.max(minAttack, GAME_MAX_ATTACK); 
+                let maxAttack   = Math.max(minAttack + 300, GAME_MAX_ATTACK); 
 
                 // Create a min attack button. 
                 buttonDiv.appendChild(create_button('Min Attack: ' + minAttack, 
@@ -932,8 +1247,8 @@ function get_adjacent_cells(x, y) {
     return adjCells; 
 }
 
-function create_cost_button(name, cost, click_handler) {
-    return create_button(name + ': ' + '(' + cost + ', ' + cost + ')', click_handler); 
+function create_cell_button(name, cost, click_handler) {
+    return create_button(name + ': ' + '(0, ' + cost + ')', click_handler); 
 }
 
 function create_button(text, click_handler)
@@ -983,6 +1298,9 @@ function create_p(text, args = {}) {
     if ('img_src' in args) {
         add_img_before(node, args['img_src'])
     }
+    if ('class' in args) {
+        node.className = args['class'];
+    }
     if ('color' in args) {
         node.style.color = args['color'];
     }
@@ -1002,14 +1320,6 @@ function clear_div(divHTML) {
     while (divHTML.firstChild) {
         divHTML.firstChild.remove();
     }
-}
-
-// Convert a 6-hex value to a corresponding HTML RGB color code string. 
-function HTML_id_to_color(uid) {
-    colorString = id_to_color(uid).toString(16); 
-    // HTML expects a '#' + hex. 
-    // Pad string to 6 hex values since javascript will remove leading zeroes. 
-    return '#' + '0'.repeat(6 - colorString.length) + colorString; 
 }
 
 // Capitalize the first character in a string. 

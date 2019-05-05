@@ -1,9 +1,22 @@
+import time
+import re
+
 import aiohttp
 from aiohttp import web
 import asyncio
 import aiohttp_jinja2
+
 from colorfight import Colorfight
-import time
+from colorfight.config import get_config
+
+# =============================================================================
+#    Utility
+# =============================================================================
+
+def url_safe(s):
+    if re.search('[^0-9a-zA-Z-_.]', s):
+        return False
+    return True
 
 def clean_gameroom(request):
     delete_rooms = []
@@ -15,6 +28,9 @@ def clean_gameroom(request):
         if name in request.app['game']:
             request.app['game'].pop(name)
 
+# =============================================================================
+#    Web pages
+# =============================================================================
 
 @aiohttp_jinja2.template('index.html')
 async def index(request):
@@ -22,22 +38,34 @@ async def index(request):
 
 @aiohttp_jinja2.template('gameroom.html')
 async def game_room(request):
+    if 'replay' in request.url.path:
+        return {'allow_manual_mode': False, 'replay_mode': True}
+
     gameroom_id = request.match_info['gameroom_id']
-    return {'allow_manual_mode': request.app['game'][gameroom_id].allow_manual_mode}
+    if gameroom_id in request.app['game']:
+        return {'allow_manual_mode': request.app['game'][gameroom_id].allow_manual_mode, 
+                'replay_enable'    : request.app['game'][gameroom_id].replay_enable}
+    else:
+        return {}
 
 @aiohttp_jinja2.template('gameroom_list.html')
 async def gameroom_list(request):
     clean_gameroom(request)
-    headers = ['Name', 'Players', 'Turns']
+    headers = ['Name', 'Players', 'Turns', 'Lock']
     gamerooms = []
     for name, game in request.app['game'].items():
         gameroom = {}
         gameroom['Name'] = '{0}'.format(name)
         gameroom['Players'] = len(game.users)
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
-        gameroom['link'] = '/gameroom/{0}'.format(name)
+        gameroom['link'] = '/gameroom/{0}/play'.format(name)
+        gameroom['Lock'] = game.join_key != ""
         gamerooms.append(gameroom)
     return {'gamerooms': gamerooms, 'headers': headers}
+
+@aiohttp_jinja2.template('replay_list.html')
+async def replay_list(request):
+    return {}
 
 @aiohttp_jinja2.template('get_started.html')
 async def get_started(request):
@@ -55,12 +83,18 @@ async def api_documentation(request):
 async def contact(request):
     return {}
 
+# =============================================================================
+#    Websockets
+# =============================================================================
+
 async def game_channel(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    curr_turn = 0 
+    key_frame = 0 
     gameroom_id = request.match_info['gameroom_id']
+    game_id = None
+    last_send = time.time()
 
     if gameroom_id in request.app['game']:
         game = request.app['game'][gameroom_id]
@@ -68,9 +102,11 @@ async def game_channel(request):
         try:
             while True:
                 game.update()
-                if curr_turn != game.turn:
-                    curr_turn = game.turn
-                    await ws.send_json(game.get_game_info())
+                if key_frame != game.key_frame or game_id != game.game_id or time.time() - last_send > 30:
+                    game_id   = game.game_id
+                    key_frame = game.key_frame
+                    last_send = time.time()
+                    await ws.send_json(game.get_compressed_game_info())
                 await asyncio.sleep(0.04)
         finally:
             pass
@@ -101,10 +137,20 @@ async def action_channel(request):
             pass
     return ws
 
+# =============================================================================
+#    RPC to server
+# =============================================================================
+
 async def restart(request):
     data = await request.json()
-    gameroom_id = data['gameroom_id']
-    config = data['config']
+    if 'gameroom_id' in data:
+        gameroom_id = data['gameroom_id']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify room id"})
+    if 'config' in data:
+        config = data['config']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify config"})
 
     admin_password = ""
     if 'admin_password' in data:
@@ -125,20 +171,59 @@ async def restart(request):
     else:
         return web.json_response({"success": False, "err_msg": "You are not allowed to do this"})
 
+async def start_game(request):
+    data = await request.json()
+    if 'gameroom_id' in data:
+        gameroom_id = data['gameroom_id']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify room id"})
+
+    admin_password = ""
+    if 'admin_password' in data:
+        admin_password = data['admin_password']
+
+    if gameroom_id not in request.app['game']:
+        return web.json_response({"success": False, "err_msg": "No such room"})
+
+    game = request.app['game'][gameroom_id]
+
+    if admin_password == game.admin_password or admin_password == request.app['admin_password']:
+        game.start()
+    else:
+        return web.json_response({"success": False, "err_msg": "You are not allowed to do this"})
+
+    return web.json_response({"success": True})
+
 async def create_gameroom(request):
     data = await request.json()
     try:
         gameroom_id = data['gameroom_id']
+        if not url_safe(gameroom_id):
+            return web.json_response({"success": False, "err_msg": "You have illegal special characters in you gameroom id"})
+
         if gameroom_id in request.app['game']:
             return web.json_response({"success": False, "err_msg": "Same id exists"})
 
         if len(request.app['game']) >= 10:
             return web.json_response({"success": False, "err_msg": "Max room number reached"})
 
-        request.app['game'][gameroom_id] = Colorfight()
+        if 'config' in data:
+            # If it's an official game, we require a password
+            if data['config'] == 'official':
+                if 'admin_password' not in data:
+                    return web.json_response({"success": False, "err_msg": "You need to set a password for official game!"})
+            config = get_config(data['config'])
+        else:
+            config = get_config('default')
+
+        request.app['game'][gameroom_id] = Colorfight(config = config)
+        request.app['game'][gameroom_id].save_replay = lambda replay, data: request.app['firebase'].upload_replay(replay, data)
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
+
+        if 'join_key' in data:
+            request.app['game'][gameroom_id].join_key = data['join_key']
 
     except Exception as e:
         return web.json_response({"success": False, "err_msg": str(e)})
@@ -164,3 +249,20 @@ async def delete_gameroom(request):
         return web.json_response({"success": False, "err_msg": str(e)})
 
     return web.json_response({"success": True})
+
+async def download_replay(request):
+    gameroom_id = request.match_info['gameroom_id']
+    if gameroom_id not in request.app['game']:
+        return web.Response(status = 400)
+    else:
+        game = request.app['game'][gameroom_id]
+        if ((game.replay_enable == 'end' and game.turn == game.max_turn) or \
+                game.replay_enable == 'always'):
+            return web.Response(body = request.app['game'][gameroom_id].get_log())
+        else:
+            return web.Response(status = 400)
+
+
+
+    
+

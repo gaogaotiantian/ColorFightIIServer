@@ -75,11 +75,11 @@
 <h2 id="methods-of-colorfight">methods of <code>Colorfight</code></h2>
 <ul>
 <li>
-<p><code>.connect(url)</code> </p>
+<p><code>.connect(room)</code> </p>
 <blockquote>
-<p>Establish connection to the server. <code>url</code> is the url of the game room
+<p>Establish connection to the server. <code>room</code> is the name of the game room
   you want to join.</p>
-<p>You should always connect first. <code>game.connect("http://colorfightii.herokuapp.com/gameroom/public")</code> is the default way to connect to the default
+<p>You should always connect first. <code>game.connect(room = "public")</code> is the default way to connect to the default
 public room</p>
 </blockquote>
 </li>
@@ -93,12 +93,14 @@ public room</p>
 </blockquote>
 </li>
 <li>
-<p><code>.register(username, password)</code></p>
+<p><code>.register(username, password, join_key = "")</code></p>
 <blockquote>
 <p>Register to the game with <code>username</code> and <code>password</code>. Duplicate 
   <code>username</code> is not allowed. If you already joined the game and somehow
   disconnected. Using the same <code>username</code> and <code>password</code> will allow
-  you to continue with previous account. Returns <code>True</code> if success.</p>
+  you to continue with previous account. <code>join_key</code> is required if the
+  gameroom is locked, otherwise you do not need to specify the argument. 
+  Returns <code>True</code> if success.</p>
 <p>This should happen after you connect to the server and before you start
   you game loop.</p>
 </blockquote>
@@ -147,6 +149,9 @@ public room</p>
   to the server in a single round, the latter one will overlap the former
   ones. Only the last command list the server receives is valid. In theory,
   you should only send one command list every round. </p>
+<p>Returns a <code>dict</code> from the server of whether the command is taken.
+  <code>{"success": &lt;boolean&gt;, "err_msg": &lt;str&gt;}</code>. <code>err_msg</code> only exists
+  if <code>success</code> is <code>False</code>.</p>
 <p>All the commands(attack, build, upgrade) above will only return a 
   <code>string</code> representing the command. So * nothing will happen * if you
   do not send the commands to the server. 
@@ -198,12 +203,6 @@ public room</p>
 </blockquote>
 </li>
 <li>
-<p><code>tax_level</code></p>
-<blockquote>
-<p>The tax_level of the user.</p>
-</blockquote>
-</li>
-<li>
 <p><code>tax_amount</code></p>
 <blockquote>
 <p>The amount of energy and gold the user will be taxed.</p>
@@ -236,7 +235,7 @@ public room</p>
 <h2 id="methods-of-gamemap">methods of <code>GameMap</code></h2>
 <ul>
 <li>
-<p><code>game_map[position]</code></p>
+<p><code>game_map[position]</code> (<code>game_map.get_cell(position)</code> in Java)</p>
 <blockquote>
 <p>Get the <code>MapCell</code> object on <code>position</code>. <code>position</code> should be
   a <code>Position</code> object or a <code>tuple</code> <code>(x, y)</code>.</p>
@@ -302,6 +301,18 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 </li>
 <li>
 <p><code>force_field</code></p>
+</li>
+<li>
+<p><code>is_empty</code></p>
+<blockquote>
+<p>Whether the building is empty</p>
+</blockquote>
+</li>
+<li>
+<p><code>is_home</code></p>
+<blockquote>
+<p>Whether the building is home </p>
+</blockquote>
 </li>
 </ul>
 <h1 id="building">Building</h1>
