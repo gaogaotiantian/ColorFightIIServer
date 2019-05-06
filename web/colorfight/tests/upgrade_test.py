@@ -115,7 +115,7 @@ def test_build_over_maximum_tech_level():
         assert (len(info['error'][uid]) == 0)
         cell = info['game_map'][y][x]
         assert (cell['building']['level'] == i+2)
-        assert [info['users'][uid]['tech_level'] == i+2]
+        assert (info['users'][uid]['tech_level'] == i+2)
 
     result = upgrade(game, uid, x, y)
     assert (result['success'])

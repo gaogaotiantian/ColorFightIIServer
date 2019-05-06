@@ -21,7 +21,6 @@ def test_game_restart():
         print(e)
         assert (False)
 
-
 def test_register_with_same_username_and_password():
     try:
         game = Colorfight()
@@ -31,6 +30,34 @@ def test_register_with_same_username_and_password():
         assert (uid > 0)
         info = game.get_game_info()
         assert(len(info["users"]) == 1)
+    except Exception as e:
+        print(e)
+        assert (False)
+
+def test_empty_username():
+    try:
+        game = Colorfight()
+        try:
+            uid = join(game, '', 'a')
+            assert (False)
+        except:
+            pass
+        info = game.get_game_info()
+        assert(len(info["users"]) == 0)
+    except Exception as e:
+        print(e)
+        assert (False)
+
+def test_long_username():
+    try:
+        game = Colorfight()
+        try:
+            uid = join(game, '123456789012356', 'a')
+            assert (False)
+        except:
+            pass
+        info = game.get_game_info()
+        assert(len(info["users"]) == 0)
     except Exception as e:
         print(e)
         assert (False)
@@ -65,6 +92,17 @@ def test_initial_user_info():
         assert(not user['dead'])
         assert(user['gold_source'] == 10)
         assert(user['energy_source'] == 10)
+    except Exception as e:
+        print(e)
+        assert (False)
+
+def test_maximum_user_number():
+    try:
+        game = Colorfight()
+        for i in range (8):
+            username = "exampleAI" + str(i)
+            uid = join(game,username,'a')
+            game.update(True)
     except Exception as e:
         print(e)
         assert (False)
