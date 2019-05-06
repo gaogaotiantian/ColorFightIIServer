@@ -15,7 +15,7 @@ def test_join():
     try:
         game = Colorfight()
         uid = join(game, 'a', 'a')
-        assert(uid > 0)
+        assert(int(uid) > 0)
         info = game.get_game_info()
         assert(uid in info['users'])
         user = info['users'][uid]
@@ -102,7 +102,7 @@ def test_build():
     game.update(True)
     info = game.get_game_info()
     cell = info['game_map'][attack_y][x]
-    assert(not info['error'][1])
+    assert(not info['error']["1"])
     assert(cell['owner'] == uid)
     assert(cell['building']['name'] == 'gold_mine')
     assert(cell['gold'] == cell['natural_gold'] * 2)

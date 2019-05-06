@@ -8,7 +8,7 @@ def test_game_restart():
     try:
         game = Colorfight()
         uid = join(game, 'a', 'a')
-        assert (uid > 0)
+        assert (int(uid) > 0)
         game.update(True)
         info = game.get_game_info()
         assert(len(info['users']) == 1)
@@ -25,9 +25,9 @@ def test_register_with_same_username_and_password():
     try:
         game = Colorfight()
         uid = join(game, 'a', 'a')
-        assert (uid > 0)
+        assert (int(uid) > 0)
         uid = join(game, 'a', 'a')
-        assert (uid > 0)
+        assert (int(uid) > 0)
         info = game.get_game_info()
         assert(len(info["users"]) == 1)
     except Exception as e:
@@ -66,7 +66,7 @@ def test_register_with_same_username_different_password():
     try:
         game = Colorfight()
         uid = join(game, 'a', 'a')
-        assert (uid > 0)
+        assert (int(uid) > 0)
         try:
             uid = join(game, 'a', 'ab')
             assert(False)
@@ -82,7 +82,7 @@ def test_initial_user_info():
     try:
         game = Colorfight()
         uid = join(game, 'a', 'a')
-        assert (uid > 0)
+        assert (int(uid) > 0)
         info = game.get_game_info()
         user = info['users'][uid]
         assert (user['uid'] == uid)

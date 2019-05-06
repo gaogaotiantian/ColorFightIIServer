@@ -343,6 +343,7 @@ class Colorfight:
 
         if self.allow_join_after_start or self.turn == 0:
             for uid in range(1, len(self.users) + 2):
+                uid = str(uid)
                 if uid not in self.users:
                     user = User(uid, username, password)
                     if self.game_map.born(user):

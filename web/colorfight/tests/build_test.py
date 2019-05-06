@@ -18,7 +18,7 @@ def test_build_on_base():
     info = game.get_game_info()
     assert(info['error'])
     expected_err_msg = 'b ' + str(x) + ' ' + str(y) + ' ' + 'g failed, There is a building on this cell already.'
-    assert(info['error'][1][0] == expected_err_msg)
+    assert(info['error']["1"][0] == expected_err_msg)
 
 def test_build_without_enough_resource():
     game = Colorfight()
@@ -63,7 +63,7 @@ def test_invalid_building_type():
     info = game.get_game_info()
     assert(info['error'])
     expected_err_msg = 'b ' + str(x) + ' ' + str(attack_y) + ' ' + 'r failed, Not a correct building.'
-    assert(info['error'][1][0] == expected_err_msg)
+    assert(info['error']['1'][0] == expected_err_msg)
 
 def test_build_on_invalid_cell():
     game = Colorfight()
@@ -83,7 +83,7 @@ def test_build_on_invalid_cell():
     info = game.get_game_info()
     assert (info['error'])
     expected_err_msg = 'b ' + str(x) + ' ' + str(new_y) + ' ' + 'g failed, You need to build on your own cell.'
-    assert (info['error'][1][0] == expected_err_msg)
+    assert (info['error']['1'][0] == expected_err_msg)
 
     result = build(game, uid, -1, -1, BLD_GOLD_MINE)
     assert(result["success"])

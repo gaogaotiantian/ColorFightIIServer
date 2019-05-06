@@ -53,7 +53,7 @@ def test_upgrade_fortress_with_lower_homelevel():
     game.update(True)
     info = game.get_game_info()
     cell = info['game_map'][attack_y][x]
-    assert (not info['error'][1])
+    assert (not info['error']['1'])
     assert (cell['owner'] == uid)
     assert (cell['building']['name'] == 'fortress')
 
