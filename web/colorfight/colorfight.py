@@ -343,7 +343,6 @@ class Colorfight:
 
         if self.allow_join_after_start or self.turn == 0:
             for uid in range(1, len(self.users) + 2):
-                uid = str(uid)
                 if uid not in self.users:
                     user = User(uid, username, password)
                     if self.game_map.born(user):
@@ -450,13 +449,18 @@ class Colorfight:
                 game_map["data"][y][x] = [temp_info[key] for key in game_map['headers']]
         info['game_map'] = game_map
 
+        users = {}
+        for uid in info['users']:
+            users[str(uid)] = info['users'][uid]
+        info['users'] = users
+
     def get_game_info(self):
         return {\
                 "turn": self.turn, \
                 "info": self.info(), \
                 "error": self.errors, \
                 "game_map":self.game_map.info(), \
-                "users": {str(user.uid): user.info() for user in self.users.values()} \
+                "users": {user.uid: user.info() for user in self.users.values()} \
         }
 
     def get_compressed_game_info(self):
