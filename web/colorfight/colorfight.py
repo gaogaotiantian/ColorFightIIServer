@@ -4,6 +4,8 @@ import sys
 import gzip
 import copy
 
+import orjson
+
 from .game_map import GameMap
 from .user import User
 from .position import Position
@@ -453,7 +455,7 @@ class Colorfight:
                 "info": self.info(), \
                 "error": self.errors, \
                 "game_map":self.game_map.info(), \
-                "users": {user.uid: user.info() for user in self.users.values()} \
+                "users": {str(user.uid): user.info() for user in self.users.values()} \
         }
 
     def get_compressed_game_info(self):
@@ -494,5 +496,6 @@ class Colorfight:
     def get_log(self):
         if self.log_turn != self.turn:
             self.log_turn = self.turn
-            self.compressed_log = gzip.compress(json.dumps(self.log, separators=[',',':']).encode('utf-8'), compresslevel = 4)
+            log_bytes = orjson.dumps(self.log)
+            self.compressed_log = gzip.compress(log_bytes, compresslevel = 5)
         return self.compressed_log

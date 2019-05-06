@@ -218,6 +218,7 @@ async def create_gameroom(request):
 
         request.app['game'][gameroom_id] = Colorfight(config = config)
         request.app['game'][gameroom_id].save_replay = lambda replay, data: request.app['firebase'].upload_replay(replay, data)
+        request.app['game'][gameroom_id].replay_lock = asyncio.Lock(loop = asyncio.get_event_loop())
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
@@ -258,7 +259,14 @@ async def download_replay(request):
         game = request.app['game'][gameroom_id]
         if ((game.replay_enable == 'end' and game.turn == game.max_turn) or \
                 game.replay_enable == 'always'):
-            return web.Response(body = request.app['game'][gameroom_id].get_log())
+            await game.replay_lock.acquire()
+            try:
+                loop = asyncio.get_event_loop()
+                log = await loop.run_in_executor(request.app['thread_executor'], 
+                        request.app['game'][gameroom_id].get_log)
+            finally:
+                game.replay_lock.release()
+            return web.Response(body = log)
         else:
             return web.Response(status = 400)
 

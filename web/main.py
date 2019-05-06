@@ -1,8 +1,10 @@
 import os
 import pathlib 
+import concurrent.futures
 
 from aiohttp import web
 import aiohttp_jinja2
+import asyncio
 import jinja2
 
 from routes import setup_routes, setup_static_routes
@@ -19,9 +21,12 @@ async def init_app():
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(PROJECT_ROOT / 'templates')))
     app['game'] = {}
     app['game']['public'] = Colorfight()
+    app['game']['public'].replay_lock = asyncio.Lock(loop = asyncio.get_event_loop())
     app['game_sockets'] = []
     app['admin_password'] = os.getenv('ADMIN_PASSWORD', "")
     app['firebase'] = Firebase()
+    app['process_executor'] = concurrent.futures.ProcessPoolExecutor()
+    app['thread_executor'] = concurrent.futures.ThreadPoolExecutor()
     setup_routes(app)
     setup_static_routes(app)
     
