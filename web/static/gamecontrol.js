@@ -163,8 +163,12 @@ $( function() {
     })
 
     // Render callbacks
-    $( '#resource-render-button' ).click( function() {
-        change_render_options({"gold": "toggle", "energy": "toggle"});
+    $( '#gold-render-button' ).click( function() {
+        change_render_options({"gold": "toggle"});
+    })
+
+    $( '#energy-render-button' ).click( function() {
+        change_render_options({"energy": "toggle"});
     })
 
     $( '#building-render-button' ).click( function() {

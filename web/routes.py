@@ -10,9 +10,9 @@ def setup_routes(app):
     app.router.add_get('/', index)
     app.router.add_get('/gameroom', gameroom_list)
     app.router.add_get('/getstarted', get_started)
-    app.router.add_get('/document', game_rules)
-    app.router.add_get('/document/game_rules', game_rules)
-    app.router.add_get('/document/api', api_documentation)
+    app.router.add_get('/docs', game_rules)
+    app.router.add_get('/docs/game_rules', game_rules)
+    app.router.add_get('/docs/api', api_documentation)
     app.router.add_get('/contact', contact)
 
     # RPC

@@ -83,7 +83,7 @@ let forceRefresh  = false;
 let renderOptions = {
     "energy"  : true,
     "gold"    : true,
-    "owner"   : true,
+    "owner"   : "normal",
     "building": true,
 };
 
@@ -323,7 +323,12 @@ function change_render_options(options) {
     for (key in options) {
         if (key in renderOptions) {
             if (options[key] == "toggle") {
-                renderOptions[key] = !renderOptions[key];
+                if (key == "owner") {
+                    const ownerOptions = ["normal", "extra", "none"];
+                    renderOptions[key] = ownerOptions[((ownerOptions.indexOf(renderOptions[key]) + 1) % ownerOptions.length)];
+                } else {
+                    renderOptions[key] = !renderOptions[key];
+                }
             } else {
                 renderOptions[key] = options[key];
             }
@@ -362,17 +367,17 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     borderCount += 1; 
 
     // Draw energy border. 
-    if (renderOptions["energy"] || currCell['owner'] == 0) {
+    if (renderOptions["energy"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
         draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, borderCount * 2);
         borderCount += 1;
     }
     // Draw gold border. 
-    if (renderOptions["gold"] || currCell['owner'] == 0) {
+    if (renderOptions["gold"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
         draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, borderCount * 2);
         borderCount += 1;
     }
     // Fill in owner color. Unowned corresponds to black. 
-    if (renderOptions["owner"]) {
+    if (renderOptions["owner"] != "none") {
         draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, borderCount * 2);
     } else {
         draw_cell_rect(base, id_to_color(0), 1.0, x, y, borderCount * 2);
@@ -409,17 +414,17 @@ function set_cell_bg(x, y, color) {
 }
 
 function animate_cell(x, y, currCell, prevCell, progress) {
-    if (renderOptions["owner"]) {
+    if (renderOptions['owner'] != "none") {
         let capture_cell    = cellContainers[y][x].children[2]; 
         let ownerShrink     = 0; 
         let prevMap         = prevGameData['game_map'];
         // Cell was captured the previous round. 
 
         let borderCount = 1;
-        if (renderOptions['energy'] || currCell['owner'] == 0) {
+        if (renderOptions["energy"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
             borderCount += 1;
         } 
-        if (renderOptions['gold'] || currCell['owner'] == 0) {
+        if (renderOptions["gold"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
             borderCount += 1;
         }
         ownerShrink = borderCount * 2
