@@ -17,13 +17,23 @@ def test_get_game_info_speed():
         print(e)
         assert(False)
 
+def test_create():
+    try:
+        start_time = time.time()
+        game = Colorfight()
+        end_time = time.time()
+        assert(end_time - start_time < 0.1)
+    except Exception as e:
+        print(e)
+        assert(False)
+
 def test_update():
     game = Colorfight()
     info = game.get_game_info()
     start_time = time.time()
     game.update(force = True)
     end_time = time.time()
-    assert(end_time - start_time < 0.05)
+    assert(end_time - start_time < 0.02)
 
 def test_update_with_maximum_players():
     game = Colorfight()
@@ -36,7 +46,7 @@ def test_update_with_maximum_players():
     start_time = time.time()
     game.update(force=True)
     end_time = time.time()
-    assert(end_time - start_time < 0.05)
+    assert(end_time - start_time < 0.02)
 
 def test_update_with_half_map_full():
     game = Colorfight()
@@ -56,4 +66,4 @@ def test_update_with_half_map_full():
     start_time = time.time()
     game.update(force=True)
     end_time = time.time()
-    assert (end_time - start_time < 0.05)
+    assert (end_time - start_time < 0.02)
