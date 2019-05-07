@@ -1063,7 +1063,7 @@ function create_cell_info(x, y) {
     // Level Building
     // energy   (base)
     // gold     (base)
-    // attack_cost + (force_field - % siege loss)
+    // attack_cost (force_field)
     // 
     // if attackable: min attack, max attack, other attack
     // if buildable : mine or well (cost, old -> new)
@@ -1125,28 +1125,7 @@ function create_cell_info(x, y) {
     const forceField = cell['force_field'];
     if (forceField > 0) {
         // Put the force field in parens. 
-        costString += ' (';
-        costString += String(forceField); 
-
-        // Iterate through adjacent looking for sieging. 
-        let siegeCount  = 0;
-        let adjPos      = get_adjacent_cells(x, y);
-        for (let pos of adjPos) {
-            let adjOwner = cellMap[pos[1]][pos[0]]['owner'];
-            if ((adjOwner != 0) && (cell['owner'] != adjOwner)) {
-                siegeCount += 1; 
-            }
-        }
-
-        if (siegeCount > 0) {
-            // Subtract the siege percent.
-            costString += ' - ';
-            costString += String(siegeCount * GAME_SIEGE_PERCENT);
-            costString += '%';
-        }
-
-        // Close out the parens. 
-        costString += ')';
+        costString += ' (' + String(forceField) + ')';
     }
 
     ////////////////////////////////////////////////////////////////////////////
