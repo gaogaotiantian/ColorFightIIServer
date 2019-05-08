@@ -66,45 +66,49 @@ class Colorfight:
             /param data: dict for all possible parameters
         """
         try:
+            new_config = {}
             for field in data:
                 val = data[field]
                 if field == "max_turn":
-                    if 200 <= val <= 2000:
-                        self.max_turn = val
+                    if type(val) == int and 200 <= val <= 2000:
+                        new_config["max_turn"] = val
                     else:
                         return False, "max_turn value invalid"
                 elif field == "round_time":
-                    if 0.2 <= val <= 20:
-                        self.round_time = val
+                    if 0.2 <= float(val) <= 20:
+                        new_config["round_time"] = float(val)
                     else:
-                        return False, "rount_time value invalid"
+                        return False, "round_time value invalid"
                 elif field == "first_round_time":
-                    if val in ["full", "never"] or 0 <= val <= 60:
-                        self.first_round_time = val
+                    if val in ["full", "never"] or 0 <= float(val) <= 60:
+                        new_config["first_round_time"] = val
                     else:
                         return False, "first_round_time value invalid"
                 elif field == "finish_time":
-                    if 0 <= val <= 60:
-                        self.finish_time = val
+                    if 0 <= float(val) <= 60:
+                        new_config["finish_time"] = float(val)
                     else:
                         return False, "finish_time value invalid"
                 elif field == "allow_join_after_start":
                     if val == True or val == False:
-                        self.allow_join_after_start = val
+                        new_config["allow_join_after_start"] = val
                     else:
                         return False, "allow_join_after_start value invalid"
                 elif field == "allow_manual_mode":
                     if val == True or val == False:
-                        self.allow_manual_mode = val
+                        new_config["allow_manual_mode"] = val
                     else:
                         return False, "allow_manual_mode value invalid"
                 elif field == "replay_enable":
                     if val in ["always", "never", "end"]:
-                        self.replay_enable = val
+                        new_config["replay_enable"] = val
                     else:
                         return False, "replay_enable value invalid"
                 else:
                     return False, "Invalid field {}".format(field)
+            # All data are valid
+            for key in new_config:
+                setattr(self, key, new_config[key])
         except Exception as e:
             return False, "Invalid data, {}".format(e)
 
