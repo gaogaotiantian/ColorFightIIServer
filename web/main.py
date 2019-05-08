@@ -6,6 +6,7 @@ from aiohttp import web
 import aiohttp_jinja2
 import asyncio
 import jinja2
+import uvloop
 
 from routes import setup_routes, setup_static_routes
 
@@ -33,6 +34,7 @@ async def init_app():
     return app
 
 def main():
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     app = init_app()
     web.run_app(app, port = os.getenv('PORT', 5000))
 
