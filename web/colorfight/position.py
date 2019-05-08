@@ -57,9 +57,11 @@ class Position:
 
     def get_surrounding_cardinals_tuple(self):
         # This is faster than creating all the Position objects
+        ret = []
         for d in Direction.all_cardinals:
             if 0 <= self.x + d[0] < GAME_WIDTH and 0 <= self.y + d[1] < GAME_HEIGHT:
-                yield (self.x + d[0], self.y + d[1])
+                ret.append((self.x + d[0], self.y + d[1]))
+        return ret
 
     def info(self):
         return (self.x, self.y)
