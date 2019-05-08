@@ -11,6 +11,15 @@ def test_create_instance():
         print(e)
         assert(False)
 
+def test_non_symmetric_instance():
+    try:
+        game = Colorfight(symmetric = False)
+        uid = join(game, 'a', 'a')
+        assert(uid > 0)
+    except Exception as e:
+        print(e)
+        assert(False)
+
 def test_join():
     try:
         game = Colorfight()
@@ -124,3 +133,14 @@ def test_upgrade():
     cell = info['game_map'][y][x]
     assert(cell['building']['level'] == 2)
     assert(info['users'][uid]['tech_level'] == 2)
+
+def test_game_map_full():
+    game = Colorfight()
+    for i in range(8):
+        uid = join(game, '{}'.format(i), 'a')
+        assert(uid > 0)
+    try:
+        uid = join(game, 'should_fail', 'a')
+        assert False, "Should fail to join"
+    except Exception as e:
+        pass

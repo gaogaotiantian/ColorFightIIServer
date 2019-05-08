@@ -1,6 +1,8 @@
 from ..colorfight import Colorfight
 from ..constants import GAME_WIDTH, GAME_HEIGHT
 from ..constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_FORTRESS
+from ..building import Fortress
+from ..position import Position
 from .util import *
 import pytest
 
@@ -102,3 +104,37 @@ def test_upgrade_fortress():
     assert (not len(info['error'][uid]))
     cell = info['game_map'][attack_y][x]
     assert (cell['building']['level'] == 3)
+
+def test_fortress_decr():
+    game = Colorfight()
+    attack_uid = join(game, 'a', 'a')
+    defense_uid = join(game, 'b', 'b')
+
+    game.update(True)
+    info = game.get_game_info()
+
+    game.users[attack_uid].energy = 100000
+    game.users[attack_uid].gold = 100000
+    game.users[defense_uid].energy = 100000
+    game.users[defense_uid].gold = 100000
+    home_x, home_y = info['users'][defense_uid]['cells'][0]
+    for pos in Position(home_x, home_y).get_surrounding_cardinals():
+        if game.game_map[pos].owner == 0:
+            cell_x = pos.x
+            cell_y = pos.y
+            attack(game, defense_uid, cell_x, cell_y, 2000)
+            break
+
+    game.update(True)
+    info = game.get_game_info()
+
+    total_cell_num = 0
+    for pos in Position(cell_x, cell_y).get_surrounding_cardinals():
+        game.game_map[pos].owner = attack_uid
+        game.game_map[pos].building = Fortress()
+        total_cell_num += 1
+
+    game.update(True)
+    info = game.get_game_info()
+
+    assert(info['game_map'][cell_y][cell_x]['force_field'] == 1000 - total_cell_num * 20 )

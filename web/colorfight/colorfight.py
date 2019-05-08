@@ -15,7 +15,7 @@ from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
-    def __init__(self, config = None):
+    def __init__(self, config = None, symmetric = True):
         self.turn = 0
 
         # Setups
@@ -32,7 +32,7 @@ class Colorfight:
         self.join_key = ""
         self.finish_time = 0
         self.key_frame = 0
-        self.symmetric = True
+        self.symmetric = symmetric
         self.game_id   = 0
         self.last_update = time.time()
         self.users = {}
@@ -122,7 +122,7 @@ class Colorfight:
         self._prev_game_info = None
         self._game_info = None
         self.start_count_down = self.first_round_time
-        self.game_map = GameMap(self.height, self.width) 
+        self.game_map = GameMap(self.height, self.width, symmetric = self.symmetric) 
         self.last_update = time.time() 
         self.game_id = str(int(self.last_update * 1000))
         self.key_frame = 1
