@@ -324,6 +324,9 @@ class Colorfight:
         command
     '''
     def register(self, uid, username, password, join_key = ""):
+        if type(username) != str or type(password) != str:
+            return False, "Username and Password needs to be strings"
+
         if len(username) >= 15:
             return False, "Username can't exceed 15 characters."
 
