@@ -1,200 +1,252 @@
 <h1 id="colorfightii-rules">ColorfightII Rules</h1>
 <h2 id="overview">Overview</h2>
-<p>ColorfightII is a round based game where players try to expand their territory 
-and collect resource to win the game. </p>
+<p>ColorfightII is a round based game where players try to expand their territory and collect resources to win the game. </p>
 <p>There are two kinds of resources:</p>
 <ul>
 <li>Energy</li>
 <li>Gold</li>
 </ul>
-<p>Each player starts with a certain amount of energy and a home cell. The player
-will get energy and gold from the cells they occupy. Each cell provides 
-different amount of energy and gold per round.</p>
-<p>Players use energy to attack and occupy other cells to expand their territory,
-therefore collect more gold and energy source.</p>
-<p>Players use gold to build different buildings on their own cells to help the
-game process.</p>
-<p>At the end of the game, the player with the highest amount of gold wins.</p>
+<p>Each player starts with an initial amount of energy and a home cell. 
+Each cell controlled by the player during a round will provide gold and energy. </p>
+<p>Players can use energy to attack and occupy other cells to expand their territory 
+and gain more gold and energy per turn. </p>
+<p>Players can use gold to build different buildings on their own cells to enhance their effects.</p>
+<p>At the end of the game, the player with the most gold wins.</p>
 <h2 id="game-flow">Game Flow</h2>
 <h3 id="preparation">Preparation</h3>
-<p>In the beginning of each game, a 30x30 map will be generated. Each cell of the map
-will have <code>natural_cost</code>, <code>natural_energy</code> and <code>natural_gold</code> 
-attributes. </p>
+<p>In the beginning of each game, a 30x30 map will be generated. </p>
 <h3 id="register">Register</h3>
-<p>During anytime of the game, a player is allowed to register to the
-game. The player will be assigned to a cell, this cell will be the home of
-the player. A player will have 1000 <code>energy</code> when register to the game.</p>
-<h3 id="command">Command</h3>
-<p>For each round, a player could give a list of valid commands. The possible 
-commands are:</p>
+<p>At the beginning of the game players can register to join the game. 
+Each player that regisers will be assigned a <code>Home</code> cell and start with 1000 <code>energy</code>.</p>
+<h3 id="cells">Cells</h3>
+<p>Each cell of the map will have: </p>
+<ul>
+<li><code>natural_energy</code> Base energy generated per turn.</li>
+<li><code>natural_gold</code> Base gold generated per turn.</li>
+<li><code>natural_cost</code> Base energy cost to capture.</li>
+</ul>
+<h3 id="commands">Commands</h3>
+<p>During each round a player can give a list of commands. 
+The possible commands are:</p>
 <ul>
 <li>attack</li>
 <li>build</li>
 <li>upgrade</li>
 </ul>
-<h4 id="attack">attack</h4>
-<p>Players could use a certain amount of energy to attack a cell that's adjacent
-to their already occupied cells. </p>
-<p>To successfully attack(or occupy) the cell, the player has to spend at least
-<code>attack_cost</code> amount of energy.</p>
-<p>If multiple players attack one cell in the same round, the player spends the 
-most energy will be the attacker and the equivalent attack energy will be
-<code>max_energy * 2 - total_energy</code> where <code>max_energy</code> is the maximum energy
-a player spends and the <code>total_energy</code> will be all the energy spent on this
-cell. </p>
-<p>In this case, the equivalent attack energy has to be at least <code>attack_cost</code>
-to successfully attack the cell. </p>
-<p>The more energy the player uses to attack the cell, the more <code>force_field</code>
-will be generated after the cell is occupied so it is harder for other players 
-to take it back. The generated <code>force_field</code> will be
- <code>(equivalent_energy - attack_cost) * 2</code>. The upper limit of <code>force_field</code> is 1000.</p>
-<p>No matter whether the attack is successful, all the energy will be spent.</p>
+<h4 id="attack">Attack</h4>
+<p>Players can attack cells adjacent to any of their owned cells in the four cardinal directions (up, down, left, right) by using energy. </p>
+<p>Each cell has a <code>natural_cost</code> and a <code>force_field</code>. </p>
+<p>To capture a cell, at least <code>attack_cost</code> energy must be spent. </p>
+<ul>
+<li><code>attack_cost == natural_cost + force_field</code></li>
+</ul>
+<p>Any energy used in an attack will be consumed even if the attack fails to capture the cell. </p>
+<p>If multiple players attack a cell in the same round, only the player who spends the most energy may capture the cell. 
+However, in order for the attack to succeed, the player who spends the most energy must spend more than all other attackers combined and still have enough left over to actually capture the cell. </p>
+<p>In mathematical terms, the <code>net_attack</code> is calculated as: </p>
+<ul>
+<li><code>net_attack == max_energy * 2 - total_energy</code></li>
+</ul>
+<p>Or equivalently as:</p>
+<ul>
+<li><code>net_attack == max_energy - all_other_attackers</code> </li>
+</ul>
+<p><code>net_attack</code> must be greater than <code>attack_cost</code> to capture the cell. </p>
+<p>Note that players can attack their own cells as a strategy to protect them. </p>
 <blockquote>
-<p>For example, assume the <code>attack_cost</code> of a cell is <code>100</code>.</p>
-<p>Case 1, if player A spent 50 energy to attack it, the attack would fail and 
-  player A will lose 50 energy(which is not a wise move). </p>
-<p>Case 2, if player A spent 150 energy to attack it, the attack would succeed and
-  player A will occupy the cell with 150 energy spent. The cell will also have 100
-  <code>force_field</code> because 50 extra energy is spent to attack it, 
-so the <code>attack_cost</code> will be 200. </p>
-<p>Case 3, if player A spent 150 energy and player B spent 150 energy. The 
-  <code>equivalent_energy</code> will be 0 so the attack would fail. Both A and B lose
-  150 energy(bad for them but this is not a stupid move for them because they
-  would not have known).</p>
-<p>Case 4, if the player A spent 350 energy and player B spent 150 energy, the 
-  <code>equivalent_energy</code> will be 350 - 150 = 200 and player A will take the cell.
-  player B will lose 150 energy and the <code>force_field</code> would be (200 - 100) * 2 = 200.</p>
+<p>For example, assume the <code>attack_cost</code> of a cell is <code>100</code> and Player A owns it. 
+If player B uses 100 energy to attack the cell and player A uses 1 energy to attack the cell on the same round, then <code>net_attack</code> is only 99 and player B will fail to capture the cell. </p>
 </blockquote>
-<p>Notice that players can attack their own cells as a strategy.</p>
+<p>When a cell is captured, a <code>force_field</code> will be generated to make it harder for other players to attack. 
+As stated previously, <code>force_field</code> is added to the <code>natural_cost</code> to calculate the <code>attack_cost</code>. </p>
+<p>The more excess energy the player uses to attack a cell, the more <code>force_field</code> will be generated if the cell is captured. 
+On capture, the cell will gain <code>force_field</code> equal to twice the excess attack strength up to a maximum of <code>1000</code>. In mathematical terms this is:</p>
+<ul>
+<li><code>min(1000, 2 * (net_attack - attack_cost))</code></li>
+</ul>
 <blockquote>
-<p>For example, assume the <code>attack_cost</code> of a cell is <code>100</code> and Player A
-  owns it. Player B decided to use 100 energy to attack the cell and Player A
-  attack that cell with 1 energy on the same round. Then the equivalent energy
-  would be 99 and Player B would fail to attack that cell.</p>
+<p>Case 1, if player A spends 50 energy to attack it, the attack will fail and player A will lose 50 energy(which is not a wise move). </p>
+<p>Case 2, if player A spends 150 energy to attack it, the attack will succeed and player A will occupy the cell and lose 150 energy. 
+The cell will have 100 <code>force_field</code> because 50 more energy than was needed to capture the cell was spent, so the <code>attack_cost</code> will be 200. </p>
+<p>Case 3, if player A spends 150 energy and player B spends 150 energy. 
+The attack will fail because <code>net_attack == 150 - 150 == 0</code>. 
+Both A and B lose 150 energy (bad for them, but not a stupid since they can not predict what the other players might do).</p>
+<p>Case 4, if the player A spends 350 energy and player B spends 150 energy. 
+Player A will capture the cell because <code>net_attack == 350 - 150 == 200</code> and lose 350 energy. 
+Player B will lose 150 energy. 
+The cell will be owned by A and have <code>force_field == min(1000, 2 * (200 - 100)) == 200</code></p>
 </blockquote>
-<h4 id="build">build</h4>
-<p>A player could build on occupied cells.</p>
-<p>A player needs <code>cost</code> amount of gold to build the building. </p>
-<p>The buildings will take affect the round they are built. </p>
-<h4 id="upgrade">upgrade</h4>
-<p>A player could upgrade their buildings to have better effects from them. 
-The maximum level of the building(except for home) is limited by the level of
-home. You need to upgrade your home before upgrading other buildings. </p>
-<p>All buildings including home start at level 1. After each upgrade, the level
-will increase by 1. </p>
-<p>Notice the player can build and upgrade the building on the same round. The 
-commands will be parsed in order.</p>
+<h4 id="build">Build</h4>
+<p>Players can enhance cells they own by building on them. </p>
+<p>Each building has a gold <code>cost</code> to build it. </p>
+<p>The buildings will take effect the round they are built. </p>
+<p>There are four types of buildings:</p>
+<ul>
+<li><code>Home</code> The home base of the player.</li>
+<li><code>Well</code> Upgrades energy generation.</li>
+<li><code>Mine</code> Upgrades gold generations.</li>
+<li><code>Fort</code> Generates force field.</li>
+</ul>
+<h4 id="upgrade">Upgrade</h4>
+<p>A player can upgrade their buildings to improve their effects. </p>
+<p>All buildings, including <code>Home</code>, start at level 1 when built. 
+After each upgrade the level will increase by 1. 
+Buildings other than <code>Home</code> can only be upgraded until they reach the current upgrade level of <code>Home</code>. 
+In order to upgrade them further, <code>Home</code> must be upgraded. </p>
+<p>Note that a player can build and upgrade a cell in the same round since the build command is handled first. </p>
 <h3 id="update">Update</h3>
 <h4 id="order">Order</h4>
 <ol>
-<li>Parse all the commands<ol>
-<li>building will be built</li>
-<li>upgrade will finish</li>
-<li>resource will be spent</li>
+<li>
+<p>All commands will be parsed.</p>
+<ol>
+<li>All build commands will be applied.</li>
+<li>All upgrade commands will be applied.</li>
+<li>Build and upgrade resources will be consumed.</li>
 </ol>
 </li>
-<li>Update cells<ol>
-<li>parse all the attack commands, calculate the owner of the cell for next
-   round. if buildings are destroyed, compute effects</li>
-<li><code>gold</code> and <code>energy</code> income will be calculated based on the new
-   possessions.</li>
-<li><code>tech_level</code> will be determined.</li>
-<li><code>force_field</code> will be updated accordingly.</li>
+<li>
+<p>Update cells</p>
+<ol>
+<li>All attack commands will be parsed.</li>
+<li>Effects of attack commands will be applied per cell. Calculate new owners and buildings.</li>
+<li><code>Gold</code> and <code>Energy</code> income for each player will be updated.</li>
+<li><code>tech_level</code> for each player will be updated.</li>
+<li><code>force_field</code> for each cell will be updated.</li>
 </ol>
 </li>
-<li>Update players<ol>
-<li><code>gold</code> and <code>energy</code> will be updated </li>
-<li>player without any cell will be dead </li>
+<li>
+<p>Update players</p>
+<ol>
+<li><code>Gold</code> and <code>Energy</code> will be updated.</li>
+<li>Players without any cells will be marked as dead.</li>
 </ol>
 </li>
 </ol>
 <h2 id="game-feature">Game Feature</h2>
 <h3 id="mapcell">MapCell</h3>
 <p>A <code>MapCell</code> represents a cell that a user can occupy. </p>
-<p><code>MapCell</code> can produce energy and gold for each round. It has three natural
-attributes:</p>
+<p><code>MapCell</code> can produce energy and gold for each round. 
+It has three natural attributes:</p>
 <ul>
 <li><code>natural_energy</code> (1 - 10)</li>
 <li><code>natural_gold</code> (1 - 10)</li>
 <li><code>natural_cost</code> (1 - 300)</li>
 </ul>
-<p>The natural attributes of a cell will not change in a game. However, the actual
-energy and gold it produces and the actual cost to occupy it may change due to
-other aspects. </p>
-<p>A <code>MapCell</code> will generate energy and gold each round based on 
-<code>natural_energy</code>, <code>natural_gold</code> and the building on the cell. </p>
-<p><code>energy_source</code> and <code>gold_source</code> shows the resource a <code>MapCell</code>
-can produce per round.</p>
-<p>However, the actual energy and gold a player gets may be taxed if the player
-owns too many cells.</p>
-<h4 id="building">Building</h4>
-<p>Players can build on a <code>MapCell</code> that's owned by them. Only one building
-is allowed on one <code>MapCell</code></p>
-<p>Each building has a <code>level</code>. When the building is built, the <code>level</code>
-is <code>1</code>. Players can upgrade their buildings(increase level) with resources 
-as long as the building's level is less than their <code>tech_level</code>(Upgrading
-home is not restricted by this rule).</p>
-<p>A building on a <code>MapCell</code> will change the amount of energy and gold the 
-cell provides. </p>
+<p>The natural attributes of a cell will not change during the game. 
+However, the actual energy and gold it produced by the cell and the actual cost to capture it may change due to other aspects. </p>
+<p>The actual resource generating attributes are:</p>
 <ul>
-<li><code>Home</code> is automatically built on the cell that the player spawns. 
-  <code>Home</code> has a very high <code>attack_cost</code> which is determined by the 
-  <code>level</code> of the building and the <code>energy</code> the user owns. <code>Home</code>
-  also provides fixed amount of <code>energy</code> and <code>gold</code>. As <code>home</code> 
-  stores the gold of the user, <code>1/3</code> of the total <code>gold</code> the user owns
-  will be stolen if <code>Home</code> is destroyed.<ul>
-<li><code>attack_cost</code> = <code>(1000 + user.energy + force_field) * level</code></li>
-<li><code>upgrade_cost</code> = <code>[(1000, 1000), (2000, 2000)]</code></li>
-<li><code>energy</code> = <code>10 * level</code></li>
-<li><code>gold</code> = <code>10 * level</code></li>
-<li>Destroy effect: <code>1/3</code> of <code>gold</code> will be stolen by attacker</li>
+<li><code>energy</code> The actual energy generated per round. </li>
+<li><code>gold</code> The actual gold generated per round.</li>
 </ul>
-</li>
-<li><code>EnergyWell</code> is the building to increase the energy production. When 
-  <code>EnergyWell</code> is destroyed, the energy it is producing will become the 
-  <code>force_field</code> of the cell after it's taken.<ul>
-<li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> = <code>[(200, 0), (400, 0)]</code></li>
-<li><code>energy</code> = <code>natural_energy * (1 + level)</code></li>
-<li>Destroy effect: <code>(50, 150, 350)[level - 1]</code> <code>force_field</code> will be
-  added to the cell</li>
+<h3 id="gamemap">GameMap</h3>
+<p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
+<p>At the beginning of the game, the game will generate a <code>GameMap</code> and blur
+it so the <code>natural_cost</code> will be smooth.</p>
+<p><code>natural_cost</code> is weakly correlated with the <code>natural_energy</code> and  <code>natural_gold</code> of the <code>MapCell</code>. </p>
+<h4 id="buildings">Buildings</h4>
+<p>Players can build buildings on a <code>MapCell</code> they own at the cost of some resources. 
+Only one building can be built per <code>MapCell</code>.</p>
+<p>Players can upgrade their buildings to enhance their effects at the cost of some resources. 
+Every building has a current upgrade <code>level</code>.
+When a building is built, the <code>level</code> starts at <code>1</code>.
+When a player upgrades a building, the upgrade <code>level</code> increases by one and the effect of the building is enhanced. </p>
+<p>Each player has a <code>tech_level</code> which is the level of their <code>Home</code> if they have one, otherwise it is 0. 
+Buildings other than the <code>Home</code> can only be upgraded until they reach the player's current <code>tech_level</code>. 
+In order to upgrade further, the player must upgrade the <code>level</code> of their <code>Home</code> to increase their <code>tech_level</code>.</p>
+<p>When another player captures a cell, the building on it is destroyed. </p>
+<p>In the event that a players loses their <code>Home</code> all of their buildings will be destroyed. </p>
+<h5 id="home">Home</h5>
+<p>Each player may only have one <code>Home</code> at a time. </p>
+<p>Each player starts with a <code>Home</code> on their starting cell. </p>
+<p><code>Home</code> provides 10 <code>gold</code> and 10 <code>energy</code> per <code>level</code>.</p>
+<ul>
+<li><code>energy == 10 * level</code></li>
+<li><code>gold == 10 * level</code></li>
 </ul>
-</li>
-<li><code>GoldMine</code> is the building to increase the gold production. When 
-  <code>GoldMine</code> is destoyed, the gold left in there will become the trophy of 
-  the attacker.<ul>
-<li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0)]</code></li>
-<li><code>gold</code> = <code>natural_gold * (1 + level)</code> </li>
-<li>Destroy effect: <code>(50, 150, 350)[level-1]</code> <code>gold</code> will be added to
-  the attacker</li>
+<p><code>Home</code> has an <code>attack_cost</code> based on the current <code>level</code> and the energy the owner has. </p>
+<ul>
+<li><code>attack_cost == level * (1000 + force_field + user.energy)</code></li>
 </ul>
-</li>
-<li><code>Fortress</code> is the building to improve the defense of the territory. A 
-  <code>Fortress</code> will increase the amount of <code>force_field</code> of both the cell
-  it's on and all the adjacent owned cells. It will also decrease the amount of
-  <code>force_field</code> of all the adjacent enemy cells.<ul>
-<li><code>cost</code> = <code>100 gold</code></li>
-<li><code>upgrade_cost</code> =  <code>[(200, 0), (400, 0)]</code></li>
-<li><code>adjacent_forcefield_incr</code> = <code>2 + level</code></li>
-<li><code>self_forcefield_incr</code> = <code>5 * level</code></li>
-<li><code>adjacent_forcefield_decr</code> = <code>10 * (1 + level)</code></li>
+<p>Build and upgrade cost: </p>
+<ul>
+<li><code>(energy, gold)</code></li>
+<li><code>cost == (0, 1000)</code></li>
+<li><code>upgrade_cost == [2: (1000, 1000), 3: (2000, 2000)]</code></li>
 </ul>
-</li>
+<p>When a player loses their <code>Home</code>, <code>1/3</code> of their total <code>gold</code> will be lost and given to the player who captured their <code>Home</code>.
+In addition, their <code>tech_level</code> will be reduced to <code>0</code> and all of their buildings will be destroyed. </p>
+<ul>
+<li>Destroy Effect: <code>1/3</code> of <code>gold</code> will be stolen by the attacker. All buildings will be destroyed. </li>
 </ul>
-<p><code>upgrade_cost</code> = [level2 cost(gold, energy), level3 cost(gold, energy)]</p>
-<p>A building will be destroyed if the cell is occupied by another player.</p>
+<h5 id="energy-well">Energy Well</h5>
+<p><code>EnergyWell</code> enhances the energy production of a cell. 
+It increases the production by the <code>natural_energy</code> per <code>level</code>.</p>
+<ul>
+<li><code>energy == natural_energy * (1 + level)</code></li>
+</ul>
+<p>Build and upgrade cost:</p>
+<ul>
+<li><code>(energy, gold)</code></li>
+<li><code>cost == (0, 100)</code></li>
+<li><code>upgrade_cost == [2: (0, 200), 3: (0, 400)]</code></li>
+</ul>
+<p>Capturing a cell with an <code>EnergyWell</code> gives free <code>force_field</code></p>
+<ul>
+<li><code>Destroy Effect: Add (1: 50, 2: 150, 3: 350) force_field</code></li>
+</ul>
+<h5 id="gold-mine">Gold Mine</h5>
+<p><code>GoldMine</code> enhances the gold production of a cell. 
+It increases the production by the <code>natural_gold</code> per <code>level</code>.</p>
+<ul>
+<li><code>gold == natural_gold * (1 + level)</code></li>
+</ul>
+<p>Build and upgrade cost:</p>
+<ul>
+<li><code>(energy, gold)</code></li>
+<li><code>cost == (0, 100)</code></li>
+<li><code>upgrade_cost == [2: (0, 200), 3: (0, 400)]</code></li>
+</ul>
+<p>Capturing a cell with an <code>GoldMine</code> gives free <code>gold</code></p>
+<ul>
+<li><code>Destroy Effect: Add (1: 50, 2: 150, 3: 350) gold</code></li>
+</ul>
+<h5 id="fortress">Fortress</h5>
+<p><code>Fortress</code> enhances the defensive and offensive properties of a cell. 
+It increases the <code>attack_cost</code> of a cell, generates <code>force_field</code> for the cell and its allied neighbors, and decreases <code>force_field</code> of enemy neighbors. </p>
+<ul>
+<li><code>attack_cost</code> = <code>(natural_cost + force_field) * (1 + level)</code></li>
+<li><code>self_forcefield_incr == 5 * level</code></li>
+<li><code>ally_forcefield_incr == 2 + level</code></li>
+<li><code>enemy_forcefield_decr == 10 * (1 + level)</code></li>
+</ul>
+<p>Build and upgrade cost:</p>
+<ul>
+<li><code>(energy, gold)</code></li>
+<li><code>cost == (0, 100)</code></li>
+<li><code>upgrade_cost == [2: (0, 200), 3: (0, 400)]</code></li>
+</ul>
 <h4 id="force-field">Force Field</h4>
-<p>A <code>MapCell</code> will have a <code>force_field</code> after it's occupied by a player. 
-This will equivalently add <code>attack_cost</code> to the <code>MapCell</code> so it would 
-be harder for other players to occupy it.
-<code>force_field</code> is determined by the energy a player puts to attack the cell 
-and the total energy all players put to attack this cell in that round. </p>
-<p><code>force_field = int(min(1000, 2*(energy*2 - total_energy - attack_cost)))</code></p>
-<p><code>force_field</code> will be added to <code>attack_cost</code></p>
-<p>After each round, <code>force_field</code> will be updated based on surrounding cells.
-For each enemy surrounding cell, <code>force_field</code> will reduce <code>10</code>. For
-each self cell, <code>force_field</code> will increase <code>2</code>.</p>
+<p>Each <code>MapCell</code> has a <code>force_field</code>. 
+The value of the <code>force_field</code> increases the <code>attack_cost</code> of the <code>MapCell</code>. 
+Unowned cells start with <code>force_field == 0</code>. </p>
+<p>When capturing a cell, energy beyond what is necessary to capture the cell increases the <code>force_field</code>. 
+The <code>force_field</code> gained is twice the excess energy:</p>
+<ul>
+<li><code>force_field == min(1000, 2 * (net_attack - attack_cost))</code></li>
+</ul>
+<p>In addition, when capturing a cell with an <code>EnergyWell</code>, the cell will gain <code>force_field</code> based on the level of the <code>EnergyWell</code>. </p>
+<ul>
+<li><code>force_field += (1: 50, 2: 150, 3: 350)</code></li>
+</ul>
+<p>After each round, the <code>force_field</code> will be updated based on its building and the adjacent cells. 
+<code>fort_level == 0</code> if the adjacent cell we are considering has no <code>fortress</code>. </p>
+<ul>
+<li>Cell has a fortress, increase by <code>5 * fort_level</code></li>
+<li>Each adjacent ally, increase by <code>2 + fort_level</code></li>
+<li>Each adjacent enemy, decrease by <code>10 * (1 + fort_level)</code></li>
+</ul>
 <blockquote>
 <p>For example. Player A owns cell (2, 2) and currently the cell has 100 
   <code>force_field</code>. Player A owns (2, 1) and (1, 2), too. (2, 3) is empty and
@@ -207,28 +259,32 @@ each self cell, <code>force_field</code> will increase <code>2</code>.</p>
   a level 1 <code>Fortress</code> and (3, 2) with nothing. The cell (2, 2) will have 
   a <code>force_field</code> change for <code>5 + 4 + 2 - 20 - 10</code> = <code>-19</code></p>
 </blockquote>
-<h3 id="gamemap">GameMap</h3>
-<p><code>GameMap</code> consists of <code>GAME_WIDTH * GAME_HEIGHT</code> <code>MapCell</code>s.</p>
-<p>In the beginning of the game, the game will generate a <code>GameMap</code> and blur
-it so the <code>natural_cost</code> will be smooth.</p>
-<p><code>natural_cost</code> is moderately related to <code>natural_energy</code> and 
-<code>natural_gold</code></p>
+<h4 id="attack-cost">Attack Cost</h4>
+<p>The <code>attack_cost</code> of a cell depends on its <code>natural_cost</code>, <code>force_field</code>, and the level of any <code>fortress</code> built on it. 
+Assuming a cell with no <code>fortress</code> has a <code>fort_level == 0</code>, <code>attack_cost</code> is:</p>
+<ul>
+<li><code>attack_cost == (natural_cost + force_field) * (1 + fort_level)</code></li>
+</ul>
 <h3 id="user">User</h3>
-<p>Each player enters the game with a <code>username</code> and a <code>password</code>. If a
-player register with the same <code>username</code> and <code>password</code>, it will be 
-treated as the same user. Duplicate usernames are not allowed.</p>
-<p>A player starts with 1000 <code>energy</code> and 0 <code>gold</code>. </p>
+<p>Players can join a game that is open to new players by supplying a <code>username</code> and a <code>password</code>. 
+While the game is going, anybody who supplies the <code>username</code> and <code>password</code> of a current player will be treated as that player. 
+This is only intended to make conflicts unlikely. It is not intended as a security feature. </p>
+<p>Player registration only lasts until the end of the game. 
+Each player must re-register with any new game that is started. </p>
+<p>Each unique player must have a unique <code>username</code>. 
+If two players attempt to register with the same <code>username</code> then only one will succeed. </p>
 <h4 id="tech-level">Tech Level</h4>
-<p><code>tech_level</code> is determined by the highest level of <code>home</code> buildings the
-player has. <code>tech_level</code> limits the level of all other buildings. The player
-needs to upgrade their home to a higher level, therefore achieves a higher
-<code>tech_level</code>, before they upgrade other buildings.</p>
+<p><code>tech_level</code> is the level of the player's <code>Home</code> building. 
+All other buildings can only be upgraded until they reach the player's <code>tech_level</code>. 
+In order to upgrade buildings further, a player must first increase their <code>tech_level</code> by leveling up their <code>Home</code>. </p>
 <h4 id="tax-amount">Tax Amount</h4>
-<p><code>tax_amount</code> is determined by the number of cells and resource buildings 
-(<code>energy_well</code> and <code>gold_mine</code>) a player owns. The more cells and 
-resource buildings a player owns, the larger the <code>tax_amount</code> will be.</p>
-<p>The equation for <code>tax_amount</code> generated from number of cells and buildings
-are the same.</p>
+<p>Players are taxed <code>energy</code> and <code>gold</code> every turn based on the number of cells and resource buildings (<code>EnergyWell</code> and <code>GoldMine</code>) they own. 
+There are actually two taxes, one based on cell count <code>cell_tax_amount</code> and one based on building count <code>building_tax_amount</code>. </p>
+<p>Both taxes use the same progressive <code>marginal_tax_rate</code> system with the same tax brackets. 
+This is similar to the US tax system. 
+For those unfamiliar with how this works, each extra unit has a cost, the cost increases the more units owned, and the increased costs are not retroactive. 
+Moving up to the next tax bracket only affects new units. 
+The old units are taxed at their previous rate. </p>
 <table>
 <thead>
 <tr>

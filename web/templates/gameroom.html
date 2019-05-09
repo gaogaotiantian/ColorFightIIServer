@@ -40,28 +40,30 @@
                   <a id="compress-button" href="#" class="collapse"><i class="fas fa-compress"></i></a>
                 </div>
                 <div class="text-right">
-                  <a id="resource-render-button" href="#"><i class="fas fa-coins"></i></a>
+                  <a id="gold-render-button" href="#"><i class="fas fa-coins"></i></a>
+                  <a id="energy-render-button" href="#"><i class="fas fa-fire"></i></a>
                   <a id="building-render-button" href="#"><i class="fas fa-building"></i></a>
                   <a id="owner-render-button" href="#"><i class="fas fa-square"></i></a>
                 </div>
               </div>
             </div>
           </div>
-          {% if allow_manual_mode %}
-          <div id="user-info">
-            <div id= "join-game-section" class="game-status-section">
-              <form id="join-game-form">
-                <label>Username:</label><br>
-                <input type="text" class="row-input"><br>
-                <label>Password:</label><br>
-                <input type="password" class="row-input"><br>
-                <input id="join-game-button" type="button" onclick="join_game_button()" value="Join Game">
-              </form>
+          <div id="user-info" class="d-none">
+            <div id="join-game-section">
+              <p class="game-status-header">JOIN GAME</p>
+              <div class="game-status-section">
+                <form id="join-game-form">
+                  <label>Username:</label><br>
+                  <input type="text" class="row-input"><br>
+                  <label>Password:</label><br>
+                  <input type="password" class="row-input"><br>
+                  <input id="join-game-button" type="button" onclick="join_game_button()" value="Join Game">
+                </form>
+              </div>
             </div>
             <div id="self-info">
             </div>
           </div>
-          {% endif %}
           {% if replay_mode %}
           <p class="game-status-header">REPLAY</p>
           <div id="replay-info">

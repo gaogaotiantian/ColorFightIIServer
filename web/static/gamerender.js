@@ -83,7 +83,7 @@ let forceRefresh  = false;
 let renderOptions = {
     "energy"  : true,
     "gold"    : true,
-    "owner"   : true,
+    "owner"   : "normal",
     "building": true,
 };
 
@@ -323,7 +323,12 @@ function change_render_options(options) {
     for (key in options) {
         if (key in renderOptions) {
             if (options[key] == "toggle") {
-                renderOptions[key] = !renderOptions[key];
+                if (key == "owner") {
+                    const ownerOptions = ["normal", "extra", "none"];
+                    renderOptions[key] = ownerOptions[((ownerOptions.indexOf(renderOptions[key]) + 1) % ownerOptions.length)];
+                } else {
+                    renderOptions[key] = !renderOptions[key];
+                }
             } else {
                 renderOptions[key] = options[key];
             }
@@ -362,17 +367,17 @@ function per_turn_draw_cell(x, y, currCell, prevCell)
     borderCount += 1; 
 
     // Draw energy border. 
-    if (renderOptions["energy"] || currCell['owner'] == 0) {
+    if (renderOptions["energy"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
         draw_cell_rect(base, '#65c9cf', currCell['natural_energy'] / 10, x, y, borderCount * 2);
         borderCount += 1;
     }
     // Draw gold border. 
-    if (renderOptions["gold"] || currCell['owner'] == 0) {
+    if (renderOptions["gold"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
         draw_cell_rect(base, '#faf334', currCell['natural_gold']   / 10, x, y, borderCount * 2);
         borderCount += 1;
     }
     // Fill in owner color. Unowned corresponds to black. 
-    if (renderOptions["owner"]) {
+    if (renderOptions["owner"] != "none") {
         draw_cell_rect(base, id_to_color(currCell['owner']), 1.0, x, y, borderCount * 2);
     } else {
         draw_cell_rect(base, id_to_color(0), 1.0, x, y, borderCount * 2);
@@ -409,17 +414,17 @@ function set_cell_bg(x, y, color) {
 }
 
 function animate_cell(x, y, currCell, prevCell, progress) {
-    if (renderOptions["owner"]) {
+    if (renderOptions['owner'] != "none") {
         let capture_cell    = cellContainers[y][x].children[2]; 
         let ownerShrink     = 0; 
         let prevMap         = prevGameData['game_map'];
         // Cell was captured the previous round. 
 
         let borderCount = 1;
-        if (renderOptions['energy'] || currCell['owner'] == 0) {
+        if (renderOptions["energy"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
             borderCount += 1;
         } 
-        if (renderOptions['gold'] || currCell['owner'] == 0) {
+        if (renderOptions["gold"] && (!(renderOptions["owner"] == "extra") || currCell['owner'] == 0)) {
             borderCount += 1;
         }
         ownerShrink = borderCount * 2
@@ -613,9 +618,18 @@ function parse_game_data_and_draw(newData) {
     draw_selected_cell_info(); 
     draw_selected_user_info(); 
 
-    // Draw our own info or the join game info.
-    if (document.getElementById('user-info')) {
+    // Draw our own info or the join game info if manual mode is allowed.
+    if (gameData['info']['allow_manual_mode']) {
+        var userDiv = document.getElementById('user-info');
+        if (userDiv.classList.contains("d-none")) {
+            userDiv.classList.remove("d-none");
+        }
         draw_self_user_info(); 
+    } else {
+        var userDiv = document.getElementById('user-info');
+        if (!userDiv.classList.contains("d-none")) {
+            userDiv.classList.add("d-none");
+        }
     }
     // Flush our command queue. This clears our command queue even if we 
     // can not send them to avoid keeping stale commands in the queue. 
@@ -1049,7 +1063,7 @@ function create_cell_info(x, y) {
     // Level Building
     // energy   (base)
     // gold     (base)
-    // attack_cost + (force_field - % siege loss)
+    // attack_cost (force_field)
     // 
     // if attackable: min attack, max attack, other attack
     // if buildable : mine or well (cost, old -> new)
@@ -1111,28 +1125,7 @@ function create_cell_info(x, y) {
     const forceField = cell['force_field'];
     if (forceField > 0) {
         // Put the force field in parens. 
-        costString += ' (';
-        costString += String(forceField); 
-
-        // Iterate through adjacent looking for sieging. 
-        let siegeCount  = 0;
-        let adjPos      = get_adjacent_cells(x, y);
-        for (let pos of adjPos) {
-            let adjOwner = cellMap[pos[1]][pos[0]]['owner'];
-            if ((adjOwner != 0) && (cell['owner'] != adjOwner)) {
-                siegeCount += 1; 
-            }
-        }
-
-        if (siegeCount > 0) {
-            // Subtract the siege percent.
-            costString += ' - ';
-            costString += String(siegeCount * GAME_SIEGE_PERCENT);
-            costString += '%';
-        }
-
-        // Close out the parens. 
-        costString += ')';
+        costString += ' (' + String(forceField) + ')';
     }
 
     ////////////////////////////////////////////////////////////////////////////

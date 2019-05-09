@@ -56,7 +56,7 @@ class MapCell:
         self.building.upgrade()
 
     def update(self, users):
-        if self.is_home:
+        if self.building.is_home:
             self.building.stored_energy = users[self.owner].energy
         # Change owner based on attacker list
         if self.attacker_list:
@@ -92,10 +92,10 @@ class GameMap:
         self._cells = self._generate_cells(width, height)
     
     def __getitem__(self, location):
-        if isinstance(location, Position):
-            return self._cells[location.y][location.x]
-        elif isinstance(location, tuple):
+        if isinstance(location, tuple):
             return self._cells[location[1]][location[0]]
+        elif isinstance(location, Position):
+            return self._cells[location.y][location.x]
 
     def __contains__(self, item):
         if isinstance(item, Position):
@@ -168,16 +168,17 @@ class GameMap:
                 cell.update(users)
                 uid = cell.owner
                 if uid in users:
-                    users[uid].cells[cell.position] = cell
-                    users[uid].gold_source += cell.gold
-                    users[uid].energy_source += cell.energy
+                    user = users[uid]
+                    user.cells[cell.position] = cell
+                    user.gold_source += cell.gold
+                    user.energy_source += cell.energy
                     # Update tech_level
-                    if cell.is_home and cell.building.level > users[uid].tech_level:
-                        users[uid].tech_level = cell.building.level
+                    if cell.building.is_home and cell.building.level > user.tech_level:
+                        user.tech_level = cell.building.level
                     # Update building number
-                    if not cell.is_empty:
-                        users[uid].building_number[cell.building.name] = \
-                                users[uid].building_number.get(cell.building.name, 0) + 1
+                    if not cell.building.is_empty:
+                        user.building_number[cell.building.name] = \
+                                user.building_number.get(cell.building.name, 0) + 1
                 else:
                     if cell.owner != 0:
                         print(cell.owner)
@@ -194,16 +195,16 @@ class GameMap:
         for x in range(self.width):
             for y in range(self.height):
                 cell = self._cells[y][x]
-                surrounding_enemy_number = 0
-                surrounding_self_number  = 0
-                for pos in cell.position.get_surrounding_cardinals():
-                    if self[pos].owner != 0:
-                        if self[pos].owner != cell.owner:
-                            cell.force_field -= self[pos].adjacent_forcefield_decr
-                        else:
-                            cell.force_field += self[pos].adjacent_forcefield_incr
-                cell.force_field += cell.self_forcefield_incr
-                cell.force_field  = clip(cell.force_field, 0, 1000)
+                if cell.owner != 0:
+                    for pos in cell.position.get_surrounding_cardinals_tuple():
+                        otherCell = self[pos]
+                        if otherCell.owner != 0:
+                            if otherCell.owner != cell.owner:
+                                cell.force_field -= otherCell.adjacent_forcefield_decr
+                            else:
+                                cell.force_field += otherCell.adjacent_forcefield_incr
+                    cell.force_field += cell.self_forcefield_incr
+                    cell.force_field  = clip(cell.force_field, 0, 1000)
 
     def info(self):
         info = [[None for _ in range(self.width)] for _ in range(self.height)]
@@ -253,8 +254,11 @@ class GameMap:
                 for y in range(height):
                     if cells[y][x] == None:
                         orig_x, orig_y = self._cast_to_original_coord(x, y)
-                        cells[y][x] = copy.deepcopy(cells[orig_y][orig_x])
+                        cells[y][x] = copy.copy(cells[orig_y][orig_x])
                         cells[y][x].position = Position(x, y)
+                        # attack list is the only thing that may be conflict 
+                        # with shallow copy
+                        cells[y][x].attacker_list = []
             for i in range(3):
                 cells = self._blur(cells, percent = 0.05)
 
@@ -266,6 +270,6 @@ class GameMap:
         ret = [[None for _ in range(width)] for _ in range(height)]
         for x in range(width):
             for y in range(height):
-                ret[y][x] = copy.deepcopy(cells[y][x])
+                ret[y][x] = copy.copy(cells[y][x])
         return ret
 

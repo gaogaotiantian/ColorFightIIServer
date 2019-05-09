@@ -4,6 +4,8 @@ import sys
 import gzip
 import copy
 
+import orjson
+
 from .game_map import GameMap
 from .user import User
 from .position import Position
@@ -13,7 +15,7 @@ from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
-    def __init__(self, config = None):
+    def __init__(self, config = None, symmetric = True):
         self.turn = 0
 
         # Setups
@@ -30,7 +32,7 @@ class Colorfight:
         self.join_key = ""
         self.finish_time = 0
         self.key_frame = 0
-        self.symmetric = True
+        self.symmetric = symmetric
         self.game_id   = 0
         self.last_update = time.time()
         self.users = {}
@@ -64,45 +66,49 @@ class Colorfight:
             /param data: dict for all possible parameters
         """
         try:
+            new_config = {}
             for field in data:
                 val = data[field]
                 if field == "max_turn":
-                    if 200 <= val <= 2000:
-                        self.max_turn = val
+                    if type(val) == int and 200 <= val <= 2000:
+                        new_config["max_turn"] = val
                     else:
                         return False, "max_turn value invalid"
                 elif field == "round_time":
-                    if 0.2 <= val <= 20:
-                        self.round_time = val
+                    if type(val) in (float, int) and 0.2 <= float(val) <= 20:
+                        new_config["round_time"] = float(val)
                     else:
-                        return False, "rount_time value invalid"
+                        return False, "round_time value invalid"
                 elif field == "first_round_time":
-                    if val in ["full", "never"] or 0 <= val <= 60:
-                        self.first_round_time = val
+                    if val in ["full", "never"] or (type(val) in (float, int) and 0 <= float(val) <= 60):
+                        new_config["first_round_time"] = val
                     else:
                         return False, "first_round_time value invalid"
                 elif field == "finish_time":
-                    if 0 <= val <= 60:
-                        self.finish_time = val
+                    if type(val) in (float, int) and 0 <= float(val) <= 60:
+                        new_config["finish_time"] = float(val)
                     else:
                         return False, "finish_time value invalid"
                 elif field == "allow_join_after_start":
                     if val == True or val == False:
-                        self.allow_join_after_start = val
+                        new_config["allow_join_after_start"] = val
                     else:
                         return False, "allow_join_after_start value invalid"
                 elif field == "allow_manual_mode":
                     if val == True or val == False:
-                        self.allow_manual_mode = val
+                        new_config["allow_manual_mode"] = val
                     else:
                         return False, "allow_manual_mode value invalid"
                 elif field == "replay_enable":
                     if val in ["always", "never", "end"]:
-                        self.replay_enable = val
+                        new_config["replay_enable"] = val
                     else:
                         return False, "replay_enable value invalid"
                 else:
                     return False, "Invalid field {}".format(field)
+            # All data are valid
+            for key in new_config:
+                setattr(self, key, new_config[key])
         except Exception as e:
             return False, "Invalid data, {}".format(e)
 
@@ -116,7 +122,7 @@ class Colorfight:
         self._prev_game_info = None
         self._game_info = None
         self.start_count_down = self.first_round_time
-        self.game_map = GameMap(self.height, self.width) 
+        self.game_map = GameMap(self.height, self.width, symmetric = self.symmetric) 
         self.last_update = time.time() 
         self.game_id = str(int(self.last_update * 1000))
         self.key_frame = 1
@@ -322,6 +328,9 @@ class Colorfight:
         command
     '''
     def register(self, uid, username, password, join_key = ""):
+        if type(username) != str or type(password) != str:
+            return False, "Username and Password needs to be strings"
+
         if len(username) >= 15:
             return False, "Username can't exceed 15 characters."
 
@@ -447,6 +456,11 @@ class Colorfight:
                 game_map["data"][y][x] = [temp_info[key] for key in game_map['headers']]
         info['game_map'] = game_map
 
+        users = {}
+        for uid in info['users']:
+            users[str(uid)] = info['users'][uid]
+        info['users'] = users
+
     def get_game_info(self):
         return {\
                 "turn": self.turn, \
@@ -494,5 +508,6 @@ class Colorfight:
     def get_log(self):
         if self.log_turn != self.turn:
             self.log_turn = self.turn
-            self.compressed_log = gzip.compress(json.dumps(self.log, separators=[',',':']).encode('utf-8'), compresslevel = 4)
+            log_bytes = orjson.dumps(self.log)
+            self.compressed_log = gzip.compress(log_bytes, compresslevel = 5)
         return self.compressed_log

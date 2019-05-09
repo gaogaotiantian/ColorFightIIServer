@@ -1,6 +1,8 @@
 from ..colorfight import Colorfight
 from ..constants import GAME_WIDTH, GAME_HEIGHT
-from ..constants import BLD_GOLD_MINE, BLD_ENERGY_WELL
+from ..constants import BLD_GOLD_MINE, BLD_ENERGY_WELL, BLD_HOME
+from ..building import Empty
+from ..position import Position
 from .util import *
 import pytest
 
@@ -90,3 +92,71 @@ def test_build_on_invalid_cell():
     game.update(True)
     info = game.get_game_info()
     assert(info["error"])
+
+def test_build_without_home():
+    game = Colorfight()
+    uid = join(game, 'a', 'a')
+
+    game.update(True)
+    info = game.get_game_info()
+    x, y = info['users'][uid]['cells'][0]
+    game.users[uid].energy = 10000
+    game.users[uid].gold = 10000
+    game.game_map[(x, y)].building = Empty()
+
+    game.update(True)
+
+    pos = Position(x, y).get_surrounding_cardinals()[0]
+    game.game_map[pos].owner = uid
+    build(game, uid, pos.x, pos.y, BLD_GOLD_MINE)
+
+    game.update(True)
+    info = game.get_game_info()
+    assert(info['error'][uid])
+    assert(game.game_map[pos].building.name == "empty")
+
+def test_build_second_home():
+    game = Colorfight()
+    uid = join(game, 'a', 'a')
+
+    game.update(True)
+    info = game.get_game_info()
+    x, y = info['users'][uid]['cells'][0]
+    game.users[uid].energy = 10000
+    game.users[uid].gold = 10000
+
+    pos = Position(x, y).get_surrounding_cardinals()[0]
+    game.game_map[pos].owner = uid
+    build(game, uid, pos.x, pos.y, BLD_HOME)
+
+    game.update(True)
+    info = game.get_game_info()
+    assert(info['error'][uid])
+    assert(game.game_map[pos].building.name == "empty")
+
+def test_rebuild_base():
+    game = Colorfight()
+    uid = join(game, 'a', 'a')
+
+    game.update(True)
+    info = game.get_game_info()
+    x, y = info['users'][uid]['cells'][0]
+    game.users[uid].energy = 10000
+    game.users[uid].gold = 10000
+
+    game.game_map[(x, y)].building = Empty()
+
+    game.update(True)
+    info = game.get_game_info()
+
+    assert(info['users'][uid]['tech_level'] == 0)
+
+    result = build(game, uid, x, y, BLD_HOME)
+    assert(result['success'])
+    
+    game.update(True)
+    info = game.get_game_info()
+
+    assert(not info['error'][uid])
+    assert(info['users'][uid]['tech_level'] == 1)
+    assert(info['game_map'][y][x]['building']['name'] == 'home')

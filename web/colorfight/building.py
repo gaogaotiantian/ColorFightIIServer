@@ -16,9 +16,6 @@ class BaseBuilding:
     def get_attack_cost(self, cell):
         return int(cell.natural_cost + cell.force_field)
 
-    def get_force_field_increase(self, cell):
-        return 0
-
     def upgrade(self):
         self.level += 1
 
@@ -122,9 +119,6 @@ class Fortress(BaseBuilding):
 
     def get_attack_cost(self, cell):
         return (cell.natural_cost + cell.force_field) * (1 + self.level)
-
-    def get_force_field_increase(self, cell):
-        return self.level * 10
 
     @property
     def adjacent_forcefield_incr(self):
