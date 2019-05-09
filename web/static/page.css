@@ -144,7 +144,7 @@ body {
         inset 0px 0px 5000px rgba(96,146,255,0.109);
 }
 
-.doc-section p, .doc-section tbody {
+.doc-section p, .doc-section tbody, .doc-section li {
     color: #cacaca;
     text-shadow: 0px 0px 4px #0084ff;
     margin-bottom: 0.5rem;
@@ -214,7 +214,15 @@ body {
     0px 0px 10px #005aad;
 }
 
-.doc-section h1,h2,h3,h4 {
+.doc-section h5 {
+    margin-top: 1.1rem;
+    text-shadow: 
+    0px 0px 3px #60b7ff,
+    0px 0px 10px #005aad;
+}
+
+
+.doc-section h1,h2,h3,h4,h5 {
     font-weight: 600;
 }
 
