@@ -131,7 +131,7 @@ body {
 .doc-section {
     /* background-color: rgb(105, 106, 126); */
     font-family: 'Comfortaa';
-    color: rgb(228, 247, 255);
+    color: #cacaca;
     border-radius: 8px;
     padding: 20px 35px 40px;
     margin-bottom: 20px;
