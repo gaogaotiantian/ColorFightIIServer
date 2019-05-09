@@ -75,17 +75,17 @@ class Colorfight:
                     else:
                         return False, "max_turn value invalid"
                 elif field == "round_time":
-                    if 0.2 <= float(val) <= 20:
+                    if type(val) in (float, int) and 0.2 <= float(val) <= 20:
                         new_config["round_time"] = float(val)
                     else:
                         return False, "round_time value invalid"
                 elif field == "first_round_time":
-                    if val in ["full", "never"] or 0 <= float(val) <= 60:
+                    if val in ["full", "never"] or (type(val) in (float, int) and 0 <= float(val) <= 60):
                         new_config["first_round_time"] = val
                     else:
                         return False, "first_round_time value invalid"
                 elif field == "finish_time":
-                    if 0 <= float(val) <= 60:
+                    if type(val) in (float, int) and 0 <= float(val) <= 60:
                         new_config["finish_time"] = float(val)
                     else:
                         return False, "finish_time value invalid"

@@ -106,3 +106,53 @@ def test_maximum_user_number():
     except Exception as e:
         print(e)
         assert (False)
+
+def test_start():
+    game = Colorfight()
+    game.start()
+    assert(game.turn == 1)
+
+def test_update_features():
+    game = Colorfight()
+    game.config({"first_round_time": "never"})
+    game.round_time = 0
+
+    assert(game.key_frame == 1)
+    game.update()
+    assert(game.turn == 0)
+    assert(game.key_frame == 2)
+
+    game.config({"first_round_time": "full"})
+    game.update()
+    assert(game.turn == 0)
+
+    game.config({"first_round_time": 30})
+    game.update()
+    assert(game.turn == 0)
+    assert(game.key_frame == 3)
+
+    game.config({"first_round_time": 'full'})
+
+    for i in range(8):
+        join(game, '{}'.format(i), 'abc')
+
+    game.update()
+    assert(game.turn == 1)
+
+    game.config({"first_round_time": 0})
+    game.update()
+    assert(game.turn == 2)
+
+    game.turn = game.max_turn
+    game.update()
+    assert(game.turn == game.max_turn)
+
+    game.finish_time = 0.0000001
+    game.update()
+    assert(game.turn == 0)
+
+    game.allow_join_after_start = False
+    game.update(True)
+
+    result = game.parse_action(None, msg_register('a', 'a'))
+    assert(not result['success'])

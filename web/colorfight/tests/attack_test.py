@@ -25,6 +25,19 @@ def test_attack_cell_with_less_attack_cost():
     assert(game.users[uid].energy == 9910)
     assert(len(game.users[uid].cells) == 1)
 
+def test_attack_invalid_cell():
+    game = Colorfight()
+    uid = join(game, 'a', 'a')
+    game.update(True)
+    info = game.get_game_info()
+    x, y = info['users'][uid]['cells'][0]
+    game.users[uid].energy = 10000
+    result = attack(game, uid, (x+15)%GAME_WIDTH, (y+15)%GAME_HEIGHT, 100)
+    assert(result["success"])
+    game.update(True)
+    # home with level one provide 10 energy each round
+    assert (game.errors[uid])
+
 def test_attack_without_enough_energy():
     game = Colorfight()
     uid = join(game, 'a', 'a')
