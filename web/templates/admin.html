@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'header.html' %}
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="container">
+      <div class="main-content">
+        <form>
+          <div class="form-group">
+            <label>Admin Password</label>
+            <input type=password id="admin-password-input" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Max Gameroom Number ({{ max_gameroom_number }})</label>
+            <input id="max-gameroom-number-input" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Idle Clear Time(seconds) ({{ idle_clear_time }})</label>
+            <input id="idle-clear-time-input" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Allow Create Room ({{ allow_create_room }})</label>
+            <select class="form-control" id="allow-create-room-sel">
+              <option value="same" selected="selected">Same as current</option>
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button type=button id="submit-button" class="btn from-control">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="/static/admin.js"></script>
+  </body>
+</html>
