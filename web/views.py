@@ -22,7 +22,7 @@ def clean_gameroom(request):
     delete_rooms = []
     for name, gameroom in request.app['game'].items():
         # clear the rooms that's inactivate for more than 10 minutes
-        if name != 'public' and time.time() - gameroom.last_update > 10 * 60:
+        if name != 'public' and time.time() - gameroom.last_update > request.app['config']['idle_clear_time']:
             delete_rooms.append(name)
     for name in delete_rooms:
         if name in request.app['game']:
@@ -35,6 +35,14 @@ def clean_gameroom(request):
 @aiohttp_jinja2.template('index.html')
 async def index(request):
     return {}
+
+@aiohttp_jinja2.template('admin.html')
+async def admin(request):
+    return {
+        'max_gameroom_number': request.app['config']['max_gameroom_number'],
+        'idle_clear_time'    : request.app['config']['idle_clear_time'],
+        'allow_create_room'  : request.app['config']['allow_create_room']
+    }
 
 @aiohttp_jinja2.template('gameroom.html')
 async def game_room(request):
@@ -194,9 +202,32 @@ async def start_game(request):
 
     return web.json_response({"success": True})
 
+async def config_admin(request):
+    data = await request.json()
+    if 'admin_password' not in data:
+        return web.json_response({"success": False, "err_msg": "You need admin password"})
+
+    if data['admin_password'] != request.app['admin_password']:
+        return web.json_response({"success": False, "err_msg": "Admin password is wrong"})
+
+    try:
+        if 'max_gameroom_number' in data:
+            request.app['config']['max_gameroom_number'] = int(data['max_gameroom_number'])
+        if 'idle_clear_time' in data:
+            request.app['config']['idle_clear_time']     = int(data['idle_clear_time'])
+        if 'allow_create_room' in data:
+            request.app['config']['allow_create_room']   = bool(data['allow_create_room'])
+    except Exception as e:
+        return web.json_response({"success": False, "err_msg": "Wrong config, {}, {}".format(data, e)})
+
+    return web.json_response({"success": True})
+
 async def create_gameroom(request):
     data = await request.json()
     try:
+        if not request.app['config']['allow_create_room']:
+            return web.json_response({"success": False, "err_msg": "Creating room is disabled now"})
+
         gameroom_id = data['gameroom_id']
         if not url_safe(gameroom_id):
             return web.json_response({"success": False, "err_msg": "You have illegal special characters in you gameroom id"})
@@ -204,7 +235,7 @@ async def create_gameroom(request):
         if gameroom_id in request.app['game']:
             return web.json_response({"success": False, "err_msg": "Same id exists"})
 
-        if len(request.app['game']) >= 10:
+        if len(request.app['game']) >= request.app['config']['max_gameroom_number']:
             return web.json_response({"success": False, "err_msg": "Max room number reached"})
 
         if 'config' in data:

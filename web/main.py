@@ -23,6 +23,10 @@ async def init_app():
     app['game'] = {}
     app['game']['public'] = Colorfight()
     app['game']['public'].replay_lock = asyncio.Lock(loop = asyncio.get_event_loop())
+    app['config'] = {}
+    app['config']['max_gameroom_number'] = 15
+    app['config']['idle_clear_time'] = 600
+    app['config']['allow_create_room'] = True
     app['game_sockets'] = []
     app['admin_password'] = os.getenv('ADMIN_PASSWORD', "")
     app['firebase'] = Firebase()

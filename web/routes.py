@@ -14,10 +14,12 @@ def setup_routes(app):
     app.router.add_get('/docs/game_rules', game_rules)
     app.router.add_get('/docs/api', api_documentation)
     app.router.add_get('/contact', contact)
+    app.router.add_get('/admin', admin)
 
     # RPC
     app.router.add_post('/start'  , start_game)
     app.router.add_post('/restart', restart)
+    app.router.add_post('/configadmin', config_admin)
     app.router.add_post('/creategameroom', create_gameroom)
     app.router.add_post('/deletegameroom', delete_gameroom)
 
