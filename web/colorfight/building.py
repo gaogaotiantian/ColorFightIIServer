@@ -3,6 +3,7 @@ from .constants import BLD_ENERGY_WELL, BLD_GOLD_MINE, BLD_HOME, BLD_FORTRESS
 class BaseBuilding:
     cost = 0
     upgrade_cost = []
+    name = ""
     def __init__(self):
         self.level = 1
         self.stored_energy = 0

@@ -170,7 +170,7 @@ async def restart(request):
     game = request.app['game'][gameroom_id]
 
     if admin_password == game.admin_password or admin_password == request.app['admin_password']:
-        result, err_msg = game.config(data['config'])
+        result, err_msg = game.config(config)
         if result:
             game.restart()
             return web.json_response({"success": True})

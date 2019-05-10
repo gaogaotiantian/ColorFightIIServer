@@ -243,7 +243,7 @@ class GameMap:
             for x in range(width):
                 for y in range(height):
                     cells[y][x] = MapCell(Position(x, y))
-            for i in range(3):
+            for _ in range(3):
                 cells = self._blur(cells, percent = 0.05)
         else:
             # generate a 1/8 slice first
@@ -259,7 +259,7 @@ class GameMap:
                         # attack list is the only thing that may be conflict 
                         # with shallow copy
                         cells[y][x].attacker_list = []
-            for i in range(3):
+            for _ in range(3):
                 cells = self._blur(cells, percent = 0.05)
 
         return cells

@@ -177,7 +177,6 @@ class Colorfight:
             self.update_cells()
             # 2. Update all the users for gold and energy
             self.update_users()
-            start = time.time()
             self.add_log()
             self.last_update = time.time() 
 
@@ -491,7 +490,6 @@ class Colorfight:
                            "users"   : currData["users"], \
                            "game_map":{"data":[[[] for j in range(GAME_WIDTH)] for i in range(GAME_HEIGHT)]}}
 
-                game_map_data = currData['game_map']['data']
                 for y in range(GAME_HEIGHT):
                     for x in range(GAME_WIDTH):
                         cell_data = currData['game_map']['data'][y][x]
