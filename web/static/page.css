@@ -150,7 +150,7 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.doc-section a{
+.doc-section a, .contact-icons-div a {
     color: #91c2ff;
 }
 
