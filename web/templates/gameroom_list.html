@@ -14,116 +14,14 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <div class="table-container">
-              <div class="table-div">
-                <div class="table-head">
-                  <div class="table-row table-row-head row">
-                    {% for header in headers %}
-                      {% if header == 'Name' %}
-                        <div class="table-column th-name col-md-7">
-                      {% else %}
-                        <div class="table-column col">
-                      {% endif %}
-                        <h1>{{ header }}</h1>
-                    </div>
-                    {% endfor %}
-                  </div>
-                  <span class="table-divider"></span>
-                </div>
-                <div>
-                  {% for room in gamerooms %}
-                  <div href={{room.link}} class="game-room-tr table-row table-row-content row">
-                    {% for header in headers %}
-                      {% if header == 'Name' %}
-                        <div class="table-column col-md-7 gameroom-name-div">
-                          {% if room[header] != 'public' %}
-                            <a href="#" data-toggle="modal" data-target="#gameroom-delete-modal" class="delete-room-icon"><i class="fas  fa-trash-alt delete-room-icon"></i></a>
-                          {% endif %}
-                          {{ room[header]}}
-                      {% else %}
-                        <div class="table-column col">
-                          {% if header != 'Lock' %}
-                            {{ room[header]}}
-                          {% elif room['Lock'] %}
-                            <i class="fas fa-lock"></i>
-                          {% endif %}
-                      {% endif %}
-                    </div>
-                    {% endfor %}
-                  </div>
-                  {% endfor %}
-                  <div href='#' data-toggle="modal" data-target="#gameroom-create-modal" class="add-room-tr table-row table-row-content row">
-                    <div class="table-column col-md-12 text-center">
-                      <a id="gameroom-create-fa"><i class="fas fa-lg fa-plus-circle"></i></a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {% include 'roomlist.html' %}
           </div>
         </div>
       </div>
 
-      <!-- create game room modal -->
-      <div class="modal fade" id="gameroom-create-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Create Gameroom</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="gameroom-name">Gameroom Name</label>
-                <input class="form-control" id="gameroom-name" placeholder="Input gameroom name here">
-              </div>
-              <div class="form-group">
-                <label for="admin-password-input">Admin Password</label>
-                <input class="form-control" id="admin-password-input" type="password" placeholder="Leave blank if you allow everyone to change the config">
-              </div>
-              <div class="form-group">
-                <label for="join-key-input">Join Key</label>
-                <input class="form-control" id="join-key-input" type="password" placeholder="Leave blank if you allow everyone to join the room">
-              </div>
-              <div class="form-group">
-                <label for="config-input">Gameroom Config</label>
-                <select class="form-control" id="config-input">
-                  <option value="default">default</option>
-                  <option value="official">official</option>
-                </select>
-              </div>
-            </div>
-            <div class="modal-foot text-right">
-              <button type="button" id="create-gameroom-button" class="btn btn-primary">Create</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {% include 'create_gameroom_modal.html' %}
 
-      <!-- delete game room modal -->
-      <div class="modal fade" id="gameroom-delete-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Delete Gameroom</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="delete-admin-password-input">Admin Password</label>
-                <input class="form-control" id="delete-admin-password-input" type="password" placeholder="">
-              </div>
-            </div>
-            <div class="modal-foot text-right">
-              <button type="button" id="delete-gameroom-button" class="btn btn-danger">DELETE</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {% include 'delete_gameroom_modal.html' %}
 
     </div>
     <script src="/static/gameroom_list.js"></script>

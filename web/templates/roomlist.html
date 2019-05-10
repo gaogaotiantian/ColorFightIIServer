@@ -1,0 +1,46 @@
+            <div class="table-container">
+              <div class="table-div">
+                <div class="table-head">
+                  <div class="table-row table-row-head row">
+                    {% for header in headers %}
+                      {% if header == 'Name' %}
+                        <div class="table-column th-name col-md-7">
+                      {% else %}
+                        <div class="table-column col">
+                      {% endif %}
+                        <h1>{{ header }}</h1>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  <span class="table-divider"></span>
+                </div>
+                <div>
+                  {% for room in gamerooms %}
+                  <div href={{room.link}} class="game-room-tr table-row table-row-content row">
+                    {% for header in headers %}
+                      {% if header == 'Name' %}
+                      <div class="table-column col-md-7 gameroom-name-div">
+                        {% if not room['Admin'] or require_master_admin %}
+                        <a href="#" data-toggle="modal" data-target="#gameroom-delete-modal" class="delete-room-icon"><i class="fas  fa-trash-alt delete-room-icon"></i></a>
+                        {% endif %}
+                        {{ room[header]}}
+                      {% else %}
+                      <div class="table-column col">
+                        {% if header != 'Lock' %}
+                          {{ room[header]}}
+                        {% elif room['Lock'] %}
+                        <i class="fas fa-lock"></i>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                    {% endfor %}
+                  </div>
+                  {% endfor %}
+                  <div href='#' data-toggle="modal" data-target="#gameroom-create-modal" class="add-room-tr table-row table-row-content row">
+                    <div class="table-column col-md-12 text-center">
+                      <a id="gameroom-create-fa"><i class="fas fa-lg fa-plus-circle"></i></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>

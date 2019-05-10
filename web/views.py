@@ -22,7 +22,7 @@ def clean_gameroom(request):
     delete_rooms = []
     for name, gameroom in request.app['game'].items():
         # clear the rooms that's inactivate for more than 10 minutes
-        if name != 'public' and time.time() - gameroom.last_update > request.app['config']['idle_clear_time']:
+        if not gameroom.admin_room and time.time() - gameroom.last_update > request.app['config']['idle_clear_time']:
             delete_rooms.append(name)
     for name in delete_rooms:
         if name in request.app['game']:
@@ -38,7 +38,20 @@ async def index(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
+    headers = ['Name', 'Players', 'Turns', 'Lock']
+    gamerooms = []
+    for name, game in request.app['game'].items():
+        gameroom = {}
+        gameroom['Name'] = '{0}'.format(name)
+        gameroom['Players'] = len(game.users)
+        gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
+        gameroom['link'] = '/gameroom/{0}/play'.format(name)
+        gameroom['Lock'] = game.join_key != ""
+        gameroom['Admin'] = game.admin_room
+        gamerooms.append(gameroom)
     return {
+        'gamerooms': gamerooms, 
+        'headers': headers,
         'max_gameroom_number': request.app['config']['max_gameroom_number'],
         'idle_clear_time'    : request.app['config']['idle_clear_time'],
         'allow_create_room'  : request.app['config']['allow_create_room']
@@ -68,7 +81,9 @@ async def gameroom_list(request):
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
         gameroom['link'] = '/gameroom/{0}/play'.format(name)
         gameroom['Lock'] = game.join_key != ""
+        gameroom['Admin'] = game.admin_room
         gamerooms.append(gameroom)
+    gamerooms.sort(key = lambda x: -x['Admin'])
     return {'gamerooms': gamerooms, 'headers': headers}
 
 @aiohttp_jinja2.template('replay_list.html')
@@ -247,9 +262,18 @@ async def create_gameroom(request):
         else:
             config = get_config('default')
 
+        # If this is an admin room
+        admin_room = False
+        if 'admin' in request.query and request.query['admin'].lower() == 'true':
+            if 'master_admin_password' in data and data['master_admin_password'] == request.app['admin_password']:
+                admin_room = True
+            else:
+                return web.json_response({"success": False, "err_msg": "To create an admin room, you need admin"})
+
         request.app['game'][gameroom_id] = Colorfight(config = config)
         request.app['game'][gameroom_id].save_replay = lambda replay, data: request.app['firebase'].upload_replay(replay, data)
         request.app['game'][gameroom_id].replay_lock = asyncio.Lock(loop = asyncio.get_event_loop())
+        request.app['game'][gameroom_id].admin_room  = admin_room
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
@@ -271,7 +295,8 @@ async def delete_gameroom(request):
 
         admin_password = data.get('admin_password', "")
 
-        if request.app['game'][gameroom_id].admin_password == admin_password or \
+        game = request.app['game'][gameroom_id]
+        if (not game.admin_room and game.admin_password == admin_password) or \
                 request.app['admin_password'] == admin_password:
             request.app['game'].pop(gameroom_id)
         else:

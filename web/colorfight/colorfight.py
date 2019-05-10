@@ -34,6 +34,7 @@ class Colorfight:
         self.key_frame = 0
         self.symmetric = symmetric
         self.game_id   = 0
+        self.admin_room = True
         self.last_update = time.time()
         self.users = {}
         self.errors = {}
