@@ -974,8 +974,8 @@ function get_user_info(uid) {
 // Create a user info div. 
 function create_user_info(uid, user) {
     // [color box] username (dead/in-game)
-    // tech_level
-    // cells owned / total cells  energy_well num  gold_mine num  fortress num
+    // cells owned / total cells tech_level
+    // energy_well num  gold_mine num  fortress num
     // energy_icon energy + energy_source - tax_amount
     // gold_icon   gold   + gold_source   - tax_amount
 
@@ -996,8 +996,12 @@ function create_user_info(uid, user) {
     energyTotal.className   = 'text-right';
     goldTotal.className     = 'text-right';
 
+    const userInfoTable = [
+        [create_p("Cells: " + user['cells'].length + '/' + GAME_MAX_CELLS)],
+        [create_p("Tech: " + user['tech_level'])],
+    ]
+
     const userCellTable = [
-        [create_p(user['cells'].length + '/' + GAME_MAX_CELLS)],
         [create_p(user['building_number']['energy_well'] || 0, {'img_src': '/static/assets/energy_well_icon.png'})],
         [create_p(user['building_number']['gold_mine']   || 0, {'img_src': '/static/assets/gold_mine_icon.png'})],
         [create_p(user['building_number']['fortress']    || 0, {'img_src': '/static/assets/fortress_icon.png'})],
@@ -1023,7 +1027,7 @@ function create_user_info(uid, user) {
     // Construct the user box. 
     userDiv.appendChild(create_user_box(uid, user['username']));
     // Construct the tech level info. 
-    userDiv.appendChild(create_p('Tech Level: ' + user['tech_level']));
+    userDiv.appendChild(create_flex_table(userInfoTable, colClass = "pr-2"));
     // Construct the cell count info. 
     userDiv.appendChild(create_flex_table(userCellTable, colClass = "pr-1"));
     // Construct the resource table as specified above. 
