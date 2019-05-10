@@ -70,6 +70,10 @@ Or equivalently as:
 
 * ```net_attack == max_energy - all_other_attackers``` 
 
+Where ```max_energy``` is the highest energy a player spends on the cell.
+
+You can think of this as the highest energy spent on the cell is neutralized by other energy spent, before it's used to attack the cell.
+
 ```net_attack``` must be greater than ```attack_cost``` to capture the cell. 
 
 Note that players can attack their own cells as a strategy to protect them. 
@@ -191,7 +195,7 @@ In order to upgrade further, the player must upgrade the ```level``` of their ``
 
 When another player captures a cell, the building on it is destroyed. 
 
-In the event that a players loses their ```Home``` all of their buildings will be destroyed. 
+In the event that a player loses his/her ```Home``` all of his/her buildings will be destroyed. 
 
 ##### Home
 

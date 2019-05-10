@@ -51,6 +51,8 @@ However, in order for the attack to succeed, the player who spends the most ener
 <ul>
 <li><code>net_attack == max_energy - all_other_attackers</code> </li>
 </ul>
+<p>Where <code>max_energy</code> is the highest energy a player spends on the cell.</p>
+<p>You can think of this as the highest energy spent on the cell is neutralized by other energy spent, before it's used to attack the cell.</p>
 <p><code>net_attack</code> must be greater than <code>attack_cost</code> to capture the cell. </p>
 <p>Note that players can attack their own cells as a strategy to protect them. </p>
 <blockquote>
@@ -156,7 +158,7 @@ When a player upgrades a building, the upgrade <code>level</code> increases by o
 Buildings other than the <code>Home</code> can only be upgraded until they reach the player's current <code>tech_level</code>. 
 In order to upgrade further, the player must upgrade the <code>level</code> of their <code>Home</code> to increase their <code>tech_level</code>.</p>
 <p>When another player captures a cell, the building on it is destroyed. </p>
-<p>In the event that a players loses their <code>Home</code> all of their buildings will be destroyed. </p>
+<p>In the event that a player loses his/her <code>Home</code> all of his/her buildings will be destroyed. </p>
 <h5 id="home">Home</h5>
 <p>Each player may only have one <code>Home</code> at a time. </p>
 <p>Each player starts with a <code>Home</code> on their starting cell. </p>
