@@ -346,11 +346,11 @@ The old units are taxed at their previous rate.
 number  | tax rate                | total tax
 ----    | ----                    | ---
 0-100   | no tax                  | 0
-100-200 | 1 per cell/building     | 1*(num - 100) 
-200-300 | 2 per cell/building     | 100 + 2*(num - 200)
-300-400 | 3 per cell/building     | 300 + 3*(num - 300)
+101-200 | 1 per cell/building     | 1*(num - 100) 
+201-300 | 2 per cell/building     | 100 + 2*(num - 200)
+301-400 | 3 per cell/building     | 300 + 3*(num - 300)
 ...     | ...
-800-900 | 8 per cell/building     | 2800 + 8*(num - 800)
+801-900 | 8 per cell/building     | 2800 + 8*(num - 800)
 
 > For example. A player has 337 cells on which 102 ```gold_mines```, 73 
   ```energy_wells``` and 99 ```fortress``` are built. First we need to calculate
