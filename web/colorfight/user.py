@@ -10,6 +10,7 @@ class User:
         self.tech_level = 1
         self.tax_level = 0
         self.tax_amount = 0
+        self.building_home = True
         self.building_number = {}
         self.dead = False
         self.cells = {}
@@ -30,6 +31,7 @@ class User:
                 curr_coeff += 1
             tax += num * curr_coeff
             return tax
+        self.building_home = False
         cell_count = len(self.cells)
         building_count = self.building_number.get("energy_well", 0) + self.building_number.get("gold_mine", 0)
         self.tax_level = int(len(self.cells) / 100)

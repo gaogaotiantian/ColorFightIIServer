@@ -277,9 +277,12 @@ class Colorfight:
         if self.users[uid].gold < BldClass.cost:
             return False, "Not enough gold"
 
-        if BldClass is Home and self.users[uid].tech_level != 0:
-            return False, "You can only have one home"
-        elif BldClass is not Home and self.users[uid].tech_level == 0:
+        if BldClass is Home:
+            if self.users[uid].tech_level != 0 or self.users[uid].building_home:
+                return False, "You can only have one home"
+            else:
+                self.users[uid].building_home = True
+        elif self.users[uid].tech_level == 0:
             return False, "You need to have a home before build other buildings"
 
         self.game_map[build_pos].building = BldClass()
