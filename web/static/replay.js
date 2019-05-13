@@ -65,14 +65,10 @@ function load_data(data) {
         } else {
             fullGameData[i]['info'] = info;
             fullGameData[i]['users'] = round_data['users'];
-            let round_game_map_data = [];
             for (let i = 0; i < game_map_data.length; i++) {
                 for (let j = 0; j < game_map_data[0].length; j++) {
-                    if (round_data['game_map']['data'][i][j].length == 0) {
-                        round_game_map_data.push(game_map_data[i][j]);
-                    } else {
-                        round_game_map_data.push(round_data['game_map']['data'][i][j]);
-                        game_map_data[i][j] = round_data['game_map']['data'][i][j];
+                    for (idx in round_data['game_map']['data'][i][j]) {
+                        game_map_data[i][j][idx] = round_data['game_map']['data'][i][j][idx];
                     }
                 }
             }

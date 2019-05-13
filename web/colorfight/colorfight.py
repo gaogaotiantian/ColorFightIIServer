@@ -442,6 +442,7 @@ class Colorfight:
                 "start_count_down": self.start_count_down, \
                 "allow_manual_mode": self.allow_manual_mode, \
                 "game_id": self.game_id, \
+                "replay_version": 2, \
         }
 
     def compress_game_info(self, info):
@@ -449,8 +450,21 @@ class Colorfight:
             if name == "empty":
                 return " "
             return name[0]
+        def header_sort_key(header):
+            if header in ['natural_cost', 'natural_gold', 'natural_energy', 'position']:
+                return 0
+            elif header in ['owner']:
+                return 1
+            elif header in ['building', 'gold', 'energy']:
+                return 2
+            else:
+                return 3
         game_map = {"data":[[None for _ in range(self.width)] for _ in range(self.height)]}
+        # We sort the headers here from the most possible changed key to the
+        # least. This will not affect communication, but in replays, we can 
+        # save some space by not recording unchanged attributes
         game_map['headers'] = [key for key in info['game_map'][0][0]]
+        game_map['headers'].sort(key = header_sort_key, reverse = True)
         for x in range(self.game_map.width):
             for y in range(self.game_map.height):
                 temp_info = info["game_map"][y][x]
@@ -476,7 +490,6 @@ class Colorfight:
     def get_compressed_game_info(self):
         if self._game_info == None or self._game_info_key_frame != self.key_frame:
             self._game_info_key_frame = self.key_frame
-            self._prev_game_info = self._game_info
             self._game_info = self.get_game_info()
             self.compress_game_info(self._game_info)
         return self._game_info
@@ -487,20 +500,38 @@ class Colorfight:
 
         if self.replay_enable != "never":
             if not self._prev_game_info:
-                self.log.append(self.get_compressed_game_info())
+                currData = self.get_compressed_game_info()
+                self.log.append(currData)
             else:
                 currData = self.get_compressed_game_info()
                 newData = {"turn"    : currData["turn"], \
-                           "users"   : currData["users"], \
+                           "users"   : orjson.loads(orjson.dumps(currData["users"])), \
                            "game_map":{"data":[[[] for j in range(GAME_WIDTH)] for i in range(GAME_HEIGHT)]}}
+
+                for user in newData['users'].values():
+                    user.pop('cells');
 
                 for y in range(GAME_HEIGHT):
                     for x in range(GAME_WIDTH):
+                        # To save some(a lot of) space, we store partial data
+                        # of MapCell. The data is sorted from most possible
+                        # changed ones to the least. If the latter several
+                        # attributes do not change, we do not keep it in data.
+                        #
+                        # if last is [1, 2, 3, 4, 5] and current is
+                        #            [2, 2, 4, 4, 5]
+                        # We send [2, 2, 4]. The decoder should be aware of 
+                        # This and decode accordingly
                         cell_data = currData['game_map']['data'][y][x]
-                        if not same_cell(cell_data, self._prev_game_info['game_map']['data'][y][x]):
-                            newData["game_map"]["data"][y][x] = cell_data
+                        temp_queue = []
+                        for idx, d in enumerate(cell_data):
+                            temp_queue.append(d)
+                            if d != self._prev_game_info['game_map']['data'][y][x][idx]:
+                                newData["game_map"]["data"][y][x].extend(temp_queue)
+                                temp_queue = []
                 
                 self.log.append(newData)
+            self._prev_game_info = currData
 
     def clear_log(self):
         self.log_turn = 0

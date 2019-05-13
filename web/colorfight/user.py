@@ -53,4 +53,5 @@ class User:
                 "tax_level": self.tax_level, \
                 "tax_amount": self.tax_amount, \
                 "building_number": self.building_number, \
+                "cell_number": len(self.cells), \
                 "cells": [cell.position.info() for cell in self.cells.values()]}

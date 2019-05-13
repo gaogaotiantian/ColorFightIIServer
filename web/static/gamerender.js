@@ -996,8 +996,16 @@ function create_user_info(uid, user) {
     energyTotal.className   = 'text-right';
     goldTotal.className     = 'text-right';
 
+    // Backward compatibility for older replays
+    let cell_number = 0;
+    if ('cell_number' in user) {
+        cell_number = user['cell_number'];
+    } else if ('cells' in user) {
+        cell_number = user['cells'].length;
+    }
+
     const userInfoTable = [
-        [create_p("Cells: " + user['cells'].length + '/' + GAME_MAX_CELLS)],
+        [create_p("Cells: " + cell_number + '/' + GAME_MAX_CELLS)],
         [create_p("Tech: " + user['tech_level'])],
     ]
 
