@@ -9,8 +9,31 @@ var replayStatus = 'invalid';
 const possibleReplaySpeed = [0.125, 0.25, 0.5, 1, 2, 3, 4];
 var replaySpeedIdx = 3;
 
-function load_file() {
-    let file = document.getElementById('replay-file-input').files[0];
+// Firebase
+firebase.initializeApp({
+    apiKey: 'AIzaSyDtvyYNODSMcNw6Z__3BurnaKvW8wofOyg',
+    authDomain: 'colorfightai.com',
+    storageBucket: 'colorfightai-firebase.appspot.com',
+    projectId: 'colorfightai-firebase',
+})
+
+var storage = firebase.storage();
+
+function loading_start() {
+    $('#loading-div').removeClass("d-none");
+    $('#game-div').addClass("d-none");
+}
+
+function loading_end() {
+    $('#loading-div').addClass("d-none");
+    $('#game-div').removeClass("d-none");
+}
+
+function load_file(file = false) {
+    loading_start();
+    if (!file) {
+        file = document.getElementById('replay-file-input').files[0];
+    }
     fr = new FileReader();
     fr.onloadend = function(e) {
         try {
@@ -19,7 +42,8 @@ function load_file() {
             load_data(data);
         }
         catch (exception) {
-            console.log(exception)
+            console.log(exception);
+            loading_end();
             alert("Wrong replay file!");
         }
     }
@@ -56,6 +80,7 @@ function load_data(data) {
             fullGameData[i]['game_map']['data'] = JSON.parse(JSON.stringify(game_map_data));
         }
     }
+    loading_end();
     replayCurrTurn = 0;
     replayMaxTurn = data.length - 1;
     replayStatus = 'play';
@@ -63,6 +88,29 @@ function load_data(data) {
     var slider = document.getElementById('replay-slider');
     slider.max = replayMaxTurn;
     slider.value = 0;
+}
+
+function play_replay(game_id) {
+    loading_start()
+    var ref = storage.ref('replays/'+game_id.toString()+'.cfr');
+
+    ref.getDownloadURL().then(function(url) {
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+        xhr.onload = function(event) {
+            var blob = xhr.response;
+            try {
+                load_file(blob);
+            }
+            catch (exception) {
+                console.log(exception);
+                loading_end();
+                alert("Wrong replay file!");
+            }
+        };
+        xhr.open('GET', url);
+        xhr.send();
+    })
 }
 
 function play_loop() {
@@ -140,7 +188,10 @@ $(function() {
             let raw_data = sessionStorage.getItem('rawGameData');
             load_data(JSON.parse(raw_data));
         } 
-    }
+    } else if ('load' in queryDict && queryDict['load']) {
+        let game_id = window.location.pathname.substr(window.location.pathname.lastIndexOf('/')+1);
+        play_replay(game_id)
+    } 
 
     play_loop();
 })

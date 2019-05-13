@@ -10,25 +10,6 @@ var storage = firebase.storage();
 var page = 1;
 var REPLAYS_PER_PAGE = 20;
 
-function load_file(file = false, game_id = "upload") {
-    if (!file) {
-        file = document.getElementById('replay-file-input').files[0];
-    }
-    fr = new FileReader();
-    fr.onloadend = function(e) {
-        try {
-            let raw = pako.inflate(fr.result, {to:'string'});
-            sessionStorage.setItem("rawGameData", raw);
-            window.location.href = '/replay/' + game_id + '?loaded=true'
-        }
-        catch (exception) {
-            console.log(exception)
-            alert("Wrong replay file!");
-        }
-    }
-    fr.readAsArrayBuffer(file);
-}
-
 function download_replay(game_id) {
     var ref = storage.ref('replays/'+game_id.toString()+'.cfr');
 
@@ -49,24 +30,7 @@ function download_replay(game_id) {
 }
 
 function play_replay(game_id) {
-    var ref = storage.ref('replays/'+game_id.toString()+'.cfr');
-
-    ref.getDownloadURL().then(function(url) {
-        var xhr = new XMLHttpRequest();
-        xhr.responseType = 'blob';
-        xhr.onload = function(event) {
-            var blob = xhr.response;
-            try {
-                load_file(blob, game_id);
-            }
-            catch (exception) {
-                console.log(exception)
-                alert("Wrong replay file!");
-            }
-        };
-        xhr.open('GET', url);
-        xhr.send();
-    })
+    window.location.href = '/replay/' + game_id + '?load=true';
 }
 
 function add_img_before(node, src) {
@@ -195,7 +159,7 @@ $(function() {
     // Replay buttons
     //
     $('#replay-file-load-button').click(function(e) {
-        $('#replay-file-input').click();
+        window.location.href='/replay/local';
     })
 
     $('#replay-file-input').change(function() {
@@ -215,4 +179,4 @@ $(function() {
         .then(function(snapshot) {
             update_page(snapshot);
         })
-})
+});
