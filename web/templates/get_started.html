@@ -25,8 +25,8 @@
               <div class="doc-section">
                 <h3>Download</h3>
                 <p>You can also download the example AI from our website directly.</p>
-                <a href="https://firebasestorage.googleapis.com/v0/b/colorfightai-firebase.appspot.com/o/assets%2Fpython3.zip?alt=media&token=9187e90d-56c5-4308-999f-c3bf0ff050e0" class="pr-2"><button>Python3</button></a>
-                <a href="https://firebasestorage.googleapis.com/v0/b/colorfightai-firebase.appspot.com/o/assets%2Fjava.zip?alt=media&token=c37017fe-b693-45d7-b2ad-824ff40dd5fd" class="pr-2"><button>Java</button></a>
+                <a href="https://firebasestorage.googleapis.com/v0/b/colorfightai-firebase.appspot.com/o/assets%2Fpython3.zip?alt=media&token=e81ee7b2-da73-43d7-9557-9abae38bdc0d" class="pr-2"><button>Python3</button></a>
+                <a href="https://firebasestorage.googleapis.com/v0/b/colorfightai-firebase.appspot.com/o/assets%2Fjava.zip?alt=media&token=7be3952c-224b-4640-8372-5b184f35b0aa" class="pr-2"><button>Java</button></a>
               </div>
 
               <div class="doc-header">
@@ -39,6 +39,9 @@
                 <p><code>pip3 install -r requirements.txt</code></p>
                 <p>Then you can run you bot by:</p>
                 <p><code>python3 example_ai.py</code></p>
+                <p>If you experience <code>python ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]</code> error on MacOX:</p>
+                <p>It's because Apple forked their own version of ssl and python3.6 has this weird problem with wss/https.</p>
+                <p>You can switch to python3.7 or check <a href="https://stackoverflow.com/questions/42098126/mac-osx-python-ssl-sslerror-ssl-certificate-verify-failed-certificate-verify">this link</a> for a solution</p>
               </div>
 
               <div class="doc-section">
