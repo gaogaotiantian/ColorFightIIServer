@@ -3,6 +3,7 @@ class User:
         self.uid = uid
         self.username = username
         self.password = password
+        self.verified = False
         self.energy   = 1000
         self.gold     = 0
         self.energy_source = 0
@@ -44,6 +45,7 @@ class User:
     def info(self):
         return {"uid":self.uid, \
                 "username": self.username, \
+                "verified": self.verified, \
                 "energy": self.energy, \
                 "gold": self.gold, \
                 "dead": self.dead, \

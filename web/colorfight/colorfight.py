@@ -59,6 +59,9 @@ class Colorfight:
         self.save_replay = None
         self.replay_saved = False
 
+        # Record related
+        self.verify_user = None
+
         # Initialization
         self.restart()
 
@@ -355,6 +358,10 @@ class Colorfight:
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
                     user = User(uid, username, password)
+                    if self.verify_user and self.verify_user(username, password):
+                        user.verified = True
+                    else:
+                        user.verified = False
                     if self.game_map.born(user):
                         self.key_frame += 1
                         self.users[uid] = user
