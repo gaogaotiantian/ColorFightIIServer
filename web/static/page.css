@@ -303,12 +303,21 @@ code {
     font-size: 1.1rem;
 }
 
+.footer {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8); 
+}
+
+.footer a {
+    color: rgba(255, 255, 255, 0.8); 
+}
+
 .modal-content {
     color: rgba(255, 255, 255, 0.8);
     background: #373A49;
-	background-size     : cover;
-	background-position : center;
-	background-repeat   : repeat;
+    background-size     : cover;
+    background-position : center;
+    background-repeat   : repeat;
     font-family: 'Quantico';
 }
 

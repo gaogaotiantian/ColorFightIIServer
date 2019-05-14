@@ -64,6 +64,14 @@ async def signin(request):
 async def dashboard(request):
     return {}
 
+@aiohttp_jinja2.template('terms_of_service.html')
+async def terms_of_service(request):
+    return {}
+
+@aiohttp_jinja2.template('privacy_policy.html')
+async def privacy_policy(request):
+    return {}
+
 @aiohttp_jinja2.template('gameroom.html')
 async def game_room(request):
     if 'replay' in request.url.path:

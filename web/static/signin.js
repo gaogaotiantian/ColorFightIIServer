@@ -6,5 +6,7 @@ ui.start('#firebaseui-auth-container', {
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.FacebookAuthProvider.PROVIDER_ID,
         firebase.auth.GithubAuthProvider.PROVIDER_ID,
-    ]
+    ],
+    tosUrl: '/terms_of_service',
+    privacyPolicyUrl: '/privacy_policy',
 })
