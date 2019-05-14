@@ -1,14 +1,10 @@
-firebase.initializeApp({
-    apiKey: 'AIzaSyDtvyYNODSMcNw6Z__3BurnaKvW8wofOyg',
-    authDomain: 'colorfightai.com',
-    storageBucket: 'colorfightai-firebase.appspot.com',
-    projectId: 'colorfightai-firebase',
-})
-
-var db = firebase.firestore();
+if (!db) {
+    var db = firebase.firestore();
+}
 var storage = firebase.storage();
 var page = 1;
-var REPLAYS_PER_PAGE = 20;
+var REPLAYS_PER_PAGE = 10;
+var lastDoc = null;
 
 function download_replay(game_id) {
     var ref = storage.ref('replays/'+game_id.toString()+'.cfr');
@@ -135,14 +131,54 @@ function create_replay_div(replay_data) {
     return wrapper;
 }
 
-function update_page(replay_lists) {
+function create_show_more_button(){
+    let wrapper       = document.createElement('div');
+    let colwrapper    = document.createElement('div');
+    wrapper.className = "table-row table-row-content row replay-row";
+    wrapper.id        = "show-more-button";
+    colwrapper.className = "table-column col-12 text-center";
+    colwrapper.innerHTML = "Show More";
+    wrapper.appendChild(colwrapper);
+    return wrapper
+}
+
+function update_replay_page(replay_lists, append = false) {
     let container = document.getElementById('replay-content-container');
-    container.innerHTML = "";
+    if (!append) {
+        container.innerHTML = "";
+    } else {
+        var show_more_button = document.querySelector('#show-more-button');
+        show_more_button.parentNode.removeChild(show_more_button);
+    }
 
     replay_lists.forEach(function(doc) {
         let d = create_replay_div(doc.data());
         container.appendChild(d);
     })
+    container.appendChild(create_show_more_button());
+}
+
+function load_more_replays() {
+    if (!lastDoc) {
+        db.collection("replays")
+            .orderBy("timestamp", "desc")
+            .limit(REPLAYS_PER_PAGE)
+            .get()
+            .then(function(snapshot) {
+                update_replay_page(snapshot);
+                lastDoc = snapshot.docs[snapshot.docs.length-1];
+            })
+    } else {
+        db.collection("replays")
+            .orderBy("timestamp", "desc")
+            .limit(REPLAYS_PER_PAGE)
+            .startAfter(lastDoc)
+            .get()
+            .then(function(snapshot) {
+                update_replay_page(snapshot, append=true);
+                lastDoc = snapshot.docs[snapshot.docs.length-1];
+            })
+    }
 }
 
 function show_detail(game_id) {
@@ -158,13 +194,6 @@ function show_detail(game_id) {
 $(function() {
     // Replay buttons
     //
-    $('#replay-file-load-button').click(function(e) {
-        window.location.href='/replay/local';
-    })
-
-    $('#replay-file-input').change(function() {
-        load_file();
-    })
 
     $('body').on('click', '.replay-row', function(e) {
         if (!$(e.target).hasClass('control-button')) {
@@ -172,11 +201,19 @@ $(function() {
         }
     })
 
-    db.collection("replays")
-        .orderBy("timestamp", "desc")
-        .limit(REPLAYS_PER_PAGE)
-        .get()
-        .then(function(snapshot) {
-            update_page(snapshot);
+    $('body').on('click', '#show-more-button', function(e) {
+        load_more_replays();
+    })
+
+    if (window.location.pathname.indexOf('replay') >= 0) {
+        // If this is a replay list
+        $('#replay-file-load-button').click(function(e) {
+            window.location.href='/replay/local';
         })
+
+        $('#replay-file-input').change(function() {
+            load_file();
+        })
+        load_more_replays();
+    }
 });

@@ -9,14 +9,6 @@ var replayStatus = 'invalid';
 const possibleReplaySpeed = [0.125, 0.25, 0.5, 1, 2, 3, 4];
 var replaySpeedIdx = 3;
 
-// Firebase
-firebase.initializeApp({
-    apiKey: 'AIzaSyDtvyYNODSMcNw6Z__3BurnaKvW8wofOyg',
-    authDomain: 'colorfightai.com',
-    storageBucket: 'colorfightai-firebase.appspot.com',
-    projectId: 'colorfightai-firebase',
-})
-
 var storage = firebase.storage();
 
 function loading_start() {

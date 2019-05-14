@@ -56,6 +56,13 @@ async def admin(request):
         'idle_clear_time'    : request.app['config']['idle_clear_time'],
         'allow_create_room'  : request.app['config']['allow_create_room']
     }
+@aiohttp_jinja2.template('signin.html')
+async def signin(request):
+    return {}
+
+@aiohttp_jinja2.template('dashboard.html')
+async def dashboard(request):
+    return {}
 
 @aiohttp_jinja2.template('gameroom.html')
 async def game_room(request):

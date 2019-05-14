@@ -1,11 +1,3 @@
-// Firebase
-firebase.initializeApp({
-    apiKey: 'AIzaSyDtvyYNODSMcNw6Z__3BurnaKvW8wofOyg',
-    authDomain: 'colorfightai.com',
-    storageBucket: 'colorfightai-firebase.appspot.com',
-    projectId: 'colorfightai-firebase',
-})
-
 var storage = firebase.storage();
 
 function set_link() {

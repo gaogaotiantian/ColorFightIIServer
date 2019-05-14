@@ -15,6 +15,8 @@ def setup_routes(app):
     app.router.add_get('/docs/api', api_documentation)
     app.router.add_get('/contact', contact)
     app.router.add_get('/admin', admin)
+    app.router.add_get('/signin', signin)
+    app.router.add_get('/dashboard', dashboard)
 
     # RPC
     app.router.add_post('/start'  , start_game)

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'header.html' %}
+    <link rel="stylesheet" href='/static/gameroom_list.css'>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="container-fluid">
+      <div class="main-content">
+        <div class="row">
+          <div class="col-md-12">
+
+            <div id="dashboard-container" class="row">
+
+              <div id="dashboard-user-info-container" class="col-md-4">
+
+                <div id="game-auth-container" class="doc-content-container" class="row">
+                  <div class="col-md-12">
+                    <div class="doc-header">
+                      <h1>Game Authentication Info</h1>
+                    </div>
+                  
+                    <div class="doc-section">
+                      <div id="game-auth-username-div">
+                        <p>Game Username:</p>
+                        <span id="game-auth-username" class="game-font"></span>
+                        <input id="game-auth-username-input" class="d-none game-info-input"></p>
+                      </div>
+                      <div id="game-auth-password-div">
+                        <p>Game Password:</p>
+                        <span id="game-auth-password" class="game-font"></span>
+                        <input id="game-auth-password-input" class="d-none game-info-input"></p>
+                      </div>
+                      <div class="pt-2">
+                        <button class="btn btn-primary" id="game-auth-change">Change</button>
+                        <button class="btn btn-success" id="game-auth-change-confirm" class="d-none">Confirm</button>
+                        <button class="btn btn-danger" id="game-auth-change-cancel" class="d-none">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="game-data-container" class="doc-content-container"  class="row">
+                  <div class="col-md-12">
+                    <div class="doc-header">
+                      <h1>Game Data Info</h1>
+                    </div>
+                  
+                    <div class="doc-section">
+                      <p>Ranking:</p>
+                      <span id="game-ranking"></span> 
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="dashboard-user-replay-container" class="col-md-8">
+                <div class="doc-content-container" class="row">
+                  <div class="col-md-12">
+                    <div class="doc-header">
+                      <h1>Recent Replays</h1>
+                    </div>
+                    <div class="doc-section">
+                      <div id="replay-content-container">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/static/dashboard.js"></script>
+    <script src="/static/replay_list.js"></script>
+  </body>
+</html>
