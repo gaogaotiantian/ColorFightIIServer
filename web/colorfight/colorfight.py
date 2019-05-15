@@ -42,7 +42,7 @@ class Colorfight:
         # Possible actions
         self.valid_actions = {
             # Action     # Required Args           # Optional Args # Return val
-            "register": [("username", "password"), ("join_key",),  ("uid",)],
+            "register": [("username", "password"), ("join_key",),  ("uid", "user", "new_user")],
             "command":  [("cmd_list",),            (),             ()]
         }
 
@@ -350,7 +350,7 @@ class Colorfight:
         for user in self.users.values():
             if user.username == username:
                 if user.password == password:
-                    return True, (user.uid,)
+                    return True, (user.uid, user, False)
                 else:
                     return False, "Username exists"
 
@@ -358,16 +358,7 @@ class Colorfight:
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
                     user = User(uid, username, password)
-                    if self.verify_user and self.verify_user(username, password):
-                        user.verified = True
-                    else:
-                        user.verified = False
-                    if self.game_map.born(user):
-                        self.key_frame += 1
-                        self.users[uid] = user
-                        return True, (uid,)
-                    else:
-                        return False, "Map is full"
+                    return True, (uid, user, True)
 
             raise Exception("Should never be here")
         else:
@@ -437,6 +428,15 @@ class Colorfight:
             ret[expected_results[i]] = result[i]
 
         return ret
+
+    def born(self, user, verified = False):
+        if self.game_map.born(user):
+            user.verified   = verified
+            self.key_frame += 1
+            self.users[user.uid] = user
+            return {"success": True, "uid": user.uid}
+        return {"success": False, "err_msg": "Map is full"}
+
 
     '''
     Read API

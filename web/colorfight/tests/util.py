@@ -36,6 +36,10 @@ def msg_upgrade(x, y):
 
 def join(game, username, password):
     result = game.parse_action(None, msg_register(username, password))
+    if not result["success"]:
+        return None
+    user = result["user"]
+    result = game.born(user, False)
     return result['uid']
 
 def attack(game, uid, x, y, energy):

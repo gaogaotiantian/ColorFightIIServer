@@ -167,6 +167,21 @@ async def action_channel(request):
                 msg = await ws.receive()
                 if msg.type == aiohttp.WSMsgType.text:
                     result = game.parse_action(uid, msg.data)
+                    # If this is a registration, the user is created but not 
+                    # added into the game. We need to verify it. 
+                    # The reason that we can't do this in Colorfight Object is
+                    # that verify_user() should be an async function.
+                    if "user" in result:
+                        user = result["user"]
+                        if result["new_user"]:
+                            verified = await request.app['firebase'].verify_user(user.username, user.password)
+                            result = game.born(user, verified)
+                        else:
+                            # These are useless stuff, pop it out so it won't
+                            # get jsonfied
+                            result.pop("user")
+                            result.pop("new_user")
+
                     uid = result.get('uid', uid)
                     await ws.send_json(result)
                 else:
