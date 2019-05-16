@@ -7,16 +7,20 @@ import copy
 class MapCell:
     def __init__(self, position, **kwargs):
         self.position = position
-        self.building = Empty()
         self.natural_gold = random.randint(1, 10)
         self.natural_energy = random.randint(1, 10)
-        self.owner = 0
         self.natural_cost = int((self.natural_gold + self.natural_energy) * 15 * random.uniform(0.6, 1.5))
-        self.force_field  = 0
-        self.attacker_list = []
         for kw in kwargs:
             if hasattr(self, kw):
                 setattr(self, kw, kwargs[kw])
+        self.clear()
+    
+    def clear(self):
+        self.building = Empty()
+        self.owner = 0
+        self.force_field = 0
+        self.attacker_list = []
+
     @property
     def attack_cost(self):
         return self.building.get_attack_cost(self)

@@ -198,7 +198,7 @@ async def action_channel(request):
                 else:
                     break
         finally:
-            pass
+            game.disconnect(uid)
     return ws
 
 # =============================================================================

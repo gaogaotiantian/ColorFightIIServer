@@ -461,6 +461,13 @@ class Colorfight:
             return {"success": True, "uid": user.uid}
         return {"success": False, "err_msg": "Map is full"}
 
+    def disconnect(self, uid):
+        if uid in self.users and self.turn == 0:
+            user = self.users[uid]
+            for pos in self.users[uid].cells:
+                self.game_map[pos].clear()
+            self.users.pop(uid)
+            self.key_frame += 1
 
     '''
     Read API
