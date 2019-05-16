@@ -61,6 +61,7 @@ class Colorfight:
 
         # Record related
         self.verify_user = None
+        self.result_updated = False
 
         # Initialization
         self.restart()
@@ -131,6 +132,7 @@ class Colorfight:
         self.game_id = str(int(self.last_update * 1000))
         self.key_frame = 1
         self.replay_saved = False
+        self.result_updated = False
         self.clear_log()
         self.add_log()
 
@@ -139,6 +141,7 @@ class Colorfight:
             self.update(force = True)
 
     def update(self, force = False):
+        required_actions = {}
         do_update = False
         do_restart = False
         if self.turn == 0:
@@ -164,6 +167,11 @@ class Colorfight:
             if self.replay_enable == "end" and self.save_replay and not self.replay_saved:
                 self.save_replay(self.get_log(), self.get_game_info())
                 self.replay_saved = True
+            if not self.result_updated:
+                self.result_updated = True
+                result = self.get_result()
+                if any(result):
+                    required_actions["update_result"] = self.get_result()
         else:
             if force or (time.time() - self.last_update > self.round_time):
                 do_update = True
@@ -184,12 +192,26 @@ class Colorfight:
             self.add_log()
             self.last_update = time.time() 
 
+        return required_actions
+
     def update_cells(self):
         self.game_map.update_cells(self.users)
 
     def update_users(self):
         for user in self.users.values():
             user.update()
+
+    def get_result(self):
+        '''
+            return a list of usernames as the final result
+            If a user is not verified, it's None
+            The users should be sorted based on their ranks
+        '''
+        users = list(self.users.values())
+        users.sort(key = lambda x: x.gold, reverse = True)
+        result = [user.username if user.verified else None for user in users]
+        return result
+
 
     '''
     This is the game command part.
@@ -429,9 +451,11 @@ class Colorfight:
 
         return ret
 
-    def born(self, user, verified = False):
+    def born(self, user, verified = False, data = None):
         if self.game_map.born(user):
             user.verified   = verified
+            if verified:
+                user.ranking    = data['game_ranking_mean'] - 3 * data['game_ranking_dev']
             self.key_frame += 1
             self.users[user.uid] = user
             return {"success": True, "uid": user.uid}

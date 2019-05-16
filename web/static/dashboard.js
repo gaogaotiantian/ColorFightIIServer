@@ -35,7 +35,8 @@ function init_dashboard(user) {
             let init_data = {
                 "game_username": "",
                 "game_password": "",
-                "game_ranking": 0,
+                "game_ranking_mean": 25,
+                "game_ranking_dev": 8.33333333,
                 "replays" : []
             }
             user_ref.set(init_data);
@@ -59,8 +60,8 @@ function update_dashboard(data) {
     } else {
         $('#game-auth-password').text("N/A");
     }
-    if ("game_ranking" in data) {
-        $('#game-ranking').text(data.game_ranking);
+    if ("game_ranking_mean" in data && "game_ranking_dev" in data) {
+        $('#game-ranking').text((data.game_ranking_mean - 3 * data.game_ranking_dev).toFixed(2));
     } else {
         $('#game-ranking').text("N/A");
     }

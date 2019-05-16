@@ -139,7 +139,10 @@ async def game_channel(request):
 
         try:
             while True:
-                game.update()
+                required_actions = game.update()
+                for action in required_actions:
+                    if action == "update_result":
+                        await request.app['firebase'].update_result(required_actions[action])
                 if key_frame != game.key_frame or game_id != game.game_id or time.time() - last_send > 30:
                     game_id   = game.game_id
                     key_frame = game.key_frame
@@ -174,8 +177,8 @@ async def action_channel(request):
                     if "user" in result:
                         user = result["user"]
                         if result["new_user"]:
-                            verified = await request.app['firebase'].verify_user(user.username, user.password)
-                            result = game.born(user, verified)
+                            verified, data = await request.app['firebase'].verify_user(user.username, user.password)
+                            result = game.born(user, verified, data)
                         else:
                             # These are useless stuff, pop it out so it won't
                             # get jsonfied

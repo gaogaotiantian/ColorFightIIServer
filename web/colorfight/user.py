@@ -11,6 +11,7 @@ class User:
         self.tech_level = 1
         self.tax_level = 0
         self.tax_amount = 0
+        self.ranking = 0
         self.building_home = True
         self.building_number = {}
         self.dead = False
@@ -46,6 +47,7 @@ class User:
         return {"uid":self.uid, \
                 "username": self.username, \
                 "verified": self.verified, \
+                "ranking" : self.ranking, \
                 "energy": self.energy, \
                 "gold": self.gold, \
                 "dead": self.dead, \

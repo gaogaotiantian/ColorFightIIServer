@@ -871,6 +871,7 @@ function create_user_box(uid, username) {
     // Create a horizontal flex box for the row. 
     const verified          = gameData && gameData['users'][uid] && gameData['users'][uid]['verified'];
     const userBoxDiv        = document.createElement('div');
+    let ranking           = 0;
     userBoxDiv.className    = 'd-flex';
     // Store the UID in the div. 
     userBoxDiv.setAttribute('data-uid', uid); 
@@ -883,10 +884,15 @@ function create_user_box(uid, username) {
     }
     userColorBox.style.backgroundColor  = id_to_color(uid);
 
+    if (gameData && gameData['users'] && gameData['users'][uid] && gameData['users'][uid]['ranking']) {
+        ranking = gameData['users'][uid]['ranking'];
+    }
+
     // Construct the row. 
     userBoxDiv.appendChild(userColorBox);
     if (verified) {
         userBoxDiv.appendChild(create_p(username, {"class": "username-verified"}));
+        userBoxDiv.appendChild(create_p(ranking.toFixed(2), {"class": "username-verified"}));
     } else {
         userBoxDiv.appendChild(create_p(username));
     }
