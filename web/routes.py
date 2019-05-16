@@ -14,6 +14,7 @@ def setup_routes(app):
     app.router.add_get('/docs/game_rules', game_rules)
     app.router.add_get('/docs/api', api_documentation)
     app.router.add_get('/contact', contact)
+    app.router.add_get('/leaderboard', leaderboard)
     app.router.add_get('/admin', admin)
     app.router.add_get('/terms_of_service', terms_of_service)
     app.router.add_get('/privacy_policy', privacy_policy)

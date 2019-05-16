@@ -2,6 +2,7 @@ firebase.initializeApp({
     apiKey: 'AIzaSyDtvyYNODSMcNw6Z__3BurnaKvW8wofOyg',
     authDomain: 'colorfightai-firebase.firebaseapp.com',
     storageBucket: 'colorfightai-firebase.appspot.com',
+    databaseURL: 'https://colorfightai-firebase.firebaseio.com',
     projectId: 'colorfightai-firebase',
 })
 

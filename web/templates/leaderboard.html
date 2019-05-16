@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'header.html' %}
+    <link rel="stylesheet" href='/static/gameroom_list.css'>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="container">
+      <div class="main-content">
+        <div class="row justify-content-md-center">
+          <div class="col-md-12">
+
+            <div class="doc-content-container">
+
+              <div class="doc-header row">
+                <div class="col">
+                  <h1>LEADERBOARD</h1>
+                </div>
+              </div>
+
+              <div class="doc-section">
+                <div id="leaderboard-header" class="table-head">
+                  <div class="row mb-2" style="border-bottom:solid 1px">
+                    <div class="col-2">
+                      <h1 style="border:none">RANK</h1>
+                    </div>
+                    <div class="col-7">
+                      <h1 style="border:none">USERNAME</h1>
+                    </div>
+                    <div class="col-3">
+                      <h1 style="border:none">SCORE</h1>
+                    </div>
+                  </div>
+                </div>
+                <div id="leaderboard-content" class="py-1">
+                </div>
+
+              </div>
+
+            </div> <!-- doc-content-container -->
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/static/leaderboard.js"></script>
+  </body>
+</html>

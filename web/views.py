@@ -28,6 +28,9 @@ def clean_gameroom(request):
         if name in request.app['game']:
             request.app['game'].pop(name)
 
+async def clean_leaderboard(request):
+    await request.app["firebase"].clean_leaderboard()
+
 # =============================================================================
 #    Web pages
 # =============================================================================
@@ -103,6 +106,11 @@ async def gameroom_list(request):
 
 @aiohttp_jinja2.template('replay_list.html')
 async def replay_list(request):
+    return {}
+
+@aiohttp_jinja2.template('leaderboard.html')
+async def leaderboard(request):
+    await clean_leaderboard(request)
     return {}
 
 @aiohttp_jinja2.template('get_started.html')

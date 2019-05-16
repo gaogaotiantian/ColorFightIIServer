@@ -7,7 +7,7 @@ import asyncio
 import firebase_admin
 from firebase_admin import credentials
 import time
-from firebase_admin import storage, firestore
+from firebase_admin import storage, firestore, db
 import trueskill
 
 
@@ -19,13 +19,17 @@ class Firebase:
             credential = credentials.Certificate(cred_json)
             app = firebase_admin.initialize_app(credential, {
                 'projectId'    : 'colorfightai-firebase',
-                'storageBucket': 'colorfightai-firebase.appspot.com'
+                'storageBucket': 'colorfightai-firebase.appspot.com',
+                'databaseURL'  : 'https://colorfightai-firebase.firebaseio.com'
             })
 
             self.executor = concurrent.futures.ThreadPoolExecutor(max_workers = 15)
 
-            self.bucket = storage.bucket()
+            self.bucket    = storage.bucket()
             self.firestore = firestore.client()
+            self.db        = db
+
+            self.leaderboard_duration = 5 * 24 * 3600
             self.valid = True
         except Exception as e:
             self.valid = False
@@ -58,7 +62,22 @@ class Firebase:
             loop = asyncio.get_event_loop()
             asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_data, replay, game_id))
             asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_info, game_info))
-    
+
+    def leaderboard_set_score(self, user, score):
+        if self.valid:
+            ref = db.reference('/leaderboard')
+            child = ref.child(user)
+            child.set({"score":score, "timestamp":int(time.time())})
+
+    async def clean_leaderboard(self):
+        if self.valid:
+            ref = db.reference('/leaderboard')
+            old_records = ref.order_by_child("timestamp")\
+                    .end_at(time.time() - self.leaderboard_duration)\
+                    .get()
+            for key in old_records:
+                ref.child(key).delete()
+
     async def verify_user(self, username, password):
         def _check():
             result = self.firestore.collection('users')\
@@ -95,7 +114,9 @@ class Firebase:
                 user_obj  = user[0]
                 user_data = user[1]
                 if user[0]:
+                    ladder_score = user_data['game_ranking_mean'] - 3 * user_data['game_ranking_dev']
                     batch.update(user_obj.reference, user_data)
+                    self.leaderboard_set_score(user_data["game_username"], ladder_score)
             batch.commit()
 
         loop = asyncio.get_event_loop()
@@ -133,6 +154,6 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
-    asyncio.ensure_future(f.update_result([None, None]))
+    asyncio.ensure_future(f.update_result(["test", "example", None]))
     loop.run_forever()
 
