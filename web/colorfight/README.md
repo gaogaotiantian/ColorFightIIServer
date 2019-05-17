@@ -197,6 +197,8 @@ When another player captures a cell, the building on it is destroyed.
 
 In the event that a player loses his/her ```Home``` all of his/her buildings will be destroyed. 
 
+If any building except for ```Home``` gets destroyed, half of the gold spent on the building will be returned to the player.
+
 ##### Home
 
 Each player may only have one ```Home``` at a time. 
@@ -233,12 +235,13 @@ It increases the production by the ```natural_energy``` per ```level```.
 Build and upgrade cost:
 
 * ```(energy, gold)```
-* ```cost == (0, 100)```
-* ```upgrade_cost == [2: (0, 200), 3: (0, 400)]```
+* ```cost == (0, 200)```
+* ```upgrade_cost == [2: (0, 400), 3: (0, 600)]```
 
 Capturing a cell with an ```EnergyWell``` gives free ```force_field```
 
-* ```Destroy Effect: Add (1: 50, 2: 150, 3: 350) force_field```
+* ```Destroy Effect: Add (1: 100, 2: 300, 3: 600) force_field```
+* ```Destroy Effect: (1: 100, 2: 300, 3: 600) gold will be returned```
 
 ##### Gold Mine
 
@@ -250,12 +253,13 @@ It increases the production by the ```natural_gold``` per ```level```.
 Build and upgrade cost:
 
 * ```(energy, gold)```
-* ```cost == (0, 100)```
-* ```upgrade_cost == [2: (0, 200), 3: (0, 400)]```
+* ```cost == (0, 200)```
+* ```upgrade_cost == [2: (0, 400), 3: (0, 600)]```
 
 Capturing a cell with an ```GoldMine``` gives free ```gold```
 
-* ```Destroy Effect: Add (1: 50, 2: 150, 3: 350) gold```
+* ```Destroy Effect: Add (1: 100, 2: 300, 3: 600) gold```
+* ```Destroy Effect: (1: 100, 2: 300, 3: 600) gold will be returned```
 
 ##### Fortress
 
@@ -270,8 +274,9 @@ It increases the ```attack_cost``` of a cell, generates ```force_field``` for th
 Build and upgrade cost:
 
 * ```(energy, gold)```
-* ```cost == (0, 100)```
-* ```upgrade_cost == [2: (0, 200), 3: (0, 400)]```
+* ```cost == (0, 200)```
+* ```upgrade_cost == [2: (0, 400), 3: (0, 600)]```
+* ```Destroy Effect: (1: 100, 2: 300, 3: 600) gold will be returned```
 
 #### Force Field
 

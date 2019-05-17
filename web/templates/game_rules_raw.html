@@ -159,6 +159,7 @@ Buildings other than the <code>Home</code> can only be upgraded until they reach
 In order to upgrade further, the player must upgrade the <code>level</code> of their <code>Home</code> to increase their <code>tech_level</code>.</p>
 <p>When another player captures a cell, the building on it is destroyed. </p>
 <p>In the event that a player loses his/her <code>Home</code> all of his/her buildings will be destroyed. </p>
+<p>If any building except for <code>Home</code> gets destroyed, half of the gold spent on the building will be returned to the player.</p>
 <h5 id="home">Home</h5>
 <p>Each player may only have one <code>Home</code> at a time. </p>
 <p>Each player starts with a <code>Home</code> on their starting cell. </p>
@@ -191,12 +192,13 @@ It increases the production by the <code>natural_energy</code> per <code>level</
 <p>Build and upgrade cost:</p>
 <ul>
 <li><code>(energy, gold)</code></li>
-<li><code>cost == (0, 100)</code></li>
-<li><code>upgrade_cost == [2: (0, 200), 3: (0, 400)]</code></li>
+<li><code>cost == (0, 200)</code></li>
+<li><code>upgrade_cost == [2: (0, 400), 3: (0, 600)]</code></li>
 </ul>
 <p>Capturing a cell with an <code>EnergyWell</code> gives free <code>force_field</code></p>
 <ul>
-<li><code>Destroy Effect: Add (1: 50, 2: 150, 3: 350) force_field</code></li>
+<li><code>Destroy Effect: Add (1: 100, 2: 300, 3: 600) force_field</code></li>
+<li><code>Destroy Effect: (1: 100, 2: 300, 3: 600) gold will be returned</code></li>
 </ul>
 <h5 id="gold-mine">Gold Mine</h5>
 <p><code>GoldMine</code> enhances the gold production of a cell. 
@@ -207,12 +209,13 @@ It increases the production by the <code>natural_gold</code> per <code>level</co
 <p>Build and upgrade cost:</p>
 <ul>
 <li><code>(energy, gold)</code></li>
-<li><code>cost == (0, 100)</code></li>
-<li><code>upgrade_cost == [2: (0, 200), 3: (0, 400)]</code></li>
+<li><code>cost == (0, 200)</code></li>
+<li><code>upgrade_cost == [2: (0, 400), 3: (0, 600)]</code></li>
 </ul>
 <p>Capturing a cell with an <code>GoldMine</code> gives free <code>gold</code></p>
 <ul>
-<li><code>Destroy Effect: Add (1: 50, 2: 150, 3: 350) gold</code></li>
+<li><code>Destroy Effect: Add (1: 100, 2: 300, 3: 600) gold</code></li>
+<li><code>Destroy Effect: (1: 100, 2: 300, 3: 600) gold will be returned</code></li>
 </ul>
 <h5 id="fortress">Fortress</h5>
 <p><code>Fortress</code> enhances the defensive and offensive properties of a cell. 
@@ -226,8 +229,9 @@ It increases the <code>attack_cost</code> of a cell, generates <code>force_field
 <p>Build and upgrade cost:</p>
 <ul>
 <li><code>(energy, gold)</code></li>
-<li><code>cost == (0, 100)</code></li>
-<li><code>upgrade_cost == [2: (0, 200), 3: (0, 400)]</code></li>
+<li><code>cost == (0, 200)</code></li>
+<li><code>upgrade_cost == [2: (0, 400), 3: (0, 600)]</code></li>
+<li><code>Destroy Effect: (1: 100, 2: 300, 3: 600) gold will be returned</code></li>
 </ul>
 <h4 id="force-field">Force Field</h4>
 <p>Each <code>MapCell</code> has a <code>force_field</code>. 
