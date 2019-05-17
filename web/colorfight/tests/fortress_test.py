@@ -31,7 +31,7 @@ def test_build_fortress():
     assert (cell['building']['name'] == 'fortress')
 
     cur_level = cell['building']['level']
-    expected_force_field = (500-200)*2 + 2*2 + cur_level*5
+    expected_force_field = (500-200)*2 + 2*2 + cur_level*4
     expected_attack_cost = (game.game_map._cells[attack_y][x].natural_cost + expected_force_field)*(cur_level+1)
     assert (game.game_map._cells[attack_y][x].force_field == expected_force_field)
     assert (game.game_map._cells[attack_y][x].attack_cost == expected_attack_cost)
@@ -137,4 +137,4 @@ def test_fortress_decr():
     game.update(True)
     info = game.get_game_info()
 
-    assert(info['game_map'][cell_y][cell_x]['force_field'] == 1000 - total_cell_num * 20 )
+    assert(info['game_map'][cell_y][cell_x]['force_field'] == 1000 - total_cell_num * 16 )

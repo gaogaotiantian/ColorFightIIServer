@@ -54,7 +54,7 @@ class BaseBuilding:
 
     @property
     def adjacent_forcefield_decr(self):
-        return 10
+        return 5
 
     @property
     def self_forcefield_incr(self):
@@ -123,15 +123,15 @@ class Fortress(BaseBuilding):
 
     @property
     def adjacent_forcefield_incr(self):
-        return 2 + self.level
+        return 2 + 2 * self.level
 
     @property
     def adjacent_forcefield_decr(self):
-        return 10 + 10 * self.level
+        return 6 + 10 * self.level
 
     @property
     def self_forcefield_incr(self):
-        return 5 * self.level
+        return 4 * self.level
 
 
 def get_building_class(building):

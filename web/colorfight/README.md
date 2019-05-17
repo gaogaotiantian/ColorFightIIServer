@@ -263,9 +263,9 @@ Capturing a cell with an ```GoldMine``` gives free ```gold```
 It increases the ```attack_cost``` of a cell, generates ```force_field``` for the cell and its allied neighbors, and decreases ```force_field``` of enemy neighbors. 
 
 * ```attack_cost``` = ```(natural_cost + force_field) * (1 + level)```
-* ```self_forcefield_incr == 5 * level```
-* ```ally_forcefield_incr == 2 + level```
-* ```enemy_forcefield_decr == 10 * (1 + level)```
+* ```self_forcefield_incr == 4 * level```
+* ```ally_forcefield_incr == 2 + 2 * level```
+* ```enemy_forcefield_decr == 6 + 10 * level```
 
 Build and upgrade cost:
 
@@ -293,19 +293,19 @@ After each round, the ```force_field``` will be updated based on its building an
 
 * Cell has a fortress, increase by ```5 * fort_level```
 * Each adjacent ally, increase by ```2 + fort_level```
-* Each adjacent enemy, decrease by ```10 * (1 + fort_level)```
+* Each adjacent enemy, decrease by ```6 + 10 * fort_level```
 
 > For example. Player A owns cell (2, 2) and currently the cell has 100 
   ```force_field```. Player A owns (2, 1) and (1, 2), too. (2, 3) is empty and
   Player B owns (3, 2). Therefore the cell (2, 2) has 2 self cells and 1 emeny
-  cell around, so for each round, the ```force_field``` will reduce 10 - 2 * 2
-  = 6.
+  cell around, so for each round, the ```force_field``` will reduce 6 - 2 * 2
+  = 2.
 
 > ```Fortress``` will affect the change of ```force_field```. If Player A owns
   cell (2, 2) and has a level 1 ```Fortress``` on it. Player A owns (2, 1) with
   a level 2 ```Fortress``` and (1, 2) with nothing. Player B owns (2, 3) with
   a level 1 ```Fortress``` and (3, 2) with nothing. The cell (2, 2) will have 
-  a ```force_field``` change for ```5 + 4 + 2 - 20 - 10``` = ```-19```
+  a ```force_field``` change for ```4 + 6 + 2 - 16 - 6``` = ```-10```
 
 #### Attack Cost
 
