@@ -27,9 +27,9 @@ class User:
         def get_tax(num):
             tax = 0
             curr_coeff = 0
-            while num >= 100:
-                num -= 100
-                tax += curr_coeff * 100
+            while num >= 75:
+                num -= 75
+                tax += curr_coeff * 75
                 curr_coeff += 1
             tax += num * curr_coeff
             return tax

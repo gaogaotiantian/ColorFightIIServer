@@ -20,7 +20,7 @@ def test_tax_level_1():
     game.update(True)
     info = game.get_game_info()
     cell_num = len(info['users'][uid]['cells'])
-    expected_tax = (cell_num - 100)
+    expected_tax = (cell_num - 75)
     assert (game.users[uid].tax_amount == expected_tax)
 
 def test_tax_level_max():
@@ -33,7 +33,7 @@ def test_tax_level_max():
     game.update(True)
     info = game.get_game_info()
     cell_num = len(info['users'][uid]['cells'])
-    expected_tax = 2800 + 8 * (cell_num-800)
+    expected_tax = 4125 + 11 * (cell_num-825)
     assert (game.users[uid].tax_amount == expected_tax)
 
 def test_tax_level_with_building():
@@ -65,5 +65,5 @@ def test_tax_level_with_building():
     cell_num = len(info['users'][uid]['cells'])
     assert(cell_num == 270 or 271)
     assert(count == 120 or 119)
-    expected_tax = 100 + (cell_num - 200)*2 + (count - 100)
+    expected_tax = 225 + (cell_num - 225)*3 + (count - 75)
     assert (game.users[uid].tax_amount == expected_tax)
