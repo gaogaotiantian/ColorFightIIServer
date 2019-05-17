@@ -160,7 +160,7 @@ It has three natural attributes:
 
 * ```natural_energy``` (1 - 10)
 * ```natural_gold``` (1 - 10)
-* ```natural_cost``` (1 - 300)
+* ```natural_cost``` (40 - 400)
 
 The natural attributes of a cell will not change during the game. 
 However, the actual energy and gold it produced by the cell and the actual cost to capture it may change due to other aspects. 
