@@ -463,7 +463,6 @@ class Colorfight:
 
     def disconnect(self, uid):
         if uid in self.users and self.turn == 0:
-            user = self.users[uid]
             for pos in self.users[uid].cells:
                 self.game_map[pos].clear()
             self.users.pop(uid)
@@ -481,6 +480,7 @@ class Colorfight:
                 "allow_manual_mode": self.allow_manual_mode, \
                 "game_id": self.game_id, \
                 "replay_version": 2, \
+                "game_version"  : 2, \
         }
 
     def compress_game_info(self, info):
@@ -533,9 +533,6 @@ class Colorfight:
         return self._game_info
 
     def add_log(self):
-        def same_cell(c1, c2):
-            return all([c1[i] == c2[i] for i in range(len(c1))])
-
         if self.replay_enable != "never":
             if not self._prev_game_info:
                 currData = self.get_compressed_game_info()
@@ -547,7 +544,7 @@ class Colorfight:
                            "game_map":{"data":[[[] for j in range(GAME_WIDTH)] for i in range(GAME_HEIGHT)]}}
 
                 for user in newData['users'].values():
-                    user.pop('cells');
+                    user.pop('cells')
 
                 for y in range(GAME_HEIGHT):
                     for x in range(GAME_WIDTH):

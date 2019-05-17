@@ -9,7 +9,7 @@ class MapCell:
         self.position = position
         self.natural_gold = random.randint(1, 10)
         self.natural_energy = random.randint(1, 10)
-        self.natural_cost = int((self.natural_gold + self.natural_energy) * 15 * random.uniform(0.6, 1.5))
+        self.natural_cost = int((self.natural_gold + self.natural_energy) * 20 * random.uniform(0.6, 1.5))
         for kw in kwargs:
             if hasattr(self, kw):
                 setattr(self, kw, kwargs[kw])

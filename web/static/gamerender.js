@@ -52,7 +52,7 @@ const GAME_MAX_FORCE_FIELD  = 1000;
 // Therefore, 500 energy is enough to max out the force field. 
 const GAME_MAX_ATTACK       = GAME_MAX_FORCE_FIELD / 2; 
 
-const BASE_BUILD_COST       = 100; 
+const BASE_BUILD_COST       = 200; 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Game Variables
@@ -1191,7 +1191,7 @@ function create_cell_info(x, y) {
                     }
                     else if (upgradeLevel < selfData['tech_level']) {
                         // Cost doubles per level. 
-                        let cost = BASE_BUILD_COST * Math.pow(2, upgradeLevel);
+                        let cost = BASE_BUILD_COST * (1 + upgradeLevel);
                         buttonDiv.appendChild(create_cell_button('Upgrade', 
                             cost, function(){queue_upgrade(x, y);})); 
                     }

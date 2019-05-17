@@ -1,4 +1,5 @@
 from .constants import BLD_ENERGY_WELL, BLD_GOLD_MINE, BLD_HOME, BLD_FORTRESS
+from .constants import BUILDING_COST, BUILDING_UPGRADE_COST, HOME_COST, HOME_UPGRADE_COST
 
 class BaseBuilding:
     cost = 0
@@ -68,8 +69,8 @@ class Empty(BaseBuilding):
 
 class Home(BaseBuilding):
     name = 'home'
-    cost = 1000
-    upgrade_cost = [(1000, 1000), (2000, 2000)]
+    cost = HOME_COST
+    upgrade_cost = HOME_UPGRADE_COST
     def get_energy(self, cell):
         return 10 * self.level
 
@@ -88,35 +89,37 @@ class Home(BaseBuilding):
 
 class EnergyWell(BaseBuilding):
     name = "energy_well"
-    cost = 100
-    upgrade_cost = [(200, 0), (400, 0)]
+    cost = BUILDING_COST
+    upgrade_cost = BUILDING_UPGRADE_COST
 
     def get_energy(self, cell):
         return cell.natural_energy * (1 + self.level)
 
     def taken(self, cell, users, owner_id, attacker_id):
         cell.owner = attacker_id
-        bonus_force_field = (50, 150, 350)[self.level - 1]
+        bonus_force_field = (100, 300, 600)[self.level - 1]
         cell.building = Empty()
         cell.force_field += bonus_force_field
+        users[owner_id].gold += (100, 300, 600)[self.level - 1]
 
 class GoldMine(BaseBuilding):
     name = "gold_mine"
-    cost = 100
-    upgrade_cost = [(200, 0), (400, 0)]
+    cost = BUILDING_COST
+    upgrade_cost = BUILDING_UPGRADE_COST
 
     def get_gold(self, cell):
         return cell.natural_gold * (1 + self.level)
 
     def taken(self, cell, users, owner_id, attacker_id):
         cell.owner = attacker_id
-        users[attacker_id].gold += (50, 150, 350)[self.level - 1]
+        users[attacker_id].gold += (100, 300, 600)[self.level - 1]
         cell.building = Empty()
+        users[owner_id].gold += (100, 300, 600)[self.level - 1]
 
 class Fortress(BaseBuilding):
     name = "fortress"
-    cost = 100
-    upgrade_cost = [(200, 0), (400, 0)]
+    cost = BUILDING_COST
+    upgrade_cost = BUILDING_UPGRADE_COST
 
     def get_attack_cost(self, cell):
         return (cell.natural_cost + cell.force_field) * (1 + self.level)
@@ -133,6 +136,10 @@ class Fortress(BaseBuilding):
     def self_forcefield_incr(self):
         return 4 * self.level
 
+    def taken(self, cell, users, owner_id, attacker_id):
+        cell.owner = attacker_id
+        cell.building = Empty()
+        users[owner_id].gold += (100, 300, 600)[self.level - 1]
 
 def get_building_class(building):
     '''
