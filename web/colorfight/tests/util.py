@@ -38,8 +38,10 @@ def join(game, username, password):
     result = game.parse_action(None, msg_register(username, password))
     if not result["success"]:
         return None
-    user = result["user"]
-    result = game.born(user, False)
+    if "callback" in result and result["callback"]:
+        result = game.callback(result["callback"], {"verified": False, "user_data": None})
+        if not result["success"]:
+            return None
     return result['uid']
 
 def attack(game, uid, x, y, energy):

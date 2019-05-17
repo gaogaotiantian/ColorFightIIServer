@@ -86,8 +86,8 @@ class Firebase:
                     .limit(1)\
                     .stream()
             for data in result:
-                return True, data.to_dict()
-            return False, None
+                return {"verified": True, "user_data": data.to_dict()}
+            return {"verified": False, "user_data": None}
 
         if self.valid: 
             loop = asyncio.get_event_loop()

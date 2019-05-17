@@ -182,16 +182,15 @@ async def action_channel(request):
                     # added into the game. We need to verify it. 
                     # The reason that we can't do this in Colorfight Object is
                     # that verify_user() should be an async function.
-                    if "user" in result:
-                        user = result["user"]
-                        if result["new_user"]:
-                            verified, data = await request.app['firebase'].verify_user(user.username, user.password)
-                            result = game.born(user, verified, data)
+                    if "callback" in result:
+                        if result["callback"]:
+                            cb_type = result["callback"]["type"]
+                            cb_data = result["callback"]["data"]
+                            if cb_type == "verify_user":
+                                data = await request.app['firebase'].verify_user(cb_data["username"], cb_data["password"])
+                            result = game.callback(result["callback"], data)
                         else:
-                            # These are useless stuff, pop it out so it won't
-                            # get jsonfied
-                            result.pop("user")
-                            result.pop("new_user")
+                            result.pop("callback")
 
                     uid = result.get('uid', uid)
                     await ws.send_json(result)

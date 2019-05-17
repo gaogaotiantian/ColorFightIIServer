@@ -42,7 +42,7 @@ class Colorfight:
         # Possible actions
         self.valid_actions = {
             # Action     # Required Args           # Optional Args # Return val
-            "register": [("username", "password"), ("join_key",),  ("uid", "user", "new_user")],
+            "register": [("username", "password"), ("join_key",),  ("uid", "callback")],
             "command":  [("cmd_list",),            (),             ()]
         }
 
@@ -372,7 +372,7 @@ class Colorfight:
         for user in self.users.values():
             if user.username == username:
                 if user.password == password:
-                    return True, (user.uid, user, False)
+                    return True, (user.uid, None)
                 else:
                     return False, "Username exists"
 
@@ -380,7 +380,15 @@ class Colorfight:
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
                     user = User(uid, username, password)
-                    return True, (uid, user, True)
+                    return True, (uid,
+                            {
+                                "type": "verify_user", 
+                                "data": {
+                                    "uid"     : uid,
+                                    "username": username, 
+                                    "password": password
+                                }
+                            })
 
             raise Exception("Should never be here")
         else:
@@ -450,6 +458,20 @@ class Colorfight:
             ret[expected_results[i]] = result[i]
 
         return ret
+
+    def callback(self, cb, data):
+        cb_type = cb["type"]
+        cb_data = cb["data"]
+        if cb_type == "verify_user":
+            uid = cb_data["uid"]
+            username = cb_data["username"]
+            password = cb_data["password"]
+
+            user = User(uid, username, password)
+            result = self.born(user, data["verified"], data["user_data"])
+            return result
+        else:
+            raise Exception("should never be here")
 
     def born(self, user, verified = False, data = None):
         if self.game_map.born(user):
