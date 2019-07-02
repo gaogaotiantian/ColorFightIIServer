@@ -297,6 +297,10 @@ body {
     background-color: #474A59;
 }
 
+.q-and-a-section {
+    margin-bottom: 25px;
+}
+
 code {
     background-color: rgb(81, 78, 92);
     color: #f3cae3;
