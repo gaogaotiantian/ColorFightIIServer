@@ -377,18 +377,14 @@ class Colorfight:
                     return False, "Username exists"
 
         if self.allow_join_after_start or self.turn == 0:
-            for uid in range(1, len(self.users) + 2):
-                if uid not in self.users:
-                    user = User(uid, username, password)
-                    return True, (uid,
-                            {
-                                "type": "verify_user", 
-                                "data": {
-                                    "uid"     : uid,
-                                    "username": username, 
-                                    "password": password
-                                }
-                            })
+            return True, (uid,
+                    {
+                        "type": "verify_user", 
+                        "data": {
+                            "username": username, 
+                            "password": password
+                        }
+                    })
 
             raise Exception("Should never be here")
         else:
@@ -463,11 +459,12 @@ class Colorfight:
         cb_type = cb["type"]
         cb_data = cb["data"]
         if cb_type == "verify_user":
-            uid = cb_data["uid"]
             username = cb_data["username"]
             password = cb_data["password"]
+            for uid in range(1, len(self.users) + 2):
+                if uid not in self.users:
+                    user = User(uid, username, password)
 
-            user = User(uid, username, password)
             result = self.born(user, data["verified"], data["user_data"])
             return result
         else:
