@@ -385,8 +385,6 @@ class Colorfight:
                             "password": password
                         }
                     })
-
-            raise Exception("Should never be here")
         else:
             return False, "You are not allowed to join after the game starts"
 
@@ -461,9 +459,13 @@ class Colorfight:
         if cb_type == "verify_user":
             username = cb_data["username"]
             password = cb_data["password"]
+            # Should always 
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
                     user = User(uid, username, password)
+                    break
+            else:
+                raise Exception("should never be here")
 
             result = self.born(user, data["verified"], data["user_data"])
             return result
