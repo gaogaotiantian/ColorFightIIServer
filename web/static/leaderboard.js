@@ -1,23 +1,27 @@
-function createUserDiv(rank, username, score) {
+function createUserDiv(rank, username, score, school) {
     const wrapper     = document.createElement('div');
     const rankDiv     = document.createElement('div');
     const usernameDiv = document.createElement('div');
+    const schoolDiv   = document.createElement('div');
     const scoreDiv    = document.createElement('div');
 
     wrapper.className     = "row";
-    rankDiv.className     = "col-2";
-    usernameDiv.className = "col-7";
-    scoreDiv.className    = "col-3";
+    rankDiv.className     = "col-1";
+    usernameDiv.className = "col-6";
+    schoolDiv.className    = "col-3";
+    scoreDiv.className    = "col-2";
 
-    rankDiv.innerHTML  = rank;
+    rankDiv.innerHTML     = rank;
     usernameDiv.innerHTML = username;
+    schoolDiv.innerHTML      = school;
     scoreDiv.innerHTML    = score;
 
     wrapper.appendChild(rankDiv);
     wrapper.appendChild(usernameDiv);
+    wrapper.appendChild(schoolDiv);
     wrapper.appendChild(scoreDiv);
 
-    return wrapper
+    return wrapper;
 }
 
 function draw_leaderboard() {
@@ -49,7 +53,7 @@ function draw_leaderboard_with_data(arr) {
         let username = user[0];
         let userdata = user[1];
         let rank = arr.length - idx;
-        container.appendChild(createUserDiv(rank, username, userdata['score'].toFixed(2)));
+        container.appendChild(createUserDiv(rank, username, userdata['score'].toFixed(2), userdata['school']));
     }
 }
 

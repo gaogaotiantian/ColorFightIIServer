@@ -63,11 +63,11 @@ class Firebase:
             asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_data, replay, game_id))
             asyncio.ensure_future(loop.run_in_executor(self.executor, self._upload_replay_info, game_info))
 
-    def leaderboard_set_score(self, user, score):
+    def leaderboard_set_score(self, user, school, score):
         if self.valid:
             ref = db.reference('/leaderboard')
             child = ref.child(user)
-            child.set({"score":score, "timestamp":int(time.time())})
+            child.set({"score":score, "school":school, "timestamp":int(time.time())})
 
     async def clean_leaderboard(self):
         if self.valid:
@@ -116,7 +116,7 @@ class Firebase:
                 if user[0]:
                     ladder_score = user_data['game_ranking_mean'] - 3 * user_data['game_ranking_dev']
                     batch.update(user_obj.reference, user_data)
-                    self.leaderboard_set_score(user_data["game_username"], ladder_score)
+                    self.leaderboard_set_score(user_data["game_username"], user_data["school"], ladder_score)
             batch.commit()
 
         loop = asyncio.get_event_loop()
