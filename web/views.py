@@ -46,7 +46,7 @@ async def admin(request):
     for name, game in request.app['game'].items():
         gameroom = {}
         gameroom['Name'] = '{0}'.format(name)
-        gameroom['Players'] = len(game.users)
+        gameroom['Players'] = "{} / {}".format(len(game.users), game.max_player)
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
         gameroom['link'] = '/gameroom/{0}/play'.format(name)
         gameroom['Lock'] = game.join_key != ""
@@ -95,7 +95,7 @@ async def gameroom_list(request):
     for name, game in request.app['game'].items():
         gameroom = {}
         gameroom['Name'] = '{0}'.format(name)
-        gameroom['Players'] = len(game.users)
+        gameroom['Players'] = "{} / {}".format(len(game.users), game.max_player)
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
         gameroom['link'] = '/gameroom/{0}/play'.format(name)
         gameroom['Lock'] = game.join_key != ""

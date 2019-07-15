@@ -45,6 +45,11 @@ function getConfig() {
         config[ "max_turn" ] = parseFloat( max_turn );
     }
 
+    var max_player = $( "#max-player-sel option:selected" ).val();
+    if( max_player != "same" ) {
+        config[ "max_player" ] = parseFloat( max_player );
+    }
+
     var round_time = $( "#round-time-sel option:selected" ).val();
     if( round_time != "same" ) {
         config[ "round_time" ] = parseFloat( round_time );

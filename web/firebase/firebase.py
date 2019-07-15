@@ -93,7 +93,7 @@ class Firebase:
             loop = asyncio.get_event_loop()
             future = asyncio.ensure_future(loop.run_in_executor(self.executor, _check))
             return await future
-        return False
+        return {"verified": False, "user_data": None}
 
     async def update_result(self, result):
         '''

@@ -88,11 +88,11 @@ class MapCell:
                 "force_field": self.force_field}
 
 class GameMap:
-    def __init__(self, width, height, symmetric = True):
+    def __init__(self, width, height, max_player, symmetric = True):
         self.width = width
         self.height = height
         self.symmetric = symmetric
-        self.symmetric_born_position = self._generate_symmetric_born_position()
+        self.symmetric_born_position = self._generate_symmetric_born_position(max_player)
         self._cells = self._generate_cells(width, height)
     
     def __getitem__(self, location):
@@ -109,22 +109,22 @@ class GameMap:
         else:
             return False
 
-    def _generate_symmetric_born_position(self):
+    def _generate_symmetric_born_position(self, max_player):
         x = random.randrange(1, self.width // 2)
         y = random.randrange(0, x)
         ret = [
                 Position(x, y),
+                Position(self.width - 1 - x, self.height - 1 - y),
+                Position(self.height - 1 - y, x),
+                Position(y, self.width - 1 - x),
                 Position(y, x),
                 Position(self.width - 1 - x, y),
-                Position(y, self.width - 1 - x),
                 Position(x, self.height - 1 - y),
-                Position(self.height - 1 - y, x),
-                Position(self.width - 1 - x, self.height - 1 - y),
-                Position(self.height - 1 - y, self.width - 1 - x)
+                Position(self.height - 1 - y, self.width - 1 - x),
         ]
+        ret = ret[:max_player]
         random.shuffle(ret)
         return ret
-
 
     def get_cells(self):
         return [self._cells[y][x] for y in range(self.height) for x in range(self.width)]
@@ -140,7 +140,6 @@ class GameMap:
             if self[p].owner == 0:
                 return self[p]
         return None
-
 
     def born(self, user):
         if self.symmetric:

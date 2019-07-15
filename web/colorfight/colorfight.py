@@ -19,25 +19,26 @@ class Colorfight:
         self.turn = 0
 
         # Setups
-        self.max_turn = GAME_MAX_TURN
-        self.width = GAME_WIDTH
-        self.height = GAME_HEIGHT
-        self.round_time = ROUND_TIME
+        self.max_turn         = GAME_MAX_TURN
+        self.width            = GAME_WIDTH
+        self.height           = GAME_HEIGHT
+        self.round_time       = ROUND_TIME
         self.first_round_time = ROUND_TIME
         self.start_count_down = self.first_round_time
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
-        self.replay_enable = "never"
-        self.admin_password = ""
-        self.join_key = ""
-        self.finish_time = 0
-        self.key_frame = 0
-        self.symmetric = symmetric
-        self.game_id   = 0
-        self.admin_room = True
-        self.last_update = time.time()
-        self.users = {}
-        self.errors = {}
+        self.replay_enable    = "never"
+        self.admin_password   = ""
+        self.join_key         = ""
+        self.finish_time      = 0
+        self.key_frame        = 0
+        self.symmetric        = symmetric
+        self.game_id          = 0
+        self.max_player       = 8
+        self.admin_room       = True
+        self.last_update      = time.time()
+        self.users            = {}
+        self.errors           = {}
 
         # Possible actions
         self.valid_actions = {
@@ -79,6 +80,11 @@ class Colorfight:
                         new_config["max_turn"] = val
                     else:
                         return False, "max_turn value invalid"
+                elif field == "max_player":
+                    if val in [2, 4, 8]:
+                        new_config["max_player"] = val
+                    else:
+                        return False, "max_player value invalid"
                 elif field == "round_time":
                     if type(val) in (float, int) and 0.2 <= float(val) <= 20:
                         new_config["round_time"] = float(val)
@@ -127,7 +133,7 @@ class Colorfight:
         self._prev_game_info = None
         self._game_info = None
         self.start_count_down = self.first_round_time
-        self.game_map = GameMap(self.height, self.width, symmetric = self.symmetric) 
+        self.game_map = GameMap(self.height, self.width, self.max_player, symmetric = self.symmetric) 
         self.last_update = time.time() 
         self.game_id = str(int(self.last_update * 1000))
         self.key_frame = 1
