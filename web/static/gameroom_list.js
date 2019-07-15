@@ -79,4 +79,11 @@ $(function() {
             delete_room_name = $(this).find(".gameroom-name-div").text().trim();
         }
     });
+
+    $('body').on('mouseenter', '.game-room-tr', function(e) {
+        $(this).find('.room-description').removeClass("d-none");
+    })
+    $('body').on('mouseleave', '.game-room-tr', function(e) {
+        $(this).find('.room-description').addClass("d-none");
+    })
 })

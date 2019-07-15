@@ -29,6 +29,7 @@ class Colorfight:
         self.allow_manual_mode      = True
         self.replay_enable    = "never"
         self.admin_password   = ""
+        self.room_description = ""
         self.join_key         = ""
         self.finish_time      = 0
         self.key_frame        = 0
@@ -85,6 +86,11 @@ class Colorfight:
                         new_config["max_player"] = val
                     else:
                         return False, "max_player value invalid"
+                elif field == "room_description":
+                    if type(val) == str and 0 <= len(val) <= 500:
+                        new_config["room_description"] = val
+                    else:
+                        return False, "room_description value invalid, it needs to be a string under 500 chars"
                 elif field == "round_time":
                     if type(val) in (float, int) and 0.2 <= float(val) <= 20:
                         new_config["round_time"] = float(val)
@@ -500,6 +506,7 @@ class Colorfight:
     '''
     def info(self):
         return {"max_turn": self.max_turn, \
+                "max_player": self.max_player, \
                 "width": GAME_WIDTH, \
                 "height": GAME_HEIGHT, \
                 "round_time": self.round_time, \

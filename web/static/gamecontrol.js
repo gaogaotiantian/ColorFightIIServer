@@ -40,6 +40,11 @@ function getConfig() {
         data[ "admin_password" ] = password;
     }
 
+    var room_description = $( "#room-description-text" ).val();
+    if (room_description) {
+        config[ "room_description" ] = room_description;
+    }
+
     var max_turn = $( "#max-turn-sel option:selected" ).val();
     if( max_turn != "same" ) {
         config[ "max_turn" ] = parseFloat( max_turn );
