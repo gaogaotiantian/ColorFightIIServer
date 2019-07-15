@@ -7,8 +7,8 @@ function createUserDiv(rank, username, score, school) {
 
     wrapper.className     = "row";
     rankDiv.className     = "col-1";
-    usernameDiv.className = "col-6";
-    schoolDiv.className    = "col-3";
+    usernameDiv.className = "col-4";
+    schoolDiv.className    = "col-5";
     scoreDiv.className    = "col-2";
 
     rankDiv.innerHTML     = rank;
