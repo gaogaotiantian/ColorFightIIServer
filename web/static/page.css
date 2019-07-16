@@ -92,7 +92,7 @@ body {
 }
 
 .section-overview {
-    padding: 100px 80px;
+    padding: 60px 50px;
 }
 
 .section-overview h1 {
@@ -156,6 +156,36 @@ body {
     padding: 15px 20px;
     text-align: center;
     text-transform: uppercase;
+}
+
+#current-calendar-header {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: 'Quantico';
+}
+
+.calendar-table-divider {
+    margin-top: 2px;
+    width: 100%;
+    height: 1px;
+    display: block;
+    border: solid  1px rgba(201, 247, 255, 0.856);
+    margin-bottom: 5px;
+    box-shadow: 
+        -0px 0px 1px 1px #a6dbff,
+        -2px 0px 2px 2px rgba(36,155,252,0.611),
+        2px 0px 2px 2px rgba(36,155,252,0.611);
+}
+
+#current-calendar-content {
+    font-family: 'Quantico';
+}
+
+.calendar-active {
+    text-shadow: 
+        -0px 0px 1px #a6dbff,
+        -2px 0px 2px rgba(36,155,252,0.611),
+        2px 0px 2px rgba(36,155,252,0.611);
 }
 
 .doc-content-container {
