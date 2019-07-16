@@ -11,18 +11,22 @@ import uvloop
 from routes import setup_routes, setup_static_routes
 
 from colorfight import Colorfight
+from colorfight.config import get_config
 from firebase import Firebase
 
 PROJECT_ROOT = pathlib.Path(__file__).parent
+
+def init_gamerooms(app):
+    app['game'] = {}
+    app['game']['public'] = Colorfight()
+    app['game']['duel']   = Colorfight(config = get_config('duel'))
 
 async def init_app():
 
     app = web.Application()
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(PROJECT_ROOT / 'templates')))
-    app['game'] = {}
-    app['game']['public'] = Colorfight()
-    app['game']['public'].replay_lock = asyncio.Lock(loop = asyncio.get_event_loop())
+    init_gamerooms(app)
     app['config'] = {}
     app['config']['max_gameroom_number'] = 15
     app['config']['idle_clear_time'] = 600
