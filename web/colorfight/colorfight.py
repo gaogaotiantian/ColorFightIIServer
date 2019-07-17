@@ -3,6 +3,8 @@ import time
 import sys
 import gzip
 import copy
+import string
+import random
 
 import orjson
 
@@ -15,7 +17,7 @@ from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
-    def __init__(self, config = None, symmetric = True):
+    def __init__(self, config = None, symmetric = True, admin_room = False):
         self.turn = 0
 
         # Setups
@@ -28,7 +30,6 @@ class Colorfight:
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
         self.replay_enable    = "never"
-        self.admin_password   = ""
         self.room_description = ""
         self.join_key         = ""
         self.finish_time      = 0
@@ -36,7 +37,11 @@ class Colorfight:
         self.symmetric        = symmetric
         self.game_id          = 0
         self.max_player       = 8
-        self.admin_room       = True
+        self.admin_room       = admin_room
+        if self.admin_room:
+            self.admin_password = ''.join(random.choice(string.ascii_letters) for i in range(10))
+        else:
+            self.admin_password = ""
         self.last_update      = time.time()
         self.users            = {}
         self.errors           = {}

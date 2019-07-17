@@ -18,8 +18,8 @@ PROJECT_ROOT = pathlib.Path(__file__).parent
 
 def init_gamerooms(app):
     app['game'] = {}
-    app['game']['public'] = Colorfight()
-    app['game']['duel']   = Colorfight(config = get_config('duel'))
+    app['game']['public'] = Colorfight(admin_room = True)
+    app['game']['duel']   = Colorfight(config = get_config('duel'), admin_room = True)
 
 async def init_app():
 

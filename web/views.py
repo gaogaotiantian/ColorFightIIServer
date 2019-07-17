@@ -311,10 +311,9 @@ async def create_gameroom(request):
             else:
                 return web.json_response({"success": False, "err_msg": "To create an admin room, you need admin"})
 
-        request.app['game'][gameroom_id] = Colorfight(config = config)
+        request.app['game'][gameroom_id] = Colorfight(config = config, admin_room = admin_room)
         request.app['game'][gameroom_id].save_replay = lambda replay, data: request.app['firebase'].upload_replay(replay, data)
         request.app['game'][gameroom_id].replay_lock = asyncio.Lock(loop = asyncio.get_event_loop())
-        request.app['game'][gameroom_id].admin_room  = admin_room
 
         if 'admin_password' in data:
             request.app['game'][gameroom_id].admin_password = data['admin_password']
