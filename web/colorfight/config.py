@@ -33,11 +33,10 @@ _configs = {
     'constant-run': {
         'max_turn'              : 500,
         'round_time'            : 1,
-        'first_round_time'      : 20,
+        'first_round_time'      : 10,
         'finish_time'           : 20,
         'allow_join_after_start': True,
-        'allow_manual_mode'     : False,
-        'replay_enable'         : 'always'
+        'allow_manual_mode'     : True,
     }
 }
 def get_config(config):
