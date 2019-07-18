@@ -21,6 +21,7 @@ def init_gamerooms(app):
     app['game']['public'] = Colorfight(config = get_config('constant-run'), admin_room = True)
     app['game']['public'].admin_password = ''
     app['game']['duel']   = Colorfight(config = get_config('duel'), admin_room = True)
+    app['game']['Musikverein']   = Colorfight(config = get_config('duel'), admin_room = True)
 
 async def init_app():
 
