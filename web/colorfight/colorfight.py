@@ -165,7 +165,7 @@ class Colorfight:
             if self.first_round_time == "never":
                 count_down = 9999
             elif self.first_round_time == "full":
-                if len(self.users) == 8:
+                if len(self.users) == self.max_player:
                     count_down = 0
                 else:
                     count_down = 9999
