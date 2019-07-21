@@ -60,6 +60,7 @@ async def admin(request):
         'idle_clear_time'    : request.app['config']['idle_clear_time'],
         'allow_create_room'  : request.app['config']['allow_create_room']
     }
+
 @aiohttp_jinja2.template('signin.html')
 async def signin(request):
     return {}
@@ -348,6 +349,19 @@ async def delete_gameroom(request):
         return web.json_response({"success": False, "err_msg": str(e)})
 
     return web.json_response({"success": True})
+
+async def get_gameroom_list(request):
+    gamerooms = []
+    for name, game in request.app['game'].items():
+        gameroom = {}
+        gameroom['name'] = name
+        gameroom['player_number'] = len(game.users)
+        gameroom['max_player']  = game.max_player
+        gameroom['turn'] = game.turn
+        gameroom['max_turn'] = game.max_turn
+        gameroom['rank'] = game.rank
+        gamerooms.append(gameroom)
+    return web.json_response(gamerooms)
 
 async def download_replay(request):
     gameroom_id = request.match_info['gameroom_id']

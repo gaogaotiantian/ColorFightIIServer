@@ -22,6 +22,7 @@ def setup_routes(app):
     app.router.add_get('/dashboard', dashboard)
 
     # RPC
+    app.router.add_get('/get_gameroom_list', get_gameroom_list)
     app.router.add_post('/start'  , start_game)
     app.router.add_post('/restart', restart)
     app.router.add_post('/configadmin', config_admin)
