@@ -11,7 +11,7 @@ _configs = {
         'replay_enable'         : 'end'
     },
     'rank_2': {
-        'max_turn'              : 500,
+        'max_turn'              : 300,
         'max_player'            : 2,
         'round_time'            : 1,
         'first_round_time'      : 'full',
@@ -22,7 +22,7 @@ _configs = {
         'room_description'      : "Rank room. The result will be reported for ranking. 2 player room. Start when full and restart 30s after finish."
     },
     'rank_4': {
-        'max_turn'              : 500,
+        'max_turn'              : 400,
         'max_player'            : 4,
         'round_time'            : 1,
         'first_round_time'      : 'full',
