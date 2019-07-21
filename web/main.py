@@ -20,8 +20,11 @@ def init_gamerooms(app):
     app['game'] = {}
     app['game']['public'] = Colorfight(config = get_config('constant-run'), admin_room = True)
     app['game']['public'].admin_password = ''
-    app['game']['duel']   = Colorfight(config = get_config('duel'), admin_room = True)
-    app['game']['Musikverein']   = Colorfight(config = get_config('duel'), admin_room = True)
+    app['game']['rank_2_1']      = Colorfight(config = get_config('rank_2'), admin_room = True, rank = True)
+    app['game']['rank_2_2']      = Colorfight(config = get_config('rank_2'), admin_room = True, rank = True)
+    app['game']['rank_4']        = Colorfight(config = get_config('rank_4'), admin_room = True, rank = True)
+    app['game']['rank_8']        = Colorfight(config = get_config('rank_8'), admin_room = True, rank = True)
+    app['game']['Musikverein']   = Colorfight(config = get_config('duel'),   admin_room = True, rank = True)
 
 async def init_app():
 

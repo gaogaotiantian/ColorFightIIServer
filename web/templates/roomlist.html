@@ -4,7 +4,7 @@
                   <div class="table-row table-row-head row">
                     {% for header in headers %}
                       {% if header == 'Name' %}
-                      <div class="table-column th-name col-md-7">
+                      <div class="table-column th-name col-md-6">
                         <h1>{{ header }}</h1>
                       </div>
                       {% elif header != 'Description' %}
@@ -21,7 +21,7 @@
                   <div href={{room.link}} class="game-room-tr table-row table-row-content row">
                     {% for header in headers %}
                       {% if header == 'Name' %}
-                      <div class="table-column col-md-7 gameroom-name-div">
+                      <div class="table-column col-md-6 gameroom-name-div">
                         {% if not room['Admin'] or require_master_admin %}
                         <a href="#" data-toggle="modal" data-target="#gameroom-delete-modal" class="delete-room-icon"><i class="fas  fa-trash-alt delete-room-icon"></i></a>
                         {% endif %}
@@ -31,10 +31,16 @@
                         {{ room[header] }}
                       {% else %}
                       <div class="table-column col">
-                        {% if header != 'Lock' %}
-                          {{ room[header]}}
-                        {% elif room['Lock'] %}
-                        <i class="fas fa-lock"></i>
+                        {% if header == 'Lock' %}
+                          {% if room['Lock'] %}
+                          <i class="fas fa-lock"></i>
+                          {% endif %}
+                        {% elif header == 'Rank' %}
+                          {% if room['Rank'] %}
+                          <i class="fas fa-medal"></i>
+                          {% endif %}
+                        {% else %}
+                        {{ room[header]}}
                         {% endif %}
                       {% endif %}
                       </div>

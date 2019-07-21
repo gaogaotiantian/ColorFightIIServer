@@ -40,6 +40,38 @@ function send_admin() {
     }
 }
 
+function reset_leaderboard() {
+    var data = {}
+    var admin_password = $('#config-admin-password-input').val();
+    if (admin_password) {
+        data['admin_password'] = admin_password;
+    }
+
+    var tag = $('#backup-tag-input').val();
+    if (tag) {
+        data['tag'] = tag;
+    }
+
+    if ('admin_password' in data && data['admin_password']) {
+        $.ajax( {
+            url: "/reset_leaderboard",
+            method: "POST",
+            dataType: "json",
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify( data ),
+            success: function(msg) {
+                if (!msg['success']) {
+                    alert(msg['err_msg']);
+                } else {
+                    window.location.reload();
+                }
+            }
+        } );
+    } else {
+        alert("Enter password!")
+    }
+}
+
 function createAdminGameroom() {
     var data = {};
     data['gameroom_id'] = $( '#gameroom-name' ).val();
@@ -103,6 +135,10 @@ function deleteAdminGameroom( data ) {
 $(function() {
     $('#submit-button').click(function() {
         send_admin();
+    })
+
+    $('reset-leaderboard-button').click(function() {
+        reset_leaderboard();
     })
 
     $('#create-gameroom-button').click(function() {

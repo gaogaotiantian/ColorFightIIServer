@@ -17,7 +17,7 @@ from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
 
 class Colorfight:
-    def __init__(self, config = None, symmetric = True, admin_room = False):
+    def __init__(self, config = None, symmetric = True, admin_room = False, **kwargs):
         self.turn = 0
 
         # Setups
@@ -29,6 +29,7 @@ class Colorfight:
         self.start_count_down = self.first_round_time
         self.allow_join_after_start = True
         self.allow_manual_mode      = True
+        self.rank             = False
         self.replay_enable    = "never"
         self.room_description = ""
         self.join_key         = ""
@@ -69,6 +70,10 @@ class Colorfight:
         # Record related
         self.verify_user = None
         self.result_updated = False
+
+        for k in kwargs:
+            if hasattr(self, k):
+                setattr(self, k, kwargs[k])
 
         # Initialization
         self.restart()
@@ -184,7 +189,7 @@ class Colorfight:
             if self.replay_enable == "end" and self.save_replay and not self.replay_saved:
                 self.save_replay(self.get_log(), self.get_game_info())
                 self.replay_saved = True
-            if not self.result_updated:
+            if not self.result_updated and self.rank:
                 self.result_updated = True
                 result = self.get_result()
                 if any(result):

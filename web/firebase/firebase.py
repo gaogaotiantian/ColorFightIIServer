@@ -1,6 +1,7 @@
 import sys
 import json
 import os
+import time
 import concurrent.futures
 import asyncio
 
@@ -65,18 +66,40 @@ class Firebase:
 
     def leaderboard_set_score(self, user, school, score):
         if self.valid:
-            ref = db.reference('/leaderboard')
+            ref = self.db.reference('/leaderboard')
             child = ref.child(user)
             child.set({"score":score, "school":school, "timestamp":int(time.time())})
 
     async def clean_leaderboard(self):
         if self.valid:
-            ref = db.reference('/leaderboard')
+            ref = self.db.reference('/leaderboard')
             old_records = ref.order_by_child("timestamp")\
                     .end_at(time.time() - self.leaderboard_duration)\
                     .get()
             for key in old_records:
                 ref.child(key).delete()
+
+    async def backup_leaderboard(self, tag = str(int(time.time()))):
+        if self.valid:
+            ref     = self.db.reference('/leaderboard')
+            records = ref.get()
+            target_ref = self.db.reference('/leaderboard_backup/' + tag)
+            for key in records:
+                target_ref.child(key).set(records[key])
+
+    async def reset_leaderboard(self, tag = str(int(time.time()))):
+        if self.valid:
+            if tag:
+                await self.backup_leaderboard(tag = tag)
+            ref     = self.db.reference('/leaderboard')
+            records = ref.get()
+            for key in records:
+                ref.child(key).delete()
+            batch = self.firestore.batch()
+            records = self.firestore.collection('users').stream()
+            for doc in records:
+                batch.update(doc.reference, {"game_ranking_dev": 25/3, "game_ranking_mean":25})
+            batch.commit()
 
     async def verify_user(self, username, password):
         def _check():
@@ -154,6 +177,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
-    asyncio.ensure_future(f.update_result(["test", "example", None]))
+    #asyncio.ensure_future(f.update_result(["test", "example", None]))
+    asyncio.ensure_future(f.reset_leaderboard("test"))
     loop.run_forever()
 

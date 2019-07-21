@@ -41,7 +41,7 @@ async def index(request):
 
 @aiohttp_jinja2.template('admin.html')
 async def admin(request):
-    headers = ['Name', 'Players', 'Turns', 'Lock']
+    headers = ['Name', 'Players', 'Turns', 'Lock', 'Rank']
     gamerooms = []
     for name, game in request.app['game'].items():
         gameroom = {}
@@ -50,6 +50,7 @@ async def admin(request):
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
         gameroom['link'] = '/gameroom/{0}/play'.format(name)
         gameroom['Lock'] = game.join_key != ""
+        gameroom['Rank'] = game.rank
         gameroom['Admin'] = game.admin_room
         gamerooms.append(gameroom)
     return {
@@ -90,7 +91,7 @@ async def game_room(request):
 @aiohttp_jinja2.template('gameroom_list.html')
 async def gameroom_list(request):
     clean_gameroom(request)
-    headers = ['Name', 'Players', 'Turns', 'Lock', 'Description']
+    headers = ['Name', 'Players', 'Turns', 'Lock', 'Rank', 'Description']
     gamerooms = []
     for name, game in request.app['game'].items():
         gameroom = {}
@@ -99,6 +100,7 @@ async def gameroom_list(request):
         gameroom['Turns'] = '{} / {}'.format(game.turn, game.max_turn)
         gameroom['link'] = '/gameroom/{0}/play'.format(name)
         gameroom['Lock'] = game.join_key != ""
+        gameroom['Rank'] = game.rank
         gameroom['Description'] = game.room_description
         gameroom['Admin'] = game.admin_room
         gamerooms.append(gameroom)
@@ -366,7 +368,18 @@ async def download_replay(request):
         else:
             return web.Response(status = 400)
 
+async def reset_leaderboard(request):
+    data = await request.json()
+    if 'admin_password' not in data:
+        return web.json_response({"success": False, "err_msg": "You need admin password"})
 
+    if data['admin_password'] != request.app['admin_password']:
+        return web.json_response({"success": False, "err_msg": "Admin password is wrong"})
 
+    if 'tag' in data:
+        tag = str(data['tag'])
+    else:
+        tag = None
+
+    request.app['firebase'].reset_leaderboard(tag)
     
-
