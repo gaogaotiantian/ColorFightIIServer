@@ -481,6 +481,8 @@ class Colorfight:
         if cb_type == "verify_user":
             username = cb_data["username"]
             password = cb_data["password"]
+            if not data["verified"] and self.rank:
+                return {"success": False, "err_msg": "Only verified users are allowed in rank room"}
             # Should always 
             for uid in range(1, len(self.users) + 2):
                 if uid not in self.users:
