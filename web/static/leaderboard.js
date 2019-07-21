@@ -57,7 +57,6 @@ function draw_leaderboard_with_data(arr) {
         let username = user[0];
         let userdata = user[1];
         let rank = arr.length - idx;
-        console.log(userdata)
         container.appendChild(createUserDiv(rank, username, userdata['score'].toFixed(2), userdata['school'], userdata['count'] || 0));
     }
 }
