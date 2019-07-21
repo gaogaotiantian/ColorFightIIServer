@@ -68,7 +68,8 @@ class Firebase:
         if self.valid:
             ref = self.db.reference('/leaderboard')
             child = ref.child(user)
-            child.set({"score":score, "school":school, "timestamp":int(time.time())})
+            count = child.get().get("count", 0) + 1
+            child.set({"score":score, "school":school, "timestamp":int(time.time()), "count":count})
 
     async def clean_leaderboard(self):
         if self.valid:
@@ -98,7 +99,7 @@ class Firebase:
             batch = self.firestore.batch()
             records = self.firestore.collection('users').stream()
             for doc in records:
-                batch.update(doc.reference, {"game_ranking_dev": 25/3, "game_ranking_mean":25})
+                batch.update(doc.reference, {"game_ranking_dev": 25/3, "game_ranking_mean":25, "game_ranking_count": 0})
             batch.commit()
 
     async def verify_user(self, username, password):
@@ -153,7 +154,6 @@ class Firebase:
         env = trueskill.TrueSkill()
         rating_group = []
         for user in users:
-            user_obj  = user[0]
             user_data = user[1]
             if user_data:
                 user_rating = env.create_rating(mu    = user_data['game_ranking_mean'],
@@ -178,6 +178,7 @@ if __name__ == '__main__':
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
     #asyncio.ensure_future(f.update_result(["test", "example", None]))
-    asyncio.ensure_future(f.reset_leaderboard("test"))
+    #asyncio.ensure_future(f.reset_leaderboard("test"))
+    f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
     loop.run_forever()
 
