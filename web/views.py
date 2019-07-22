@@ -117,6 +117,10 @@ async def leaderboard(request):
     await clean_leaderboard(request)
     return {}
 
+@aiohttp_jinja2.template('changelog.html')
+async def changelog(request):
+    return {}
+
 @aiohttp_jinja2.template('get_started.html')
 async def get_started(request):
     return {}

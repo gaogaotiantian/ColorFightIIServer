@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% include 'header.html' %}
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <div class="container">
+      <div class="main-content">
+        <div class="row justify-content-md-center">
+          <div class="col-md-10">
+
+            <div class="doc-content-container">
+
+              <div class="doc-header row">
+                <div class="col">
+                  <h1>Changelog</h1>
+                </div>
+              </div>
+
+              <div class="doc-section">
+                <h3>2019/7/22 - Pre-season Phase 2</h3>
+                <h5>Gameroom rule change</h5>
+                <ul>
+                  <li>Gameroom now has a new attribute - rank</li>
+                  <li>Only matches in rank room will be recorded for ladder scores</li>
+                  <li>Only verified users are allowed in rank room now</li>
+                  <li>Two 2-player room, a 4-player room and an 8-player room is available as rank rooms</li> 
+                  <li>Two bot rooms - Musikverein and Acropolis is available for single player</li> 
+                </ul>
+
+                <h5>Leaderboard change</h5>
+                <ul>
+                  <li>Leaderboard is reset for phase 2</li>
+                  <li>Total game played will be displayed on leaderboard</li>
+                </ul>
+
+                <h5>Client change</h5>
+                <ul>
+                  <li>We recommend you to update your API to the latest, but the old one still works</li>
+                  <li>Some memory leak fix for running the bot continuously</li>
+                  <li><code>destroy_gold</code> and <code>destroy_forcefield</code> are provided in <code>Building</code></li>
+                  <li><code>get_gameroom_list</code> is provided in <code>Colorfight</code> to screen and join gamerooms</li>
+                  <li><code>ExampleAI</code> has a small piece of script to run the bot forever</li> 
+                  <li>Some of the features are not applicable to Java client now. We will make it work for Java soon</li>
+                </ul>
+
+              </div>
+
+            </div> <!-- doc-content-container -->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
