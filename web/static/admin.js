@@ -137,7 +137,7 @@ $(function() {
         send_admin();
     })
 
-    $('reset-leaderboard-button').click(function() {
+    $('#reset-leaderboard-button').click(function() {
         reset_leaderboard();
     })
 
