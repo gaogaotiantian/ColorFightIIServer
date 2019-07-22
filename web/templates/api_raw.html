@@ -75,6 +75,14 @@
 <h2 id="methods-of-colorfight">methods of <code>Colorfight</code></h2>
 <ul>
 <li>
+<p><code>.get_gameroom_list()</code> </p>
+<blockquote>
+<p>return a list of data of gameroom on the server</p>
+<p>You can use this in the script to choose gameroom <code>rooms = game.get_gameroom_list()</code>
+  <code>rank_room = [room for room in rooms if room["rank"]]</code></p>
+</blockquote>
+</li>
+<li>
 <p><code>.connect(room)</code> </p>
 <blockquote>
 <p>Establish connection to the server. <code>room</code> is the name of the game room
@@ -370,6 +378,18 @@ stores a <code>MapCell</code> object of <code>(3, 4)</code> in <code>cell</code>
 <p><code>upgrade_energy</code></p>
 <blockquote>
 <p>Amount of energy to upgrade the building. Invalid if cannot upgrade</p>
+</blockquote>
+</li>
+<li>
+<p><code>destroy_gold</code></p>
+<blockquote>
+<p>Amount of gold for the attacker if the building is destroyed. </p>
+</blockquote>
+</li>
+<li>
+<p><code>destroy_forcefield</code></p>
+<blockquote>
+<p>Amount of forcefield the cell will have if the building is destroyed</p>
 </blockquote>
 </li>
 </ul>
