@@ -29,6 +29,7 @@ def setup_routes(app):
     app.router.add_post('/configadmin', config_admin)
     app.router.add_post('/creategameroom', create_gameroom)
     app.router.add_post('/deletegameroom', delete_gameroom)
+    app.router.add_post('/reset_leaderboard', reset_leaderboard)
 
     # Gameroom related
     app.router.add_get('/gameroom/{gameroom_id}/play', game_room)
