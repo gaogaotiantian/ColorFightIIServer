@@ -68,7 +68,11 @@ class Firebase:
         if self.valid:
             ref = self.db.reference('/leaderboard')
             child = ref.child(user)
-            count = child.get().get("count", 0) + 1
+            data = child.get()
+            if data:
+                count = data.get("count", 0) + 1
+            else:
+                count = 1
             child.set({"score":score, "school":school, "timestamp":int(time.time()), "count":count})
 
     async def clean_leaderboard(self):
@@ -177,8 +181,8 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
-    #asyncio.ensure_future(f.update_result(["test", "example", None]))
+    asyncio.ensure_future(f.update_result(["Athena", "Chrysus"]))
     #asyncio.ensure_future(f.reset_leaderboard("test"))
-    f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
+    #f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
     loop.run_forever()
 
