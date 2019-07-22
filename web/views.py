@@ -399,5 +399,10 @@ async def reset_leaderboard(request):
     else:
         tag = None
 
-    request.app['firebase'].reset_leaderboard(tag)
+    try:
+        await request.app['firebase'].reset_leaderboard(tag)
+    except Exception as e:
+        return web.json_response({"success": False, "err_msg": str(e)})
+
+    return web.json_response({"success": True})
     
