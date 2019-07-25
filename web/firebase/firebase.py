@@ -129,18 +129,30 @@ class Firebase:
                         .where("game_username", "==", username)\
                         .stream()
                 for data in result:
-                    return (data, data.to_dict())
-            return (None, None)
+                    return (data, data.to_dict(), {})
+            return (None, None, {})
 
         def _set(users):
+            # record matches
+            match_result = {"users": [], "mean": [], "dev": []}
             batch = self.firestore.batch()
             for user in users:
                 user_obj  = user[0]
                 user_data = user[1]
+                user_prev_data = user[2]
                 if user[0]:
+                    match_result["users"].append(user_data["game_username"])
+                    match_result["mean"].append("({:.6}, {:.6})".format(user_prev_data["game_ranking_mean"], user_data["game_ranking_mean"]))
+                    match_result["dev"].append("({:.6}, {:.6})".format(user_prev_data["game_ranking_dev"], user_data["game_ranking_dev"]))
                     ladder_score = user_data['game_ranking_mean'] - 3 * user_data['game_ranking_dev']
                     batch.update(user_obj.reference, user_data)
                     self.leaderboard_set_score(user_data["game_username"], user_data["school"], ladder_score)
+                else:
+                    match_result["users"].append("None")
+                    match_result["mean"].append("(None, None)")
+                    match_result["dev"].append("(None, None)")
+            ref = self.db.reference('/match')
+            ref.child(str(int(1000*time.time()))).set(match_result)
             batch.commit()
 
         loop = asyncio.get_event_loop()
@@ -165,6 +177,8 @@ class Firebase:
         rating_group = env.rate(rating_group)
         for idx, user in enumerate(users):
             if user[1]:
+                user[2]['game_ranking_mean'] = user[1]['game_ranking_mean']
+                user[2]['game_ranking_dev'] = user[1]['game_ranking_dev']
                 user[1]['game_ranking_mean'] = rating_group[idx][0].mu
                 user[1]['game_ranking_dev']  = rating_group[idx][0].sigma
 
@@ -177,8 +191,8 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
-    #asyncio.ensure_future(f.update_result(["test", "example", None]))
+    asyncio.ensure_future(f.update_result(["Athena", "Chrysus"]))
     #asyncio.ensure_future(f.reset_leaderboard("test"))
-    f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
+    #f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
     loop.run_forever()
 
