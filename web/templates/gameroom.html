@@ -7,10 +7,16 @@
   <body>
     {% include 'navbar.html' %}
     <div class="container-fluid">
-      <div class="d-flex justify-content-center" id="cf-game-row">
-        <div class="pr-5" id="user-list-div">
+      <div class="d-flex justify-content-center h-100" id="cf-game-row">
+        <div class="d-flex flex-column pr-5" id="user-list-div">
           <p class="game-status-header">USER LIST</p>
-          <div class="game-status-section" id="user-list-info">
+          <div class="mb-auto game-status-section" id="user-list-info">
+          </div>
+          <div class="game-chat-section pb-2">
+            <div id="game-chat-form">
+              <div class="form-control" id="game-chat-display" readonly rows="10"></div>
+              <input class="form-control" id="game-chat-input"></input>
+            </div>
           </div>
         </div>
         <div class="text-center" id="cf-game-col">

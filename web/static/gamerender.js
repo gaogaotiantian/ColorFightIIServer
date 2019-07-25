@@ -618,6 +618,16 @@ function parse_game_data_and_draw(newData) {
     draw_selected_cell_info(); 
     draw_selected_user_info(); 
 
+    // Do chat part
+    if (gameData && gameData["chat"]) {
+        var display = document.getElementById("game-chat-display");
+        for (let i = 0; i < gameData["chat"].length; i++) {
+            display.append(create_p(gameData["chat"][i]["user"] + ":", {"class":"chat-user"}));
+            display.append(create_p(gameData["chat"][i]["msg"], {"class":"chat-msg"}));
+        }
+        display.scrollTop = display.scrollHeight;
+    }
+
     // Draw our own info or the join game info if manual mode is allowed.
     if (gameData['info']['allow_manual_mode']) {
         var userDiv = document.getElementById('user-info');

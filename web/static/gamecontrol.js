@@ -1,3 +1,4 @@
+var db = firebase.firestore();
 function restartGame( data ) {
     $.ajax( {
         url: "/restart",
@@ -94,6 +95,41 @@ function getConfig() {
 
     return data;
 }
+var username = "anonymous";
+firebase.auth().onAuthStateChanged(function(user) {
+    username = "anonymous";
+    if (user) {
+        let ref = db.collection('users').doc(user.uid);
+        ref.get().then(function(doc) {
+            if (doc.exists) {
+                username = doc.data()["game_username"];
+            }
+        })
+    }
+})
+
+function sendChat() {
+    var msg = $("#game-chat-input").val();
+    if (msg) {
+        $("#game-chat-input").val("");
+        $.ajax( {
+            url: "/send_chat",
+            method: "POST",
+            dataType: "json",
+            contentType: 'application/json;charset=UTF-8',
+            data: JSON.stringify( {
+                "user": username, 
+                "msg": msg,
+                "gameroom_id"   : window.location.pathname.split('/')[2]
+            } ),
+            success: function(msg) {
+                if (!msg['success']) {
+                    alert(msg['err_msg']);
+                }
+            }
+        } );
+    }
+}
 
 /* View in fullscreen */
 function openFullscreen(elem) {
@@ -187,6 +223,12 @@ $( function() {
 
     $( '#owner-render-button' ).click( function() {
         change_render_options({"owner": "toggle"});
+    })
+
+    $( '#game-chat-input' ).keydown(function(e) {
+        if (e.keyCode == 13) {
+            sendChat();
+        }
     })
 
     $(window).on("focus", function() {

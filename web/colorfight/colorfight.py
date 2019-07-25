@@ -12,6 +12,7 @@ from .game_map import GameMap
 from .user import User
 from .position import Position
 from .building import get_building_class, Home
+from .chat import Chat
 
 from .constants import ROUND_TIME, GAME_WIDTH, GAME_HEIGHT, GAME_MAX_TURN
 from .constants import CMD_ATTACK, CMD_BUILD, CMD_UPGRADE
@@ -62,6 +63,9 @@ class Colorfight:
         # Do configuration
         if config:
             self.config(config)
+
+        # Chat
+        self.chat = Chat()
 
         # Replay related
         self.save_replay = None
@@ -566,6 +570,7 @@ class Colorfight:
         return {\
                 "turn": self.turn, \
                 "info": self.info(), \
+                "chat": self.chat.get(), \
                 "error": self.errors, \
                 "game_map":self.game_map.info(), \
                 "users": {user.uid: user.info() for user in self.users.values()} \
@@ -625,3 +630,7 @@ class Colorfight:
             log_bytes = orjson.dumps(self.log)
             self.compressed_log = gzip.compress(log_bytes, compresslevel = 5)
         return self.compressed_log
+
+    def add_chat(self, data):
+        self.chat.add(data)
+        self.key_frame += 1
