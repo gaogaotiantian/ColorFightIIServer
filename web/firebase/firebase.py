@@ -146,8 +146,8 @@ class Firebase:
                 user_prev_data = user[2]
                 if user[0]:
                     match_result["users"].append(user_data["game_username"])
-                    match_result["mean"].append("({:.6}, {:.6})".format(user_prev_data["game_ranking_mean"], user_data["game_ranking_mean"]))
-                    match_result["dev"].append("({:.6}, {:.6})".format(user_prev_data["game_ranking_dev"], user_data["game_ranking_dev"]))
+                    match_result["mean"].append("({:.5f}, {:.5f})".format(user_prev_data["game_ranking_mean"], user_data["game_ranking_mean"]))
+                    match_result["dev"].append("({:.5f}, {:.5f})".format(user_prev_data["game_ranking_dev"], user_data["game_ranking_dev"]))
                     ladder_score = user_data['game_ranking_mean'] - 3 * user_data['game_ranking_dev']
                     batch.update(user_obj.reference, user_data)
                     self.leaderboard_set_score(user_data["game_username"], user_data["school"], ladder_score)
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
-    asyncio.ensure_future(f.update_result(["Athena", "Chrysus"]))
+    asyncio.ensure_future(f.update_result([None, None]))
     #asyncio.ensure_future(f.reset_leaderboard("test"))
     #f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
     loop.run_forever()
