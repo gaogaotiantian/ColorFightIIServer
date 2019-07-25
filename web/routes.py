@@ -30,6 +30,7 @@ def setup_routes(app):
     app.router.add_post('/creategameroom', create_gameroom)
     app.router.add_post('/deletegameroom', delete_gameroom)
     app.router.add_post('/reset_leaderboard', reset_leaderboard)
+    app.router.add_post('/send_chat', send_chat)
 
     # Gameroom related
     app.router.add_get('/gameroom/{gameroom_id}/play', game_room)

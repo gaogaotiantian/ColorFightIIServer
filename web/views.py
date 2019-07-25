@@ -406,3 +406,21 @@ async def reset_leaderboard(request):
 
     return web.json_response({"success": True})
     
+async def send_chat(request):
+    data = await request.json()
+    if 'gameroom_id' in data:
+        gameroom_id = data['gameroom_id']
+    else:
+        return web.json_response({"success": False, "err_msg": "You need to specify room id"})
+
+    if gameroom_id not in request.app['game']:
+        return web.json_response({"success": False, "err_msg": "No such room"})
+
+    game = request.app['game'][gameroom_id]
+
+    if 'user' not in data or 'msg' not in data:
+        return web.json_response({"success": False, "err_msg": "Need both user and msg"})
+
+    game.add_chat({"user": data["user"], "msg": data["msg"]})
+
+    return web.json_response({"success": True})

@@ -68,7 +68,11 @@ class Firebase:
         if self.valid:
             ref = self.db.reference('/leaderboard')
             child = ref.child(user)
-            count = child.get().get("count", 0) + 1
+            data = child.get()
+            if data:
+                count = data.get("count", 0) + 1
+            else:
+                count = 1
             child.set({"score":score, "school":school, "timestamp":int(time.time()), "count":count})
 
     async def clean_leaderboard(self):
