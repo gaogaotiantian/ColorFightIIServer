@@ -24,8 +24,8 @@ def init_gamerooms(app):
     app['game']['rank_2_2']      = Colorfight(config = get_config('rank_2'), admin_room = True, rank = True)
     app['game']['rank_4']        = Colorfight(config = get_config('rank_4'), admin_room = True, rank = True)
     app['game']['rank_8']        = Colorfight(config = get_config('rank_8'), admin_room = True, rank = True)
-    app['game']['Musikverein']   = Colorfight(config = get_config('rank_2'), admin_room = True, rank = True)
-    app['game']['Acropolis']     = Colorfight(config = get_config('rank_2'), admin_room = True, rank = True)
+    app['game']['Musikverein']   = Colorfight(config = get_config('rank_2'), admin_room = True)
+    app['game']['Acropolis']     = Colorfight(config = get_config('rank_2'), admin_room = True)
 
 async def init_app():
 

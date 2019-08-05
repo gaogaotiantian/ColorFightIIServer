@@ -155,8 +155,8 @@ class Firebase:
                     match_result["users"].append("None")
                     match_result["mean"].append("(None, None)")
                     match_result["dev"].append("(None, None)")
-            ref = self.db.reference('/match')
-            ref.child(str(int(1000*time.time()))).set(match_result)
+            #ref = self.db.reference('/match')
+            #ref.child(str(int(1000*time.time()))).set(match_result)
             batch.commit()
 
         loop = asyncio.get_event_loop()
