@@ -4,7 +4,9 @@ import os
 import time
 import concurrent.futures
 import asyncio
+import datetime
 
+import schedule
 import firebase_admin
 from firebase_admin import credentials
 import time
@@ -30,12 +32,27 @@ class Firebase:
             self.firestore = firestore.client()
             self.db        = db
 
-            self.leaderboard_duration = 5 * 24 * 3600
+            self.leaderboard_duration = 7 * 24 * 3600
             self.valid = True
+            
+            self.timezone = datetime.timezone(datetime.timedelta(-1, 61200))
+
+            schedule.every().hour.at(":00").do(self.sync_backup_leaderboard, tag = "leaderboard_" + datetime.datetime.now(tz = self.timezone).strftime("%y%m%d_%H%M"))
         except Exception as e:
             self.valid = False
             print(e)
             print("Could not connect to firebase, other stuff should work fine")
+    
+    def _official_time(self):
+        curr_time = datetime.datetime.now(tz = self.timezone)
+        period1_start = datetime.datetime(year = 2019, month = 8, day = 17, hour = 5, tzinfo = self.timezone)
+        period1_end   = datetime.datetime(year = 2019, month = 8, day = 17, hour = 8, tzinfo = self.timezone)
+        period2_start = datetime.datetime(year = 2019, month = 8, day = 18, hour = 5, tzinfo = self.timezone)
+        period2_end   = datetime.datetime(year = 2019, month = 8, day = 18, hour = 8, tzinfo = self.timezone)
+
+        if period1_start < curr_time < period1_end or period2_start < curr_time < period2_end:
+            return True
+        return False
 
     def _upload_replay_data(self, data, game_id):
         blob = self.bucket.blob('replays/{}.cfr'.format(game_id))
@@ -66,14 +83,24 @@ class Firebase:
 
     def leaderboard_set_score(self, user, school, score):
         if self.valid:
+            schedule.run_pending()
             ref = self.db.reference('/leaderboard')
             child = ref.child(user)
             data = child.get()
             if data:
                 count = data.get("count", 0) + 1
+                if self._official_time():
+                    official_count = data.get("official_count", 0) + 1
+                else:
+                    official_count = data.get("official_count", 0)
             else:
                 count = 1
-            child.set({"score":score, "school":school, "timestamp":int(time.time()), "count":count})
+                if self._official_time():
+                    official_count = 1
+                else:
+                    official_count = 0
+            
+            child.set({"score":score, "school":school, "timestamp":int(time.time()), "count":count, "official_count": official_count})
 
     async def clean_leaderboard(self):
         if self.valid:
@@ -84,13 +111,23 @@ class Firebase:
             for key in old_records:
                 ref.child(key).delete()
 
+    def sync_backup_leaderboard(self, tag = str(int(time.time()))):
+        if self.valid:
+            ref     = self.db.reference('/leaderboard')
+            records = ref.get()
+            target_ref = self.db.reference('/leaderboard_backup/' + tag)
+            if records != None:
+                for key in records:
+                    target_ref.child(key).set(records[key])
+
     async def backup_leaderboard(self, tag = str(int(time.time()))):
         if self.valid:
             ref     = self.db.reference('/leaderboard')
             records = ref.get()
             target_ref = self.db.reference('/leaderboard_backup/' + tag)
-            for key in records:
-                target_ref.child(key).set(records[key])
+            if records != None:
+                for key in records:
+                    target_ref.child(key).set(records[key])
 
     async def reset_leaderboard(self, tag = str(int(time.time()))):
         if self.valid:
@@ -155,8 +192,8 @@ class Firebase:
                     match_result["users"].append("None")
                     match_result["mean"].append("(None, None)")
                     match_result["dev"].append("(None, None)")
-            #ref = self.db.reference('/match')
-            #ref.child(str(int(1000*time.time()))).set(match_result)
+            ref = self.db.reference('/match')
+            ref.child(str(int(1000*time.time()))).set(match_result)
             batch.commit()
 
         loop = asyncio.get_event_loop()
@@ -188,6 +225,11 @@ class Firebase:
 
         asyncio.ensure_future(loop.run_in_executor(self.executor, _set, users))
 
+async def test():
+    while True:
+        schedule.run_pending()
+        print("run")
+        await asyncio.sleep(1)
     
 if __name__ == '__main__':
     f = Firebase()
@@ -195,8 +237,9 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     #f.upload_replay('test'*1000, {'info':{'game_id':10201020}, 'users':{1:{'username':'abc', 'gold':1000, 'energy':2000}}})
 
-    asyncio.ensure_future(f.update_result([None, None]))
+    #asyncio.ensure_future(f.update_result([None, None]))
     #asyncio.ensure_future(f.reset_leaderboard("test"))
     #f.leaderboard_set_score("Chrysus", "Ancient", 14.47)
+    asyncio.ensure_future(test(), loop = loop)
     loop.run_forever()
 
