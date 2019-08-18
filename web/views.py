@@ -58,7 +58,9 @@ async def admin(request):
         'headers': headers,
         'max_gameroom_number': request.app['config']['max_gameroom_number'],
         'idle_clear_time'    : request.app['config']['idle_clear_time'],
-        'allow_create_room'  : request.app['config']['allow_create_room']
+        'allow_create_room'  : request.app['config']['allow_create_room'],
+        'curr_time'          : request.app['firebase'].get_curr_time(),
+        'is_official'        : request.app['firebase']._official_time()
     }
 
 @aiohttp_jinja2.template('signin.html')

@@ -42,13 +42,17 @@ class Firebase:
             self.valid = False
             print(e)
             print("Could not connect to firebase, other stuff should work fine")
+
+    def get_curr_time(self):
+        return datetime.datetime.now(tz = self.timezone)
+
     
     def _official_time(self):
-        curr_time = datetime.datetime.now(tz = self.timezone)
-        period1_start = datetime.datetime(year = 2019, month = 8, day = 17, hour = 5, tzinfo = self.timezone)
-        period1_end   = datetime.datetime(year = 2019, month = 8, day = 17, hour = 8, tzinfo = self.timezone)
-        period2_start = datetime.datetime(year = 2019, month = 8, day = 18, hour = 5, tzinfo = self.timezone)
-        period2_end   = datetime.datetime(year = 2019, month = 8, day = 18, hour = 8, tzinfo = self.timezone)
+        curr_time = self.get_curr_time()
+        period1_start = datetime.datetime(year = 2019, month = 8, day = 17, hour = 17, tzinfo = self.timezone)
+        period1_end   = datetime.datetime(year = 2019, month = 8, day = 17, hour = 20, tzinfo = self.timezone)
+        period2_start = datetime.datetime(year = 2019, month = 8, day = 18, hour = 17, tzinfo = self.timezone)
+        period2_end   = datetime.datetime(year = 2019, month = 8, day = 18, hour = 20, tzinfo = self.timezone)
 
         if period1_start < curr_time < period1_end or period2_start < curr_time < period2_end:
             return True
