@@ -49,10 +49,10 @@ class Firebase:
     
     def _official_time(self):
         curr_time = self.get_curr_time()
-        period1_start = datetime.datetime(year = 2019, month = 8, day = 17, hour = 17, tzinfo = self.timezone)
-        period1_end   = datetime.datetime(year = 2019, month = 8, day = 17, hour = 20, tzinfo = self.timezone)
-        period2_start = datetime.datetime(year = 2019, month = 8, day = 18, hour = 17, tzinfo = self.timezone)
-        period2_end   = datetime.datetime(year = 2019, month = 8, day = 18, hour = 20, tzinfo = self.timezone)
+        period1_start = datetime.datetime(year = 2019, month = 8, day = 24, hour = 17, tzinfo = self.timezone)
+        period1_end   = datetime.datetime(year = 2019, month = 8, day = 24, hour = 20, tzinfo = self.timezone)
+        period2_start = datetime.datetime(year = 2019, month = 8, day = 25, hour = 17, tzinfo = self.timezone)
+        period2_end   = datetime.datetime(year = 2019, month = 8, day = 25, hour = 20, tzinfo = self.timezone)
 
         if period1_start < curr_time < period1_end or period2_start < curr_time < period2_end:
             return True
